@@ -1,0 +1,10 @@
+{
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python3",
+    "editor.formatOnSave": true,
+    "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
+    "python.unitTest.pyTestArgs": [
+        "tests"
+    ],
+    "python.unitTest.pyTestEnabled": true,
+    "python.unitTest.pyTestPath": "${workspaceFolder}/.venv/bin/pytest"
+}
