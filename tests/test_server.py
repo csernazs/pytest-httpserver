@@ -38,7 +38,6 @@ def test_expected_request_response_as_string(httpserver: HTTPServer):
 def test_request_post(httpserver: HTTPServer):
     httpserver.expect_request("/foobar", data='{"request": "example"}', method="POST").respond_with_data("example_response")
     response = requests.post(httpserver.url_for("/foobar"), json={"request": "example"})
-    print(httpserver.log[0])
     httpserver.check_assertions()
     assert response.text == "example_response"
     assert response.status_code == 200

@@ -1,7 +1,6 @@
 
 import threading
 import json
-import time
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import make_server
@@ -65,8 +64,6 @@ class RequestMatcher:
 
     def match(self, request: Request):
         difference = self.difference(request)
-        if difference:
-            print(difference)
         return not difference
 
 
@@ -161,10 +158,7 @@ class HTTPServer:
         self.server_thread.start()
 
     def stop(self):
-        t1 = time.time()
         self.server.shutdown()
-        print(time.time() - t1)
-
         self.server_thread.join()
         self.server = None
         self.server_thread = None
