@@ -119,6 +119,17 @@ class HTTPServer:
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
 
+    def clear(self):
+        self.clear_assertions()
+        self.clear_log()
+        self.clear_all_handlers()
+
+    def clear_assertions(self):
+        self.assertions = []
+
+    def clear_log(self):
+        self.log = []
+
     def clear_all_handlers(self):
         self.ordered_handlers = []
         self.oneshot_handlers = RequestHandlerList()
