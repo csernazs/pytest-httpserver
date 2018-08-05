@@ -9,6 +9,14 @@ URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
 
 
+class Error(Exception):
+    pass
+
+
+class NoHandlerError(Error):
+    pass
+
+
 class RequestMatcher:
     def __init__(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None, query_string=None):
         self.uri = uri
@@ -65,10 +73,6 @@ class RequestMatcher:
     def match(self, request: Request):
         difference = self.difference(request)
         return not difference
-
-
-class NoHandlerError(Exception):
-    pass
 
 
 class RequestHandler:
