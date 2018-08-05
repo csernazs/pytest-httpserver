@@ -1,12 +1,12 @@
 
 
 import pytest
-from .httpserver import Server
+from .httpserver import HTTPServer
 
 
 @pytest.fixture
-def server():
-    retval = Server()
+def httpserver():
+    retval = HTTPServer()
     retval.start()
     yield retval
     retval.stop()

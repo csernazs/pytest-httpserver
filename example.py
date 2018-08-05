@@ -1,6 +1,6 @@
 #!.venv/bin/python3
 
-from pytest_httpserver.httpserver import Server
+from pytest_httpserver.httpserver import HTTPServer
 import time
 import urllib.request
 import urllib.error
@@ -10,7 +10,7 @@ def foobar(request):
     return "Hello world!"
 
 
-server = Server()
+server = HTTPServer()
 server.expect_request("/foobar").respond_with_json({"foo": "bar"})
 server.start()
 try:

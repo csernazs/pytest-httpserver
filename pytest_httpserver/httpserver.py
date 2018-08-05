@@ -110,7 +110,7 @@ class RequestHandlerList(list):
         return None
 
 
-class Server:
+class HTTPServer:
     def __init__(self, host="localhost", port=4000):
         self.host = host
         self.port = port
