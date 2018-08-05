@@ -222,19 +222,25 @@ class HTTPServer:
         return Response("No handler found for this request", 500)
 
     def dispatch(self, request):
+        handler = None
         if self.ordered_handlers:
-            handler = self.ordered_handlers.pop()
+            handler = self.ordered_handlers[0]
             if not handler.matcher.match(request):
-                return self.respond_nohandler(request)
+                response = self.respond_nohandler(request)
+                self.ordered_handlers.pop(0)
+                return response
 
-        handler = self.oneshot_handlers.match(request)
-        if handler:
-            self.oneshot_handlers.remove(handler)
-        else:
-            handler = self.handlers.match(request)
+            self.ordered_handlers.pop(0)
 
         if not handler:
-            return self.respond_nohandler(request)
+            handler = self.oneshot_handlers.match(request)
+            if handler:
+                self.oneshot_handlers.remove(handler)
+            else:
+                handler = self.handlers.match(request)
+
+            if not handler:
+                return self.respond_nohandler(request)
 
         response = handler.respond(request)
 

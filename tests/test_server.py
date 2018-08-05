@@ -61,3 +61,67 @@ def test_server_cleared_for_each_test(httpserver: HTTPServer):
 def test_server_with_statement():
     with HTTPServer(port=4001):
         pass
+
+
+def test_oneshot(httpserver: HTTPServer):
+    httpserver.expect_oneshot_request("/foobar").respond_with_data("OK foobar")
+    httpserver.expect_oneshot_request("/foobaz").respond_with_data("OK foobaz")
+
+    assert len(httpserver.oneshot_handlers) == 2
+
+    # first requests should pass
+    response = requests.get(httpserver.url_for("/foobaz"))
+    httpserver.check_assertions()
+    assert response.status_code == 200
+    assert response.text == "OK foobaz"
+
+    response = requests.get(httpserver.url_for("/foobar"))
+    httpserver.check_assertions()
+    assert response.status_code == 200
+    assert response.text == "OK foobar"
+
+    assert len(httpserver.oneshot_handlers) == 0
+
+    # second requests should fail due to 'oneshot' type
+    assert requests.get(httpserver.url_for("/foobar")).status_code == 500
+    assert requests.get(httpserver.url_for("/foobaz")).status_code == 500
+
+
+def test_ordered_ok(httpserver: HTTPServer):
+    httpserver.expect_oneshot_request("/foobar", ordered=True).respond_with_data("OK foobar")
+    httpserver.expect_oneshot_request("/foobaz", ordered=True).respond_with_data("OK foobaz")
+
+    assert len(httpserver.ordered_handlers) == 2
+
+    # first requests should pass
+    response = requests.get(httpserver.url_for("/foobar"))
+    httpserver.check_assertions()
+    assert response.status_code == 200
+    assert response.text == "OK foobar"
+
+    response = requests.get(httpserver.url_for("/foobaz"))
+    httpserver.check_assertions()
+    assert response.status_code == 200
+    assert response.text == "OK foobaz"
+
+    assert len(httpserver.ordered_handlers) == 0
+
+    # second requests should fail due to 'oneshot' type
+    assert requests.get(httpserver.url_for("/foobar")).status_code == 500
+    assert requests.get(httpserver.url_for("/foobaz")).status_code == 500
+
+
+def test_ordered_invalid_order(httpserver: HTTPServer):
+    httpserver.expect_oneshot_request("/foobar", ordered=True).respond_with_data("OK foobar")
+    httpserver.expect_oneshot_request("/foobaz", ordered=True).respond_with_data("OK foobaz")
+
+    assert len(httpserver.ordered_handlers) == 2
+
+    # these would not pass as the order is different
+    response = requests.get(httpserver.url_for("/foobaz"))
+    assert response.status_code == 500
+
+    response = requests.get(httpserver.url_for("/foobar"))
+    assert response.status_code == 500
+
+    assert len(httpserver.ordered_handlers) == 0
