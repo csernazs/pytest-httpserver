@@ -17,6 +17,10 @@ class NoHandlerError(Error):
     pass
 
 
+class HTTPServerError(Error):
+    pass
+
+
 class RequestMatcher:
     def __init__(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None, query_string=None):
         self.uri = uri
@@ -167,12 +171,20 @@ class HTTPServer:
     def thread_target(self):
         self.server.serve_forever()
 
+    def is_running(self):
+        return bool(self.server)
+
     def start(self):
+        if self.is_running():
+            raise HTTPServerError("Server is already running")
+
         self.server = make_server(self.host, self.port, self.application)
         self.server_thread = threading.Thread(target=self.thread_target)
         self.server_thread.start()
 
     def stop(self):
+        if not self.is_running():
+            raise HTTPServerError("Server is not running")
         self.server.shutdown()
         self.server_thread.join()
         self.server = None
@@ -240,3 +252,12 @@ class HTTPServer:
         response = self.dispatch(request)
         self.log.append((request, response))
         return response
+
+    def __enter__(self):
+        if not self.is_running():
+            self.start()
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        if self.is_running():
+            self.stop()

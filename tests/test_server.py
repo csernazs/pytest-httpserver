@@ -56,3 +56,8 @@ def test_server_cleared_for_each_test(httpserver: HTTPServer):
     assert httpserver.ordered_handlers == []
     assert httpserver.oneshot_handlers == []
     assert httpserver.handlers == []
+
+
+def test_server_with_statement():
+    with HTTPServer(port=4001):
+        pass
