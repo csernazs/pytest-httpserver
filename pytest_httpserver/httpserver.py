@@ -197,7 +197,7 @@ class HTTPServer:
         if self.assertions:
             raise AssertionError(self.assertions.pop(0))
 
-    def format_nohandler_assertion(self, request):
+    def format_matchers(self):
         def format_handlers(handlers):
             if handlers:
                 return ["    {!r}".format(handler.matcher) for handler in handlers]
@@ -205,8 +205,6 @@ class HTTPServer:
                 return ["    none"]
 
         lines = []
-        lines.append("No handler found for request {!r}.".format(request))
-        lines.append("")
         lines.append("Ordered matchers:")
         lines.extend(format_handlers(self.ordered_handlers))
         lines.append("")
@@ -219,7 +217,8 @@ class HTTPServer:
         return "\n".join(lines)
 
     def respond_nohandler(self, request: Request):
-        self.add_assertion(self.format_nohandler_assertion(request))
+        text = "No handler found for request {!r}.\n".format(request)
+        self.add_assertion(text + self.format_matchers())
         return Response("No handler found for this request", 500)
 
     def dispatch(self, request):
