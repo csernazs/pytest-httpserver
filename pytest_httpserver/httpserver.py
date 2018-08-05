@@ -1,11 +1,10 @@
 
 import threading
 import json
-import signal
-import collections
+import time
 
 from werkzeug.wrappers import Request, Response
-from werkzeug.serving import run_simple, make_server
+from werkzeug.serving import make_server
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -27,8 +26,16 @@ class RequestMatcher:
 
         self.data = data
 
+    def __repr__(self):
+        class_name = self.__class__.__name__
+        retval = "<{} ".format(class_name)
+        retval += "uri={uri!r} method={method!r} query_string={query_string!r} headers={headers!r} data={data!r}>".format_map(self.__dict__)
+        return retval
+
     def match_data(self, request):
-        return request.data != self.data
+        if self.data is None:
+            return True
+        return request.data == self.data
 
     def difference(self, request: Request):
         retval = []
@@ -57,10 +64,10 @@ class RequestMatcher:
         return retval
 
     def match(self, request: Request):
-        if self.difference(request):
-            return False
-        else:
-            return True
+        difference = self.difference(request)
+        if difference:
+            print(difference)
+        return not difference
 
 
 class NoHandlerError(Exception):
@@ -100,13 +107,13 @@ class RequestHandlerList(list):
         for requesthandler in self:
             if requesthandler.matcher.match(request):
                 return requesthandler
+        return None
 
 
 class Server:
     def __init__(self, host="localhost", port=4000):
         self.host = host
         self.port = port
-        self.handlers = {}
         self.assertions = []
         self.server = None
         self.server_thread = None
@@ -130,7 +137,7 @@ class Server:
         return RequestMatcher(*args, **kwargs)
 
     def expect_oneshot_request(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None, ordered=False):
-        matcher = self.create_matcher(uri, method="GET", data=None, data_encoding="utf-8", headers=None)
+        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
         request_handler = RequestHandler(matcher)
         if ordered:
             self.ordered_handlers.append(request_handler)
@@ -139,8 +146,8 @@ class Server:
 
         return request_handler
 
-    def expect_request(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None):
-        matcher = self.create_matcher(uri, method="GET", data=None, data_encoding="utf-8", headers=None)
+    def expect_request(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None) -> RequestHandler:
+        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
         request_handler = RequestHandler(matcher)
         self.handlers.append(request_handler)
         return request_handler
@@ -154,7 +161,10 @@ class Server:
         self.server_thread.start()
 
     def stop(self):
+        t1 = time.time()
         self.server.shutdown()
+        print(time.time() - t1)
+
         self.server_thread.join()
         self.server = None
         self.server_thread = None
@@ -166,8 +176,29 @@ class Server:
         if self.assertions:
             raise AssertionError(self.assertions.pop(0))
 
+    def format_nohandler_assertion(self, request):
+        def format_handlers(handlers):
+            if handlers:
+                return ["    {!r}".format(handler.matcher) for handler in handlers]
+            else:
+                return ["    none"]
+
+        lines = []
+        lines.append("No handler found for request {!r}.".format(request))
+        lines.append("")
+        lines.append("Ordered matchers:")
+        lines.extend(format_handlers(self.ordered_handlers))
+        lines.append("")
+        lines.append("Oneshot matchers:")
+        lines.extend(format_handlers(self.oneshot_handlers))
+        lines.append("")
+        lines.append("Persistent matchers:")
+        lines.extend(format_handlers(self.handlers))
+
+        return "\n".join(lines)
+
     def respond_nohandler(self, request: Request):
-        self.add_assertion("No handler found for request {!r}".format(request))
+        self.add_assertion(self.format_nohandler_assertion(request))
         return Response("No handler found for this request", 500)
 
     def dispatch(self, request):
