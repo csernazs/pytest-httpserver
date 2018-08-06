@@ -95,7 +95,7 @@ class RequestHandler:
         self.respond_with_data(response_data, status, headers, content_type=content_type)
 
     def respond_with_data(self, response_data="", status=200, headers=None, mimetype=None, content_type=None):
-        def handler(request):
+        def handler(request):  # pylint: disable=unused-argument
             return Response(response_data, status, headers, mimetype, content_type)
 
         self.request_handler = handler
@@ -115,13 +115,13 @@ class RequestHandlerList(list):
         return None
 
 
-class HTTPServer:
+class HTTPServer:   # pylint: disable=too-many-instance-attributes
     def __init__(self, host="localhost", port=4000):
         self.host = host
         self.port = port
-        self.assertions = []
         self.server = None
         self.server_thread = None
+        self.assertions = []
         self.log = []
         self.ordered_handlers = []
         self.oneshot_handlers = RequestHandlerList()

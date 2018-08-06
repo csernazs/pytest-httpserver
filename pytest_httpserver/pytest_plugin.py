@@ -21,7 +21,7 @@ def httpserver():
     yield server
 
 
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session, exitstatus):  # pylint: disable=unused-argument
     if Plugin.SERVER is not None:
         Plugin.SERVER.clear()
         Plugin.SERVER.stop()
