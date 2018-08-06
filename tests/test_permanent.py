@@ -43,6 +43,29 @@ def test_request_post(httpserver: HTTPServer):
     assert response.status_code == 200
 
 
+def test_request_any_method(httpserver: HTTPServer):
+    httpserver.expect_request("/foobar").respond_with_data("OK")
+    response = requests.post(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.delete(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.put(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.patch(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.get(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+
 def test_unexpected_request(httpserver: HTTPServer):
     httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
     requests.get(httpserver.url_for("/nonexists"))

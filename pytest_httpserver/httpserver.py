@@ -22,7 +22,7 @@ class HTTPServerError(Error):
 
 
 class RequestMatcher:
-    def __init__(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None, query_string=None):
+    def __init__(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None, query_string=None):
         self.uri = uri
         self.method = method
         self.query_string = query_string
@@ -154,7 +154,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
     def create_matcher(self, *args, **kwargs):
         return RequestMatcher(*args, **kwargs)
 
-    def expect_oneshot_request(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None, *, ordered=False):
+    def expect_oneshot_request(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None, *, ordered=False):
         matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
         request_handler = RequestHandler(matcher)
         if ordered:
@@ -164,7 +164,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         return request_handler
 
-    def expect_request(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None) -> RequestHandler:
+    def expect_request(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None) -> RequestHandler:
         matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
         request_handler = RequestHandler(matcher)
         self.handlers.append(request_handler)

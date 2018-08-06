@@ -31,7 +31,7 @@ Requests
 ~~~~~~~~
 There are three different types:
 
-- **generic**: this will be always served when there's match for this request, you can make as many HTTP requests as you want
+- **permanent**: this will be always served when there's match for this request, you can make as many HTTP requests as you want
 - **oneshot**: this will be served only once when there's a match for this request, you can only make 1 HTTP request
 - **ordered**: same as oneshot but the order must be strictly matched to the order of setting up
 

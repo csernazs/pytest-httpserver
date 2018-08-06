@@ -67,3 +67,30 @@ def test_ordered_invalid_order(httpserver: HTTPServer):
 
     # as no ordered handlers are triggered yet, these must be intact..
     assert len(httpserver.ordered_handlers) == 2
+
+
+def test_oneshot_any_method(httpserver: HTTPServer):
+    for _ in range(5):
+        httpserver.expect_oneshot_request("/foobar").respond_with_data("OK")
+
+    response = requests.post(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.get(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.delete(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.put(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    response = requests.patch(httpserver.url_for("/foobar"))
+    assert response.text == "OK"
+    assert response.status_code == 200
+
+    assert len(httpserver.oneshot_handlers) == 0
