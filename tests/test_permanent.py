@@ -1,11 +1,9 @@
 
 import requests
 import pytest
-import coverage
-
+from werkzeug.wrappers import Response
 
 from pytest_httpserver.httpserver import HTTPServer
-from werkzeug.wrappers import Response
 
 JSON_STRING = '{"foo": "bar"}'
 
