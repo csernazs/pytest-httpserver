@@ -15,11 +15,23 @@ Example
 
 .. code-block:: python
 
-    def test_my_client(server): # server is a pytest fixture which starts the server
+    def test_my_client(httpserver): # httpserver is a pytest fixture which starts the server
         # set up the server to serve /foobar with the json
-        server.expect_request("/foobar").respond_with_json({"foo": "bar"})
-        # check sthat it is served
-        assert requests.get(server.url_for("/foobar")).json() == {'foo': 'bar'}
+        httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
+        # check that the request is served
+        assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+
+
+You can also use the library without pytest. There's a with statement to ensure that the server is stopped.
+
+
+.. code-block:: python
+
+    with HTTPServer() as httpserver:
+        # set up the server to serve /foobar with the json
+        httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
+        # check that the request is served
+        print(requests.get(httpserver.url_for("/foobar")).json())
 
 
 Features
