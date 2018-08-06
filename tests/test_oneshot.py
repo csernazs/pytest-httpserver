@@ -58,10 +58,12 @@ def test_ordered_invalid_order(httpserver: HTTPServer):
     assert len(httpserver.ordered_handlers) == 2
 
     # these would not pass as the order is different
+    # this mark the whole thing 'permanently failed' so no further requests must pass
     response = requests.get(httpserver.url_for("/foobaz"))
     assert response.status_code == 500
 
     response = requests.get(httpserver.url_for("/foobar"))
     assert response.status_code == 500
 
-    assert len(httpserver.ordered_handlers) == 0
+    # as no ordered handlers are triggered yet, these must be intact..
+    assert len(httpserver.ordered_handlers) == 2

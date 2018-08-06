@@ -126,11 +126,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.ordered_handlers = []
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
+        self.permanently_failed = False
 
     def clear(self):
         self.clear_assertions()
         self.clear_log()
         self.clear_all_handlers()
+        self.permanently_failed = False
 
     def clear_assertions(self):
         self.assertions = []
@@ -152,7 +154,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
     def create_matcher(self, *args, **kwargs):
         return RequestMatcher(*args, **kwargs)
 
-    def expect_oneshot_request(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None, ordered=False):
+    def expect_oneshot_request(self, uri, method="GET", data=None, data_encoding="utf-8", headers=None, *, ordered=False):
         matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
         request_handler = RequestHandler(matcher)
         if ordered:
@@ -221,13 +223,20 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.add_assertion(text + self.format_matchers())
         return Response("No handler found for this request", 500)
 
+    def respond_permanent_failure(self):
+        self.add_assertion("All requests will be permanently failed due failed ordered handler")
+        return Response("No handler found for this request", 500)
+
     def dispatch(self, request):
+        if self.permanently_failed:
+            return self.respond_permanent_failure()
+
         handler = None
         if self.ordered_handlers:
             handler = self.ordered_handlers[0]
             if not handler.matcher.match(request):
+                self.permanently_failed = True
                 response = self.respond_nohandler(request)
-                self.ordered_handlers.pop(0)
                 return response
 
             self.ordered_handlers.pop(0)
