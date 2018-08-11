@@ -3,7 +3,7 @@ import requests
 import pytest
 from werkzeug.wrappers import Response
 
-from pytest_httpserver.httpserver import HTTPServer
+from pytest_httpserver import HTTPServer
 
 JSON_STRING = '{"foo": "bar"}'
 

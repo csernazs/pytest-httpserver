@@ -3,7 +3,7 @@
 import urllib.request
 import urllib.error
 
-from pytest_httpserver.httpserver import HTTPServer
+from pytest_httpserver import HTTPServer
 
 
 def foobar(request):

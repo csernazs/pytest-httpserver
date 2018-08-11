@@ -1,6 +1,6 @@
 
 import requests
-from pytest_httpserver.httpserver import HTTPServer
+from pytest_httpserver import HTTPServer
 
 
 def test_oneshot(httpserver: HTTPServer):

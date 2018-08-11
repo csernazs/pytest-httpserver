@@ -1,4 +1,4 @@
-from pytest_httpserver.httpserver import HTTPServer
+from pytest_httpserver import HTTPServer
 
 
 def test_server_with_statement():
