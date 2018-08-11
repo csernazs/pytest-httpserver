@@ -116,7 +116,18 @@ class RequestHandlerList(list):
 
 
 class HTTPServer:   # pylint: disable=too-many-instance-attributes
+    """
+    Server instance which manages handlers to serve pre-defined requests.
+
+    :param host: the host or IP where the server will listen
+    :param port: the TCP port where the server will listen
+    """
+
     def __init__(self, host="localhost", port=4000):
+        """
+        Initializes the instance.
+
+        """
         self.host = host
         self.port = port
         self.server = None
@@ -129,32 +140,92 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.permanently_failed = False
 
     def clear(self):
+        """
+        Clears and resets the state attributes of the object.
+
+        This method is useful when the object needs to be re-used but stopping the server is not feasible.
+
+        """
         self.clear_assertions()
         self.clear_log()
         self.clear_all_handlers()
         self.permanently_failed = False
 
     def clear_assertions(self):
+        """
+        Clears the list of assertions
+        """
+
         self.assertions = []
 
     def clear_log(self):
+        """
+        Clears the list of log entries
+        """
+
         self.log = []
 
     def clear_all_handlers(self):
+        """
+        Clears all types of the handlers (ordered, oneshot, permanent)
+        """
+
         self.ordered_handlers = []
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
 
     def url_for(self, suffix: str):
+        """
+        Return an url for a given suffix.
+
+        This basically means that it prepends the string ``http://$HOST:$PORT/`` to the `suffix` parameter
+        (where $HOST and $PORT are the parameters given to the constructor).
+
+        :param suffix: the suffix which will be added to the base url. It can start with ``/`` (slash) or
+            not, the url will be the same.
+        :return: the full url which refers to the server
+        """
+
         if not suffix.startswith("/"):
             suffix = "/" + suffix
 
         return "http://{}:{}{}".format(self.host, self.port, suffix)
 
-    def create_matcher(self, *args, **kwargs):
+    def create_matcher(self, *args, **kwargs) -> RequestMatcher:
+        """
+        Creates a :py:class:`RequestMatcher` instance with the specified parameters.
+
+        This method can be overridden if you want to use your own matcher.
+        """
+
         return RequestMatcher(*args, **kwargs)
 
-    def expect_oneshot_request(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None, *, ordered=False):
+    def expect_oneshot_request(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None, *, ordered=False) -> RequestHandler:
+        """
+        Create and register a oneshot request handler.
+
+        This handler can be only used once. Once the server serves a response for this handler,
+        the handler will be dropped.
+
+        Ordered handler (when `ordered` parameter is `True`) also determines the
+        order of the requests to be served. For example if there are two ordered handlers
+        registered, the first request must hit the first handler, and the second request must hit the
+        second one, and not vica versa.
+
+        If one or more ordered handler defined, those must be exhausted first.
+
+        :param uri: URI of the request. This must be an absolute path starting with ``/``.
+        :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
+            specified), all HTTP requests will match.
+        :param data: payload of the HTTP request. This could be a string (utf-8 encoded
+            by default, see `data_encoding`) or a bytes object.
+        :param data_encoding: the encoding used for data parameter if data is a string.
+        :param headers: dictionary of the headers of the request to be matched
+        :param ordered: specifies whether to create an ordered handler or not. See above for details.
+
+        :return: Created and register :py:class:`RequestHandler`.
+        """
+
         matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
         request_handler = RequestHandler(matcher)
         if ordered:
@@ -165,18 +236,60 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         return request_handler
 
     def expect_request(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None) -> RequestHandler:
+        """
+        Create and register a permanent request handler.
+
+        This handler can be used as many times as the request matches it, but ordered handlers
+        have higher priority so if there's one or more ordered handler registered, those must be used first.
+
+        :param uri: URI of the request. This must be an absolute path starting with ``/``.
+        :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
+            specified), all HTTP requests will match.
+        :param data: payload of the HTTP request. This could be a string (utf-8 encoded
+            by default, see `data_encoding`) or a bytes object.
+        :param data_encoding: the encoding used for data parameter if data is a string.
+        :param headers: dictionary of the headers of the request to be matched
+        :param ordered: specifies whether to create an ordered handler or not. See above for details.
+
+        :return: Created and register :py:class:`RequestHandler`.
+        """
+
         matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
         request_handler = RequestHandler(matcher)
         self.handlers.append(request_handler)
         return request_handler
 
     def thread_target(self):
+        """
+        This method serves as a thread target when the server is started.
+
+        This should not be called directly, but can be overriden to tailor it to your needs.
+        """
+
         self.server.serve_forever()
 
-    def is_running(self):
+    def is_running(self) -> bool:
+        """
+        Returns `True` when the server is running, otherwise `False`.
+        """
         return bool(self.server)
 
     def start(self):
+        """
+        Start the server in a thread.
+
+        This method returns immediately (e.g. does not block), and it's the caller's
+        responsibility to stop the server (by calling :py:meth:`stop`) when it is no longer needed).
+
+        If the sever is not stopped by the caller and execution reaches the end, the
+        program needs to be terminated by Ctrl+C or by signal as it will not terminate until
+        the thred is stopped.
+
+        If the sever is already running :py:class`HTTPServerError` will be raised. If you are
+        unsure, call :py:meth`is_running` first.
+
+        There's a context interface of this class which stops the server when the context block ends.
+        """
         if self.is_running():
             raise HTTPServerError("Server is already running")
 
@@ -185,6 +298,15 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.server_thread.start()
 
     def stop(self):
+        """
+        Stop the running server.
+
+        Notifies the server thread about the intention of the stopping, and the thread will
+        terminate itself. This needs about 0.5 seconds in worst case.
+
+        Only a running server can be stopped. If the sever is not runnig, :py:class`HTTPServerError`
+        will be raised.
+        """
         if not self.is_running():
             raise HTTPServerError("Server is not running")
         self.server.shutdown()
@@ -193,13 +315,39 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.server_thread = None
 
     def add_assertion(self, obj):
+        """
+        Add a new assertion
+
+        Assertions can be added here, and when :py:meth:`check_assertions` is called,
+        it will raise AssertionError for pytest with the object specified here.
+
+        :param obj: An object which will be passed to AssertionError.
+        """
         self.assertions.append(obj)
 
     def check_assertions(self):
+        """
+        Raise AssertionError when at least one assertion added
+
+        The first assertion added by :py:meth:`add_assertion` will be raised and
+        it will be removed from the list.
+
+        This method can be useful to get some insights into the errors happened in
+        the sever, and to have a proper error reporting in pytest.
+        """
+
         if self.assertions:
             raise AssertionError(self.assertions.pop(0))
 
-    def format_matchers(self):
+    def format_matchers(self) -> str:
+        """
+        Return a string representation of the matchers
+
+        This method returns a human-readable string representation of the matchers
+        registered. You can observe which requests will be served, etc.
+
+        This method is primairly used when reporting errors.
+        """
         def format_handlers(handlers):
             if handlers:
                 return ["    {!r}".format(handler.matcher) for handler in handlers]
@@ -219,15 +367,47 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         return "\n".join(lines)
 
     def respond_nohandler(self, request: Request):
+        """
+        Add a 'no handler' assertion.
+
+        This method is called when the server wasn't able to find any handler to serve the request.
+        As the result, there's an assertion added (which can be raised by :py:meth:`check_assertions`).
+
+        """
         text = "No handler found for request {!r}.\n".format(request)
         self.add_assertion(text + self.format_matchers())
         return Response("No handler found for this request", 500)
 
     def respond_permanent_failure(self):
+        """
+        Add a 'permanent failure' assertion.
+
+        This assertion means that no further requests will be handled. This is the resuld of missing
+        an ordered matcher.
+
+        """
+
         self.add_assertion("All requests will be permanently failed due failed ordered handler")
         return Response("No handler found for this request", 500)
 
-    def dispatch(self, request):
+    def dispatch(self, request: Request) -> Response:
+        """
+        Dispatch a request to the appropriate request handler.
+
+        This method tries to find the request handler whose matcher matches the request, and
+        then calls it in order to serve the request.
+
+        First, the request is checked for the ordered matchers. If there's an ordered matcher,
+        it must match the request, otherwise the server will be put into a `permanent failure`
+        mode in which it makes all request failed - this is the intended way of working of ordered
+        matchers.
+
+        Then oneshot handlers, and the permanent handlers are looked up.
+
+        :param request: the request object from the werkzeug library
+        :return: the response object what the handler responded, or a response which contains the error
+        """
+
         if self.permanently_failed:
             return self.respond_permanent_failure()
 
@@ -262,16 +442,37 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
     @Request.application
     def application(self, request: Request):
+        """
+        Entry point of werkzeug.
+
+        This method is called for each request, and it then calls the undecorated
+        :py:meth:`dispatch` method to serve the request.
+
+        :param request: the request object from the werkzeug library
+        :return: the response object what the dispatch returned
+        """
         request.get_data()
         response = self.dispatch(request)
         self.log.append((request, response))
         return response
 
     def __enter__(self):
+        """
+        Provide the context API
+
+        It starts the server in a thread if the server is not already running.
+        """
+
         if not self.is_running():
             self.start()
         return self
 
     def __exit__(self, *args, **kwargs):
+        """
+        Provide the context API
+
+        It stops the server if the server is running.
+        Please note that depending on the internal things of werkzeug, it may take 0.5 seconds.
+        """
         if self.is_running():
             self.stop()

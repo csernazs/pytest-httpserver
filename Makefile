@@ -25,3 +25,6 @@ cov: cov-clean
 
 cov-clean:
 	rm -rf htmlcov
+
+doc-html: .venv
+	.venv/bin/sphinx-build -M html doc doc/_build $(SPHINXOPTS) $(O)
