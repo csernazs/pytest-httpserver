@@ -9,3 +9,4 @@ htmlcov/
 build/
 dist/
 .eggs/
+doc/_build/
