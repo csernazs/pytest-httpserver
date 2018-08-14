@@ -1,10 +1,10 @@
 
 import threading
 import json
+from typing import Mapping, Optional, Union, Callable
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import make_server
-from typing import Mapping, Optional, Union, Callable
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
