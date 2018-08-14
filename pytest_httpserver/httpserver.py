@@ -4,27 +4,61 @@ import json
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import make_server
-from typing import Mapping, Optional, Union
-
+from typing import Mapping, Optional, Union, Callable
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
 
 
 class Error(Exception):
+    """
+    Base class for all exception defined in this package.
+    """
+
     pass
 
 
 class NoHandlerError(Error):
+    """
+    Raised when a :py:class:`RequestHandler` has no registered method to serve the request.
+    """
+
     pass
 
 
 class HTTPServerError(Error):
+    """
+    Raised when there's a problem with HTTP server.
+    """
+
     pass
 
 
 class RequestMatcher:
-    def __init__(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None, query_string=None):
+    """
+    Matcher object for the incoming request.
+
+    It defines various parameters to match the incoming request.
+
+    :param uri: URI of the request. This must be an absolute path starting with ``/``.
+    :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
+        specified), all HTTP requests will match.
+    :param data: payload of the HTTP request. This could be a string (utf-8 encoded
+        by default, see `data_encoding`) or a bytes object.
+    :param data_encoding: the encoding used for data parameter if data is a string.
+    :param headers: dictionary of the headers of the request to be matched
+    :param query_string: the http query string starting with ``?``, such as ``?username=user``
+    """
+
+    def __init__(
+            self,
+            uri: str,
+            method: str = METHOD_ALL,
+            data: Union[str, bytes, None] = None,
+            data_encoding: str = "utf-8",
+            headers: Optional[Mapping[str, str]] = None,
+            query_string: Optional[str] = None):
+
         self.uri = uri
         self.method = method
         self.query_string = query_string
@@ -40,17 +74,39 @@ class RequestMatcher:
         self.data = data
 
     def __repr__(self):
+        """
+        Returns the string representation of the object, with the known parameters.
+        """
+
         class_name = self.__class__.__name__
         retval = "<{} ".format(class_name)
         retval += "uri={uri!r} method={method!r} query_string={query_string!r} headers={headers!r} data={data!r}>".format_map(self.__dict__)
         return retval
 
-    def match_data(self, request):
+    def match_data(self, request: Request) -> bool:
+        """
+        Matches the data part of the request
+
+        :param request: the HTTP request
+        :return: `True` when the data is matched or no matching is required. `False` otherwise.
+        """
+
         if self.data is None:
             return True
         return request.data == self.data
 
-    def difference(self, request: Request):
+    def difference(self, request: Request) -> list:
+        """
+        Calculates the difference between the matcher and the request.
+
+        Returns a list of fields where there's a difference between the request and the matcher.
+        The returned list may have zero or more elements, each element is a three-element tuple
+        containing the field name, the request value, and the matcher value.
+
+        If zero-length list is returned, this means that there's no difference, so the request
+        matches the fields set in the matcher object.
+        """
+
         retval = []
         if self.uri != URI_DEFAULT and request.path != self.uri:
             retval.append(("uri", request.path, self.uri))
@@ -76,41 +132,115 @@ class RequestMatcher:
 
         return retval
 
-    def match(self, request: Request):
+    def match(self, request: Request) -> bool:
+        """
+        Returns whether the request matches the parameters set in the matcher
+        object or not. `True` value is returned when it matches, `False` otherwise.
+        """
+
         difference = self.difference(request)
         return not difference
 
 
 class RequestHandler:
+    """
+    Represents a response function and a :py:class:`RequestHandler` object.
+
+    This class connects the matcher object with the function responsible for the response.
+
+    :param matcher: the matcher object
+    """
+
     def __init__(self, matcher: RequestMatcher):
         self.matcher = matcher
         self.request_handler = None
 
-    def respond(self, request):
+    def respond(self, request: Request) -> Response:
+        """
+        Calls the request handler registered for this object.
+
+        If no request handler was specified previously, it raises
+        :py:class:`NoHandlerError` exception.
+
+        :param request: the incoming request object
+        :return: the response object
+        """
+
         if self.request_handler is None:
             raise NoHandlerError("No handler found for request: {} {}".format(request.method, request.path))
         else:
             return self.request_handler(request)
 
-    def respond_with_json(self, response_json, status=200, headers=None, content_type="application/json"):
+    def respond_with_json(
+            self,
+            response_json,
+            status: int = 200,
+            headers: Optional[Mapping[str, str]] = None,
+            content_type: str = "application/json"):
+        """
+        Registers a respond handler function which responds with a serialized JSON object.
+
+        :param response_json: a JSON-serializable python object
+        :param status: the HTTP status of the response
+        :param headers: the HTTP headers to be sent (excluding the Content-Type header)
+        :param content_type: the content type header to be sent
+        """
         response_data = json.dumps(response_json, indent=4)
         self.respond_with_data(response_data, status, headers, content_type=content_type)
 
-    def respond_with_data(self, response_data="", status=200, headers=None, mimetype=None, content_type=None):
+    def respond_with_data(
+            self,
+            response_data: Union[str, bytes] = "",
+            status: int = 200,
+            headers: Optional[Mapping[str, str]] = None,
+            mimetype: Optional[str] = None,
+            content_type: Optional[str] = None):
+        """
+        Registers a respond handler function which responds raw data.
+
+        For detailed description please see the :py:class:`Response` object as the
+        parameters are analogue.
+
+        :param response_data: a string or bytes object representing the body of the response
+        :param status: the HTTP status of the response
+        :param headers: the HTTP headers to be sent (excluding the Content-Type header)
+        :param content_type: the content type header to be sent
+        :param mimetype: the mime type of the request
+
+        """
         def handler(request):  # pylint: disable=unused-argument
             return Response(response_data, status, headers, mimetype, content_type)
 
         self.request_handler = handler
 
-    def respond_with_response(self, response):
+    def respond_with_response(self, response: Response):
+        """
+        Registers a respond handler function which responds the specified response object.
+
+        :param response: the response object which will be responded
+
+        """
         self.request_handler = lambda request: response
 
-    def respond_with_handler(self, func):
+    def respond_with_handler(self, func: Callable[[Request], Response]):
+        """
+        Registers the specified function as a responder.
+
+        The function will receive the request object and must return with the response object.
+        """
         self.request_handler = func
 
 
 class RequestHandlerList(list):
-    def match(self, request):
+    """
+    Represents a list of :py:class:`RequestHandler` objects.
+
+    """
+
+    def match(self, request: Request) -> RequestHandler:
+        """
+        Returns the first request handler which matches the specified request. Otherwise, it returns `None`.
+        """
         for requesthandler in self:
             if requesthandler.matcher.match(request):
                 return requesthandler
