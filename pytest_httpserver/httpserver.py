@@ -4,6 +4,8 @@ import json
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import make_server
+from typing import Mapping, Optional, Union
+
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -200,7 +202,16 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         return RequestMatcher(*args, **kwargs)
 
-    def expect_oneshot_request(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None, *, ordered=False) -> RequestHandler:
+    def expect_oneshot_request(
+            self,
+            uri: str,
+            method: str = METHOD_ALL,
+            data: Union[str, bytes, None] = None,
+            data_encoding: str = "utf-8",
+            headers: Optional[Mapping[str, str]] = None,
+            query_string: Optional[str] = None,
+            *,
+            ordered=False) -> RequestHandler:
         """
         Create and register a oneshot request handler.
 
@@ -221,12 +232,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             by default, see `data_encoding`) or a bytes object.
         :param data_encoding: the encoding used for data parameter if data is a string.
         :param headers: dictionary of the headers of the request to be matched
+        :param query_string: the http query string starting with ``?``, such as ``?username=user``
         :param ordered: specifies whether to create an ordered handler or not. See above for details.
 
         :return: Created and register :py:class:`RequestHandler`.
         """
 
-        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
+        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers, query_string=query_string)
         request_handler = RequestHandler(matcher)
         if ordered:
             self.ordered_handlers.append(request_handler)
@@ -235,7 +247,14 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         return request_handler
 
-    def expect_request(self, uri, method=METHOD_ALL, data=None, data_encoding="utf-8", headers=None) -> RequestHandler:
+    def expect_request(
+            self,
+            uri: str,
+            method: str = METHOD_ALL,
+            data: Union[str, bytes, None] = None,
+            data_encoding: str = "utf-8",
+            headers: Optional[Mapping[str, str]] = None,
+            query_string: Optional[str] = None) -> RequestHandler:
         """
         Create and register a permanent request handler.
 
@@ -254,7 +273,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :return: Created and register :py:class:`RequestHandler`.
         """
 
-        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers)
+        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers, query_string=query_string)
         request_handler = RequestHandler(matcher)
         self.handlers.append(request_handler)
         return request_handler
