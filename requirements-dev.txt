@@ -8,3 +8,4 @@ coverage
 ipdb
 requests
 sphinx
+sphinx_rtd_theme
