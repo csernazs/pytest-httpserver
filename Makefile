@@ -1,12 +1,17 @@
 
-venv:
+.venv/bin/pip:
 	python3 -m venv .venv
 	.venv/bin/pip3 install --upgrade pip wheel
+
+venv: .venv/bin/pip
 
 dev: venv
 	.venv/bin/pip3 install -r requirements-dev.txt
 	.venv/bin/pip3 install -r requirements.txt
 	.venv/bin/pip3 install -e .
+
+cs: venv
+	.venv/bin/pylint pytest_httpserver
 
 mrproper: clean
 	rm -rf dist
