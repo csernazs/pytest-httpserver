@@ -12,7 +12,7 @@ mrproper: clean
 	rm -rf dist
 
 clean: cov-clean
-	rm -rf .venv cluster.egg-info build
+	rm -rf .venv cluster.egg-info build .eggs __pycache__ */__pycache__
 
 test:
 	.venv/bin/pytest tests -s -vv
