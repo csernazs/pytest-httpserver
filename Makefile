@@ -12,6 +12,7 @@ dev: venv
 
 cs: venv
 	.venv/bin/pylint pytest_httpserver
+	.venv/bin/pycodestyle pytest_httpserver
 
 mrproper: clean
 	rm -rf dist
