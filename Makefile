@@ -1,4 +1,6 @@
 
+.PHONY: doc
+
 .venv/bin/pip:
 	python3 -m venv .venv
 	.venv/bin/pip3 install --upgrade pip wheel
@@ -17,7 +19,7 @@ cs: venv
 mrproper: clean
 	rm -rf dist
 
-clean: cov-clean
+clean: cov-clean doc-clean
 	rm -rf .venv cluster.egg-info build .eggs __pycache__ */__pycache__
 
 test:
@@ -32,5 +34,8 @@ cov: cov-clean
 cov-clean:
 	rm -rf htmlcov
 
-doc-html: .venv
+doc: .venv
 	.venv/bin/sphinx-build -M html doc doc/_build $(SPHINXOPTS) $(O)
+
+doc-clean:
+	rm -rf doc/_build
