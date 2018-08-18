@@ -1,11 +1,7 @@
-.. pytest_httpserver documentation master file, created by
-   sphinx-quickstart on Sat Aug 11 08:07:37 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
+pytest-httpserver
+=================
 
-User's Guide
-------------
 pytest-httpserver is a python package which allows you to start a real HTTP server
 for your tests. The server can be configured programmatically to how to respond to
 requests.
@@ -22,8 +18,9 @@ This library can be used with pytest in the most convenient way but if you prefe
 other test frameworks, you can still use it with the context API or by writing a wrapper
 for it.
 
-Example with pytest
--------------------
+
+Example
+-------
 
 .. code:: python
 
@@ -34,44 +31,11 @@ Example with pytest
         assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
 
 
-Example without pytest
-----------------------
-
-.. code:: python
-
-    import requests
-    import unittest
-    from pytest_httpserver import HTTPServer
-
-    class TestJSONClient(unittest.TestCase):
-        def setUp(self):
-            self.httpserver = HTTPServer()
-            self.httpserver.start()
-
-        def test_json_client(self):
-            self.httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
-            self.assertEqual(requests.get(self.httpserver.url_for("/foobar")).json(), {'foo': 'bar'})
-
-        def tearDown(self):
-            self.httpserver.stop()
-
-
-API Reference
--------------
-
-If you are looking for information on a specific function, class or
-method, this part of the documentation is for you.
+For further details, please read the :doc:`guide` or the :doc:`api`.
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 1
 
-   api
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    guide
+    api
+    changes
