@@ -15,8 +15,10 @@ setup(
     description="pytest-httpserver is a httpserver for pytest",
     entry_points={"pytest11": ["pytest_httpserver = pytest_httpserver.pytest_plugin"]},
     long_description=DESCRIPTION,
+    python_requires='>=3.4',
+    install_requires=["werkzeug==0.14.1"],
     setup_requires=["pytest-runner"],
-    tests_require=["pytest"],
+    tests_require=["pytest", "requests"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
