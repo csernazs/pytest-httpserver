@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/csernazs/pytest-httpserver.svg?branch=master
+    :target: https://travis-ci.org/csernazs/pytest-httpserver
+
 pytest_httpserver
 =================
 HTTP server for pytest

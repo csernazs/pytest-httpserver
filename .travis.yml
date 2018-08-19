@@ -1,0 +1,10 @@
+  language: python
+  python:
+    - "3.4"
+    - "3.5"
+    - "3.6"
+    - "nightly"
+  install:
+    - pip install -e . --upgrade -r requirements.txt -r requirements-test.txt
+  script:
+    - pytest -vv tests
