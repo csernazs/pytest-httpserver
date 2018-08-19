@@ -253,6 +253,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
     :param host: the host or IP where the server will listen
     :param port: the TCP port where the server will listen
+
+    .. py:attribute:: log
+
+        Attribute containing the list of two-element tuples. Each tuple contains
+        :py:class:`Request` and :py:class:`Response` object which represents the
+        incoming request and the outgoing response which happened during the lifetime
+        of the server.
     """
 
     def __init__(self, host="localhost", port=4000):
