@@ -19,6 +19,8 @@ setup(
     install_requires=["werkzeug==0.14.1"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "requests"],
+    license="MIT",
+    platforms="any",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
