@@ -1,0 +1,6 @@
+
+!!! WARNING !!!
+
+This directory contains a certificate and a root CA for testing.
+Never use these certs in production as these are (including the private keys)
+public on github.

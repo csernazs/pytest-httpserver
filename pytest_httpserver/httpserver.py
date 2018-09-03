@@ -262,7 +262,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         of the server.
     """
 
-    def __init__(self, host="localhost", port=4000):
+    def __init__(self, host="localhost", port=4000, ssl_context=None):
         """
         Initializes the instance.
 
@@ -277,6 +277,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
         self.permanently_failed = False
+        self.ssl_context = ssl_context
 
     def clear(self):
         """
@@ -328,7 +329,12 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         if not suffix.startswith("/"):
             suffix = "/" + suffix
 
-        return "http://{}:{}{}".format(self.host, self.port, suffix)
+        if self.ssl_context is None:
+            protocol = "http"
+        else:
+            protocol = "https"
+
+        return "{}://{}:{}{}".format(protocol, self.host, self.port, suffix)
 
     def create_matcher(self, *args, **kwargs) -> RequestMatcher:
         """
@@ -449,7 +455,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         if self.is_running():
             raise HTTPServerError("Server is already running")
 
-        self.server = make_server(self.host, self.port, self.application)
+        self.server = make_server(self.host, self.port, self.application, ssl_context=self.ssl_context)
         self.server_thread = threading.Thread(target=self.thread_target)
         self.server_thread.start()
 

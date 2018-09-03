@@ -1,0 +1,14 @@
+[req]
+default_bits = 4096
+prompt = no
+default_md = sha256
+distinguished_name = dn
+
+[dn]
+C=US
+ST=SomeState
+L=SomeCity
+O=Test CA
+OU=SomeOrganizationUnit
+emailAddress=test@example.com
+CN = Test CA
