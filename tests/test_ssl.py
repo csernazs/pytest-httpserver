@@ -14,7 +14,16 @@ assets_dir = pjoin(test_dir, "assets")
 
 
 def test_ssl():
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    protocol = None
+    for name in ("PROTOCOL_TLS_SERVER", "PROTOCOL_TLS", "PROTOCOL_TLSv1_2"):
+        if hasattr(ssl, name):
+            protocol = getattr(ssl, name)
+            break
+
+    assert protocol is not None, "Unable to obtain TLS protocol"
+
+    context = ssl.SSLContext(protocol)
+
     server_crt = pjoin(assets_dir, "server.crt")
     server_key = pjoin(assets_dir, "server.key")
     root_ca = pjoin(assets_dir, "rootCA.crt")
