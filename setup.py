@@ -18,7 +18,7 @@ setup(
     python_requires=">=3.4",
     install_requires=[
         "typing;python_version<'3.5'",
-        "werkzeug==0.14.1"
+        "werkzeug"
     ],
     extras_require={
         "dev": [
