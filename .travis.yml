@@ -5,6 +5,6 @@
     - "3.6"
     - "nightly"
   install:
-    - pip install -e . --upgrade -r requirements.txt -r requirements-test.txt
+    - pip install -e .[test] --upgrade
   script:
     - pytest -vv tests

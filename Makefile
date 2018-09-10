@@ -8,9 +8,7 @@
 venv: .venv/bin/pip
 
 dev: venv
-	.venv/bin/pip3 install -r requirements-dev.txt
-	.venv/bin/pip3 install -r requirements.txt
-	.venv/bin/pip3 install -e .
+	.venv/bin/pip3 install -e .[dev]
 
 cs: venv
 	.venv/bin/pylint pytest_httpserver

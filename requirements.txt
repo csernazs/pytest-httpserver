@@ -1,2 +1,0 @@
-typing; python_version < '3.5'
-werkzeug==0.14.1

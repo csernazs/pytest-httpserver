@@ -15,8 +15,38 @@ setup(
     description="pytest-httpserver is a httpserver for pytest",
     entry_points={"pytest11": ["pytest_httpserver = pytest_httpserver.pytest_plugin"]},
     long_description=DESCRIPTION,
-    python_requires='>=3.4',
-    install_requires=["werkzeug==0.14.1"],
+    python_requires=">=3.4",
+    install_requires=[
+        "typing;python_version<'3.5'",
+        "werkzeug==0.14.1"
+    ],
+    extras_require={
+        "dev": [
+            "pycodestyle",
+            "pylint",
+            "wheel",
+            "rope",
+            "pytest",
+            "pytest-cov",
+            "coverage",
+            "ipdb",
+            "requests",
+            "sphinx",
+            "sphinx_rtd_theme",
+            "reno",
+        ],
+        "test": [
+            "pytest",
+            "pytest-cov",
+            "coverage",
+            "requests",
+        ],
+        "doc": [
+            "sphinx",
+            "sphinx_rtd_theme",
+            "reno",
+        ]
+    },
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "requests"],
     license="MIT",
