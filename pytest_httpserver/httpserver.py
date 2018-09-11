@@ -262,7 +262,10 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         of the server.
     """
 
-    def __init__(self, host="localhost", port=4000, ssl_context=None):
+    DEFAULT_LISTEN_HOST = "localhost"
+    DEFAULT_LISTEN_PORT = 4000
+
+    def __init__(self, host=DEFAULT_LISTEN_HOST, port=DEFAULT_LISTEN_PORT, ssl_context=None):
         """
         Initializes the instance.
 
