@@ -18,7 +18,7 @@ mrproper: clean
 	rm -rf dist
 
 clean: cov-clean doc-clean
-	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__
+	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__ .tox
 
 test:
 	.venv/bin/pytest tests -s -vv
