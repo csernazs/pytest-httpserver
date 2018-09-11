@@ -20,8 +20,11 @@ mrproper: clean
 clean: cov-clean doc-clean
 	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__ .tox
 
-test:
+quick-test:
 	.venv/bin/pytest tests -s -vv
+
+test:
+	tox
 
 test-pdb:
 	.venv/bin/pytest tests -s -vv --pdb
