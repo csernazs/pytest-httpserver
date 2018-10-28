@@ -41,11 +41,6 @@ setup(
             "coverage",
             "requests",
         ],
-        "doc": [
-            "sphinx",
-            "sphinx_rtd_theme",
-            "reno",
-        ]
     },
     setup_requires=["pytest-runner"],
     tests_require=["pytest", "requests"],
