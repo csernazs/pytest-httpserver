@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    SSL/TLS support added with using the SSL/TLS support provided by werkzeug.
+    This is based on the ssl module from the standard library.

@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    When using pytest plugin, specifying the bind address and bind port can also be possible via environment
+    variables. Setting PYTEST_HTTPSERVER_HOST and PYTEST_HTTPSERVER_PORT will change the bind host and bind
+    port, respectively.
