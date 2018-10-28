@@ -2,6 +2,7 @@
 import threading
 import json
 from typing import Mapping, Optional, Union, Callable
+from ssl import SSLContext
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import make_server
@@ -253,6 +254,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
     :param host: the host or IP where the server will listen
     :param port: the TCP port where the server will listen
+    :param ssl_context: the ssl context object to use for https connections
 
     .. py:attribute:: log
 
@@ -265,7 +267,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
     DEFAULT_LISTEN_HOST = "localhost"
     DEFAULT_LISTEN_PORT = 4000
 
-    def __init__(self, host=DEFAULT_LISTEN_HOST, port=DEFAULT_LISTEN_PORT, ssl_context=None):
+    def __init__(self, host=DEFAULT_LISTEN_HOST, port=DEFAULT_LISTEN_PORT, ssl_context: Optional[SSLContext] = None):
         """
         Initializes the instance.
 

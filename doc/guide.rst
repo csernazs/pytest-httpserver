@@ -14,6 +14,12 @@ A free TCP port needs to be specified when instantiating the server, where no ot
 If you are using the pytest plugin it is done automatically by the plugin. Possibility to change
 the TCP port is TBD.
 
+When using pytest plugin, specifying the bind address and bind port can also be possible via environment
+variables. Setting PYTEST_HTTPSERVER_HOST and PYTEST_HTTPSERVER_PORT will change the bind host and bind
+port, respectively.
+
+If pytest plugin is not used, the DEFAULT_LISTEN_HOST and DEFAULT_LISTEN_PORT class attributes can be set
+on the HTTPServer class.
 
 Configuring
 -----------
