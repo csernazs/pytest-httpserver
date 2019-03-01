@@ -1,11 +1,13 @@
 
 import threading
 import json
-from typing import Mapping, Optional, Union, Callable
+from collections import defaultdict
+from typing import Callable, Mapping, Optional, Union
 from ssl import SSLContext
 
-from werkzeug.wrappers import Request, Response
+from werkzeug.http import parse_authorization_header
 from werkzeug.serving import make_server
+from werkzeug.wrappers import Request, Response
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -35,6 +37,49 @@ class HTTPServerError(Error):
     pass
 
 
+class NoMethodFoundForMatchingHeaderValueError(Error):
+    """
+    Raised when a :py:class:`HeaderValueMatcher` has no registered method to match the header value.
+    """
+
+    pass
+
+
+class HeaderValueMatcher:
+    """
+    Matcher object for the header value of incoming request.
+
+    :param matchers: mapping from header name to comparator function that accepts actual and expected header values
+        and return whether they are equal as bool.
+    """
+    DEFAULT_MATCHERS = {}
+
+    def __init__(self, matchers: Optional[Mapping[str, Callable[[str, str], bool]]] = None):
+        self.matchers = self.DEFAULT_MATCHERS if matchers is None else matchers
+
+    @staticmethod
+    def authorization_header_value_matcher(actual: str, expected: str) -> bool:
+        return parse_authorization_header(actual) == parse_authorization_header(expected)
+
+    @staticmethod
+    def default_header_value_matcher(actual: str, expected: str) -> bool:
+        return actual == expected
+
+    def __call__(self, header_name: str, actual: str, expected: str) -> bool:
+        try:
+            matcher = self.matchers[header_name]
+        except KeyError:
+            raise NoMethodFoundForMatchingHeaderValueError(
+                "No method found for matching header value: {}".format(header_name))
+        return matcher(actual, expected)
+
+
+HeaderValueMatcher.DEFAULT_MATCHERS = defaultdict(
+    lambda: HeaderValueMatcher.default_header_value_matcher,
+    {'Authorization': HeaderValueMatcher.authorization_header_value_matcher}
+)
+
+
 class RequestMatcher:
     """
     Matcher object for the incoming request.
@@ -58,7 +103,8 @@ class RequestMatcher:
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Optional[str] = None):
+            query_string: Optional[str] = None,
+            header_value_matcher: Optional[HeaderValueMatcher] = None):
 
         self.uri = uri
         self.method = method
@@ -73,6 +119,8 @@ class RequestMatcher:
             data = data.encode(data_encoding)
 
         self.data = data
+
+        self.header_value_matcher = HeaderValueMatcher() if header_value_matcher is None else header_value_matcher
 
     def __repr__(self):
         """
@@ -121,7 +169,7 @@ class RequestMatcher:
         request_headers = {}
         expected_headers = {}
         for key, value in self.headers.items():
-            if request.headers.get(key) != value:
+            if not self.header_value_matcher(key, request.headers.get(key), value):
                 request_headers[key] = request.headers.get(key)
                 expected_headers[key] = value
 
@@ -359,7 +407,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             headers: Optional[Mapping[str, str]] = None,
             query_string: Optional[str] = None,
             *,
-            ordered=False) -> RequestHandler:
+            ordered=False,
+            header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
         """
         Create and register a oneshot request handler.
 
@@ -382,11 +431,20 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param headers: dictionary of the headers of the request to be matched
         :param query_string: the http query string starting with ``?``, such as ``?username=user``
         :param ordered: specifies whether to create an ordered handler or not. See above for details.
+        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
 
         :return: Created and register :py:class:`RequestHandler`.
         """
 
-        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers, query_string=query_string)
+        matcher = self.create_matcher(
+            uri,
+            method=method,
+            data=data,
+            data_encoding=data_encoding,
+            headers=headers,
+            query_string=query_string,
+            header_value_matcher=header_value_matcher,
+        )
         request_handler = RequestHandler(matcher)
         if ordered:
             self.ordered_handlers.append(request_handler)
@@ -402,7 +460,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Optional[str] = None) -> RequestHandler:
+            query_string: Optional[str] = None,
+            header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
         """
         Create and register a permanent request handler.
 
@@ -417,11 +476,20 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param data_encoding: the encoding used for data parameter if data is a string.
         :param headers: dictionary of the headers of the request to be matched
         :param ordered: specifies whether to create an ordered handler or not. See above for details.
+        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
 
         :return: Created and register :py:class:`RequestHandler`.
         """
 
-        matcher = self.create_matcher(uri, method=method, data=data, data_encoding=data_encoding, headers=headers, query_string=query_string)
+        matcher = self.create_matcher(
+            uri,
+            method=method,
+            data=data,
+            data_encoding=data_encoding,
+            headers=headers,
+            query_string=query_string,
+            header_value_matcher=header_value_matcher,
+        )
         request_handler = RequestHandler(matcher)
         self.handlers.append(request_handler)
         return request_handler
