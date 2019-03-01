@@ -11,3 +11,5 @@ dist/
 .eggs/
 doc/_build/
 .tox/
+.idea/
+.python-version
