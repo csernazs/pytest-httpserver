@@ -20,7 +20,7 @@ API documentation
     .. autoclass:: pytest_httpserver.httpserver.HTTPServerError
         :members:
 
-    .. autoclass:: pytest_httpserver.httpserver.RequestMatcher
+    .. autoclass:: pytest_httpserver.httpserver.HeaderValueMatcher
         :members:
 
     .. autoclass:: pytest_httpserver.httpserver.RequestHandler
