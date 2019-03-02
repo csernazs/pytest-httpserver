@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/csernazs/pytest-httpserver.svg?branch=master
-    :target: https://travis-ci.org/csernazs/pytest-httpserver
+|build| |doc|
+
 
 pytest_httpserver
 =================
@@ -82,3 +82,11 @@ Missing features
 * HTTP/2
 * Keepalive
 * TLS
+
+
+.. |build| image:: https://travis-ci.org/csernazs/pytest-httpserver.svg?branch=master
+    :target: https://travis-ci.org/csernazs/pytest-httpserver
+
+.. |doc| image:: https://readthedocs.org/projects/pytest-httpserver/badge/?version=latest
+    :target: https://pytest-httpserver.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
