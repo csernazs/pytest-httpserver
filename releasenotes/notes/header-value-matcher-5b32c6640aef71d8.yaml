@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Make it possible to intelligently compare headers. To accomplish that
+    HeaderValueMatcher was added. It already contains logic to compare
+    unknown headers and authorization headers. Patch by Roman Inflianskas.
