@@ -529,6 +529,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             raise HTTPServerError("Server is already running")
 
         self.server = make_server(self.host, self.port, self.application, ssl_context=self.ssl_context)
+        self.port = self.server.port  # Update port (needed if `port` was set to 0)
         self.server_thread = threading.Thread(target=self.thread_target)
         self.server_thread.start()
 
