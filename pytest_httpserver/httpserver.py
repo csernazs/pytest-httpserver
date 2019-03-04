@@ -1,8 +1,12 @@
 
+import queue
 import threading
 import json
+import time
 from collections import defaultdict
 from enum import Enum
+from contextlib import suppress, contextmanager
+from copy import copy
 from typing import Callable, Mapping, Optional, Union
 from ssl import SSLContext
 
@@ -44,6 +48,44 @@ class NoMethodFoundForMatchingHeaderValueError(Error):
     """
 
     pass
+
+
+class WaitingSettings:
+    """Class for providing default settings and storing them in HTTPServer
+
+    :param raise_assertions: whether raise assertions on unexpected request or timeout or not
+    :param stop_on_nohandler: whether stop on unexpected request or not
+    :param timeout: time (in seconds) until time is out
+    """
+
+    def __init__(self, raise_assertions: bool = True, stop_on_nohandler: bool = True, timeout: float = 5):
+        self.raise_assertions = raise_assertions
+        self.stop_on_nohandler = stop_on_nohandler
+        self.timeout = timeout
+
+
+class Waiting:
+    """Class for HTTPServer.wait context manager
+
+    This class should not be instantiated directly."""
+
+    def __init__(self):
+        self._result = None
+        self._start = time.monotonic()
+        self._stop = None
+
+    def complete(self, result: bool):
+        self._result = result
+        self._stop = time.monotonic()
+
+    @property
+    def result(self) -> bool:
+        return self._result
+
+    @property
+    def elapsed_time(self) -> float:
+        """Elapsed time in seconds"""
+        return self._stop - self._start
 
 
 class HeaderValueMatcher:
@@ -310,6 +352,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
     :param host: the host or IP where the server will listen
     :param port: the TCP port where the server will listen
     :param ssl_context: the ssl context object to use for https connections
+    :param default_waiting_settings: the waiting settings object to use as default settings for :py:meth:`wait` context
+        manager
 
     .. py:attribute:: log
 
@@ -322,7 +366,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
     DEFAULT_LISTEN_HOST = "localhost"
     DEFAULT_LISTEN_PORT = 0  # Use ephemeral port
 
-    def __init__(self, host=DEFAULT_LISTEN_HOST, port=DEFAULT_LISTEN_PORT, ssl_context: Optional[SSLContext] = None):
+    def __init__(self, host=DEFAULT_LISTEN_HOST, port=DEFAULT_LISTEN_PORT, ssl_context: Optional[SSLContext] = None,
+                 default_waiting_settings: Optional[WaitingSettings] = None):
         """
         Initializes the instance.
 
@@ -338,6 +383,12 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.handlers = RequestHandlerList()
         self.permanently_failed = False
         self.ssl_context = ssl_context
+        if default_waiting_settings is not None:
+            self.default_waiting_settings = default_waiting_settings
+        else:
+            self.default_waiting_settings = WaitingSettings()
+        self._waiting_settings = copy(self.default_waiting_settings)
+        self._waiting_result = queue.LifoQueue(maxsize=1)
 
     def clear(self):
         """
@@ -654,6 +705,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         As the result, there's an assertion added (which can be raised by :py:meth:`check_assertions`).
 
         """
+        if self._waiting_settings.stop_on_nohandler:
+            self._set_waiting_result(False)
         text = "No handler found for request {!r}.\n".format(request)
         self.add_assertion(text + self.format_matchers())
         return Response("No handler found for this request", 500)
@@ -700,11 +753,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
                 return response
 
             self.ordered_handlers.pop(0)
+            self._update_waiting_result()
 
         if not handler:
             handler = self.oneshot_handlers.match(request)
             if handler:
                 self.oneshot_handlers.remove(handler)
+                self._update_waiting_result()
             else:
                 handler = self.handlers.match(request)
 
@@ -719,6 +774,69 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             response = Response(response)
 
         return response
+
+    def _set_waiting_result(self, value: bool) -> None:
+        """Set waiting_result
+
+        Setting is implemented as putting value to queue without waiting. If queue is full we simply ignore the
+        exception, because that means that waiting_result was already set, but not read.
+        """
+        with suppress(queue.Full):
+            self._waiting_result.put_nowait(value)
+
+    def _update_waiting_result(self) -> None:
+        if not self.oneshot_handlers and not self.ordered_handlers:
+            self._set_waiting_result(True)
+
+    @contextmanager
+    def wait(self, raise_assertions: Optional[bool] = None, stop_on_nohandler: Optional[bool] = None,
+             timeout: Optional[float] = None):
+        """Context manager to wait until the first of following event occurs: all ordered and oneshot handlers were
+        executed, unexpected request was received (if `stop_on_nohandler` is set to `True`), or time was out
+
+        :param raise_assertions: whether raise assertions on unexpected request or timeout or not
+        :param stop_on_nohandler: whether stop on unexpected request or not
+        :param timeout: time (in seconds) until time is out
+
+        Example:
+            def test_wait(httpserver):
+                httpserver.expect_oneshot_request('/').respond_with_data('OK')
+                with httpserver.wait(raise_assertions=False, stop_on_nohandler=False, timeout=1) as waiting:
+                    requests.get(httpserver.url_for('/'))
+                # `waiting` is :py:class:`Waiting`
+                assert waiting.result
+                print('Elapsed time: {} sec'.format(waiting.elapsed_time))
+        """
+        if raise_assertions is None:
+            self._waiting_settings.raise_assertions = self.default_waiting_settings.raise_assertions
+        else:
+            self._waiting_settings.raise_assertions = raise_assertions
+        if stop_on_nohandler is None:
+            self._waiting_settings.stop_on_nohandler = self.default_waiting_settings.stop_on_nohandler
+        else:
+            self._waiting_settings.stop_on_nohandler = stop_on_nohandler
+        if timeout is None:
+            self._waiting_settings.timeout = self.default_waiting_settings.timeout
+        else:
+            self._waiting_settings.timeout = timeout
+
+        # Ensure that waiting_result is empty
+        with suppress(queue.Empty):
+            self._waiting_result.get_nowait()
+
+        waiting = Waiting()
+        yield waiting
+
+        try:
+            waiting_result = self._waiting_result.get(timeout=self._waiting_settings.timeout)
+            waiting.complete(result=waiting_result)
+        except queue.Empty:
+            waiting.complete(result=False)
+            if self._waiting_settings.raise_assertions:
+                raise AssertionError('Wait timeout occurred, but some handlers left:\n'
+                                     '{}'.format(self.format_matchers()))
+        if self._waiting_settings.raise_assertions and not waiting.result:
+            self.check_assertions()
 
     @Request.application
     def application(self, request: Request):
