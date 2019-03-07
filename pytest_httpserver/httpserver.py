@@ -2,6 +2,7 @@
 import threading
 import json
 from collections import defaultdict
+from enum import Enum
 from typing import Callable, Mapping, Optional, Union
 from ssl import SSLContext
 
@@ -296,6 +297,12 @@ class RequestHandlerList(list):
         return None
 
 
+class HandlerType(Enum):
+    PERMANENT = 'permanent'
+    ONESHOT = 'oneshot'
+    ORDERED = 'ordered'
+
+
 class HTTPServer:   # pylint: disable=too-many-instance-attributes
     """
     Server instance which manages handlers to serve pre-defined requests.
@@ -398,7 +405,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         return RequestMatcher(*args, **kwargs)
 
-    def expect_oneshot_request(
+    def expect_request(
             self,
             uri: str,
             method: str = METHOD_ALL,
@@ -406,21 +413,22 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
             query_string: Optional[str] = None,
-            *,
-            ordered=False,
-            header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
+            header_value_matcher: Optional[HeaderValueMatcher] = None,
+            handler_type: HandlerType = HandlerType.PERMANENT) -> RequestHandler:
         """
-        Create and register a oneshot request handler.
+        Create and register a request handler.
 
-        This handler can be only used once. Once the server serves a response for this handler,
-        the handler will be dropped.
+        If `handler_type` is `HandlerType.PERMANENT` a permanent request handler is created. This handler can be used as
+        many times as the request matches it, but ordered handlers have higher priority so if there's one or more
+        ordered handler registered, those must be used first.
 
-        Ordered handler (when `ordered` parameter is `True`) also determines the
-        order of the requests to be served. For example if there are two ordered handlers
-        registered, the first request must hit the first handler, and the second request must hit the
-        second one, and not vica versa.
+        If `handler_type` is `HandlerType.ONESHOT` a oneshot request handler is created. This handler can be only used
+        once. Once the server serves a response for this handler, the handler will be dropped.
 
-        If one or more ordered handler defined, those must be exhausted first.
+        If `handler_type` is `HandlerType.ORDERED` an ordered request handler is created. Comparing to oneshot handler,
+        ordered handler also determines the order of the requests to be served. For example if there are two ordered
+        handlers registered, the first request must hit the first handler, and the second request must hit the second
+        one, and not vice versa. If one or more ordered handler defined, those must be exhausted first.
 
         :param uri: URI of the request. This must be an absolute path starting with ``/``.
         :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
@@ -430,8 +438,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param data_encoding: the encoding used for data parameter if data is a string.
         :param headers: dictionary of the headers of the request to be matched
         :param query_string: the http query string starting with ``?``, such as ``?username=user``
-        :param ordered: specifies whether to create an ordered handler or not. See above for details.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+        :param handler_type: type of handler
 
         :return: Created and register :py:class:`RequestHandler`.
         """
@@ -446,14 +454,15 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             header_value_matcher=header_value_matcher,
         )
         request_handler = RequestHandler(matcher)
-        if ordered:
-            self.ordered_handlers.append(request_handler)
-        else:
+        if handler_type == HandlerType.PERMANENT:
+            self.handlers.append(request_handler)
+        elif handler_type == HandlerType.ONESHOT:
             self.oneshot_handlers.append(request_handler)
-
+        elif handler_type == HandlerType.ORDERED:
+            self.ordered_handlers.append(request_handler)
         return request_handler
 
-    def expect_request(
+    def expect_oneshot_request(
             self,
             uri: str,
             method: str = METHOD_ALL,
@@ -463,10 +472,9 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             query_string: Optional[str] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
         """
-        Create and register a permanent request handler.
+        Create and register a oneshot request handler.
 
-        This handler can be used as many times as the request matches it, but ordered handlers
-        have higher priority so if there's one or more ordered handler registered, those must be used first.
+        This is a method for convenience. See :py:meth:`expect_request` for documentation.
 
         :param uri: URI of the request. This must be an absolute path starting with ``/``.
         :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
@@ -475,24 +483,60 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             by default, see `data_encoding`) or a bytes object.
         :param data_encoding: the encoding used for data parameter if data is a string.
         :param headers: dictionary of the headers of the request to be matched
-        :param ordered: specifies whether to create an ordered handler or not. See above for details.
+        :param query_string: the http query string starting with ``?``, such as ``?username=user``
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
 
         :return: Created and register :py:class:`RequestHandler`.
         """
 
-        matcher = self.create_matcher(
-            uri,
+        return self.expect_request(
+            uri=uri,
             method=method,
             data=data,
             data_encoding=data_encoding,
             headers=headers,
             query_string=query_string,
             header_value_matcher=header_value_matcher,
+            handler_type=HandlerType.ONESHOT,
         )
-        request_handler = RequestHandler(matcher)
-        self.handlers.append(request_handler)
-        return request_handler
+
+    def expect_ordered_request(
+            self,
+            uri: str,
+            method: str = METHOD_ALL,
+            data: Union[str, bytes, None] = None,
+            data_encoding: str = "utf-8",
+            headers: Optional[Mapping[str, str]] = None,
+            query_string: Optional[str] = None,
+            header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
+        """
+        Create and register a ordered request handler.
+
+        This is a method for convenience. See :py:meth:`expect_request` for documentation.
+
+        :param uri: URI of the request. This must be an absolute path starting with ``/``.
+        :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
+            specified), all HTTP requests will match.
+        :param data: payload of the HTTP request. This could be a string (utf-8 encoded
+            by default, see `data_encoding`) or a bytes object.
+        :param data_encoding: the encoding used for data parameter if data is a string.
+        :param headers: dictionary of the headers of the request to be matched
+        :param query_string: the http query string starting with ``?``, such as ``?username=user``
+        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+
+        :return: Created and register :py:class:`RequestHandler`.
+        """
+
+        return self.expect_request(
+            uri=uri,
+            method=method,
+            data=data,
+            data_encoding=data_encoding,
+            headers=headers,
+            query_string=query_string,
+            header_value_matcher=header_value_matcher,
+            handler_type=HandlerType.ORDERED,
+        )
 
     def thread_target(self):
         """

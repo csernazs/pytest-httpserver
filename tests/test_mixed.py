@@ -10,8 +10,8 @@ def _setup_oneshot(server: HTTPServer):
 
 
 def _setup_ordered(server: HTTPServer):
-    server.expect_oneshot_request("/ordered1", ordered=True).respond_with_data("OK ordered1")
-    server.expect_oneshot_request("/ordered2", ordered=True).respond_with_data("OK ordered2")
+    server.expect_ordered_request("/ordered1").respond_with_data("OK ordered1")
+    server.expect_ordered_request("/ordered2").respond_with_data("OK ordered2")
 
 
 def _setup_all(server: HTTPServer):
