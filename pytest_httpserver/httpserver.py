@@ -313,7 +313,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
     """
 
     DEFAULT_LISTEN_HOST = "localhost"
-    DEFAULT_LISTEN_PORT = 4000
+    DEFAULT_LISTEN_PORT = 0  # Use ephemeral port
 
     def __init__(self, host=DEFAULT_LISTEN_HOST, port=DEFAULT_LISTEN_PORT, ssl_context: Optional[SSLContext] = None):
         """
