@@ -1,0 +1,13 @@
+---
+
+features:
+  - |
+    Support ephemeral port. This can be used by specify 0 as the port number
+    to the HTTPServer instance. In such case, an unused port will be picked up
+    and the server will start listening on that port. Querying the port attribute
+    after server start reveals the real port where the server is actually listening.
+
+upgrade:
+  - |
+    The default port has been changed to 0, which results that the server will be staring
+    on an ephemeral port.
