@@ -1,10 +1,40 @@
 API documentation
 =================
 
+pytest_httpserver
+-----------------
+
 .. automodule:: pytest_httpserver
+
+HTTPServer
+~~~~~~~~~~
 
     .. autoclass:: HTTPServer
         :members:
+
+WaitingSettings
+~~~~~~~~~~~~~~~
+
+    .. autoclass:: WaitingSettings
+        :members:
+
+HeaderValueMatcher
+~~~~~~~~~~~~~~~~~~
+
+    .. autoclass:: HeaderValueMatcher
+        :members:
+
+RequestHandler
+~~~~~~~~~~~~~~
+
+    .. autoclass:: RequestHandler
+        :members:
+
+
+pytest_httpserver.httpserver
+----------------------------
+This module contains some internal classes which are normally not instantiated
+by the user.
 
 .. automodule:: pytest_httpserver.httpserver
 
@@ -18,12 +48,6 @@ API documentation
         :members:
 
     .. autoclass:: pytest_httpserver.httpserver.HTTPServerError
-        :members:
-
-    .. autoclass:: pytest_httpserver.httpserver.HeaderValueMatcher
-        :members:
-
-    .. autoclass:: pytest_httpserver.httpserver.RequestHandler
         :members:
 
     .. autoclass:: pytest_httpserver.httpserver.RequestHandlerList

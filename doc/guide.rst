@@ -50,6 +50,13 @@ When dealing with static responses you can determine all parts of the http respo
 content, etc), and you can also specify a JSON-serializable object to be returned as a json.
 
 
+Waiting for test completion or errors
+-------------------------------------
+It is possible to wait until all oneshot and ordered handlers are exhausted or any error happened. This
+is provided by a context manager which waits until one of these events occured. This can be further customized
+by :py:class:`pytest_httpserver.server.WaitSettings` object to raise or not raise assertion.
+
+
 Debugging errors while testing
 ------------------------------
 When the tests are running against the server and no matcher can be found for the given request, the server

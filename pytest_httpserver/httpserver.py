@@ -615,8 +615,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         program needs to be terminated by Ctrl+C or by signal as it will not terminate until
         the thred is stopped.
 
-        If the sever is already running :py:class`HTTPServerError` will be raised. If you are
-        unsure, call :py:meth`is_running` first.
+        If the sever is already running :py:class:`HTTPServerError` will be raised. If you are
+        unsure, call :py:meth:`is_running` first.
 
         There's a context interface of this class which stops the server when the context block ends.
         """
@@ -799,6 +799,9 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param timeout: time (in seconds) until time is out
 
         Example:
+
+        .. code-block:: python
+
             def test_wait(httpserver):
                 httpserver.expect_oneshot_request('/').respond_with_data('OK')
                 with httpserver.wait(raise_assertions=False, stop_on_nohandler=False, timeout=1) as waiting:

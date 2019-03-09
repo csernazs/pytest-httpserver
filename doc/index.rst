@@ -34,7 +34,7 @@ Example
 For further details, please read the :doc:`guide` or the :doc:`api`.
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     guide
     api
