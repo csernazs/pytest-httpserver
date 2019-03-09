@@ -10,7 +10,7 @@ def foobar(request):
     return "Hello world!"
 
 
-server = HTTPServer()
+server = HTTPServer(port=4000)
 server.expect_request("/foobar").respond_with_json({"foo": "bar"})
 server.start()
 try:
