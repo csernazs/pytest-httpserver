@@ -34,6 +34,9 @@ with HTTPServer() as httpserver:
     print(requests.get(httpserver.url_for("/foobar")).json())
 ```
 
+### Documentation
+
+Please find the API documentation at https://pytest-httpserver.readthedocs.io/en/latest/.
 
 ### Features
 
