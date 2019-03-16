@@ -1,8 +1,10 @@
 
+PYTHON ?= python3
+
 .PHONY: doc
 
 .venv/bin/pip:
-	python3 -m venv .venv
+	${PYTHON} -m venv .venv
 	.venv/bin/pip3 install --upgrade pip wheel
 
 venv: .venv/bin/pip
