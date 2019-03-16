@@ -76,4 +76,4 @@ Similar to requests, you can fine-tune what response you want to send:
 ### Missing features
 * HTTP/2
 * Keepalive
-* TLS
+* ~~TLS~~
