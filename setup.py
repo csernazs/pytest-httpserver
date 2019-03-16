@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 
-DESCRIPTION = open("README.rst").read()
+DESCRIPTION = open("README.md").read()
 
 setup(
     name="pytest_httpserver",
@@ -15,6 +15,7 @@ setup(
     description="pytest-httpserver is a httpserver for pytest",
     entry_points={"pytest11": ["pytest_httpserver = pytest_httpserver.pytest_plugin"]},
     long_description=DESCRIPTION,
+    long_description_content_type="text/markdown",
     python_requires=">=3.4",
     install_requires=[
         "typing;python_version<'3.5'",
