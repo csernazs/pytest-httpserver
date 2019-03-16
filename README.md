@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/csernazs/pytest-httpserver.svg?branch=master)](https://travis-ci.org/csernazs/pytest-httpserver)
 [![Documentation Status](https://readthedocs.org/projects/pytest-httpserver/badge/?version=latest)](https://pytest-httpserver.readthedocs.io/en/latest/?badge=latest)
+ [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## pytest_httpserver
 
