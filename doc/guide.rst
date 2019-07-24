@@ -54,7 +54,7 @@ Waiting for test completion or errors
 -------------------------------------
 It is possible to wait until all oneshot and ordered handlers are exhausted or any error happened. This
 is provided by a context manager which waits until one of these events occured. This can be further customized
-by :py:class:`pytest_httpserver.server.WaitSettings` object to raise or not raise assertion.
+by :py:class:`pytest_httpserver.server.WaitingSettings` object to raise or not raise assertion.
 
 
 Debugging errors while testing
