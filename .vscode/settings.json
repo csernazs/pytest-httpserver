@@ -1,9 +1,9 @@
 {
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python3",
     "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
-    "python.unitTest.pyTestArgs": [
+    "python.testing.pytestArgs": [
         "tests"
     ],
-    "python.unitTest.pyTestEnabled": true,
-    "python.unitTest.pyTestPath": "${workspaceFolder}/.venv/bin/pytest"
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest"
 }
