@@ -30,7 +30,7 @@ def test_wait_unexpected_request(httpserver: HTTPServer):
                 requests.get(httpserver.url_for("/foobaz"))
             assert not waiting.result
         no_handler_text = 'No handler found for request'
-        assert no_handler_text in str(error)
+        assert no_handler_text in str(error.value)
 
     make_unexpected_request_and_wait()
 
@@ -49,7 +49,7 @@ def test_wait_timeout(httpserver: HTTPServer):
         assert not waiting.result
         waiting_time_error = 0.1
         assert waiting.elapsed_time == approx(waiting_timeout, abs=waiting_time_error)
-    assert 'Wait timeout occurred, but some handlers left' in str(error)
+    assert 'Wait timeout occurred, but some handlers left' in str(error.value)
 
 
 def test_wait_raise_assertion_false(httpserver: HTTPServer):
