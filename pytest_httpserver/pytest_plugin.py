@@ -30,13 +30,18 @@ def get_httpserver_listen_address():
 
 
 @pytest.fixture
-def httpserver():
+def httpserver_listen_address():
+    return get_httpserver_listen_address()
+
+
+@pytest.fixture
+def httpserver(httpserver_listen_address):
     if Plugin.SERVER:
         Plugin.SERVER.clear()
         yield Plugin.SERVER
         return
 
-    host, port = get_httpserver_listen_address()
+    host, port = httpserver_listen_address
     if not host:
         host = HTTPServer.DEFAULT_LISTEN_HOST
     if not port:
