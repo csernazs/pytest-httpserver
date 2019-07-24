@@ -9,17 +9,27 @@ The server can be started by instatiating it and then calling the
 thread, so you will need to make sure that the :py:meth:`pytest_httpserver.HTTPServer.stop` method
 is called before your code exits.
 
-A free TCP port needs to be specified when instantiating the server, where no other daemon is listening.
+When using the pytest plugin, the server is started at the first usage of the server and it will
+remain running for the whole test suite. For each test function, a clear http server will be used
+to avoid crosstalk.
 
-If you are using the pytest plugin it is done automatically by the plugin. Possibility to change
-the TCP port is TBD.
+A free TCP port needs to be specified when instantiating the server. Setting 0 as the port number
+will select a free (ephemeral) TCP port which is guaranteed to be free.
+This is the default behavior.
 
-When using pytest plugin, specifying the bind address and bind port can also be possible via environment
-variables. Setting PYTEST_HTTPSERVER_HOST and PYTEST_HTTPSERVER_PORT will change the bind host and bind
-port, respectively.
+Specifying the bind host and port can be done in several ways:
 
-If pytest plugin is not used, the DEFAULT_LISTEN_HOST and DEFAULT_LISTEN_PORT class attributes can be set
-on the HTTPServer class.
+* Setting PYTEST_HTTPSERVER_HOST and PYTEST_HTTPSERVER_PORT will change the bind host and bind
+  port, respectively.
+
+* If pytest plugin is not used, the DEFAULT_LISTEN_HOST and DEFAULT_LISTEN_PORT class attributes can be set
+  on the HTTPServer class.
+
+* bind host and port can be specified for the constructor of the
+  :py:class:`pytest_httpserver.server.HTTPServer` class.
+
+* Overriding the ``httpserver_listen_address`` fixture in pytest.
+
 
 Configuring
 -----------
