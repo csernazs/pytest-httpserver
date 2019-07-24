@@ -1,0 +1,6 @@
+---
+
+features:
+  - |
+    Add httpserver_listen_address fixture which is used to set up the bind address and port
+    of the server. Setting bind address and port is possible by overriding this fixture.
