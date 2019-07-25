@@ -10,5 +10,6 @@ Sounds like a python script for me, but here's the manual checklist:
 - [ ] generate documentation, check version at release notes
 - [ ] build the dist: setup.py sdist bdist_wheel
 - [ ] install package in a local venv
+- [ ] run the examples in this venv
 - [ ] push to github (version bump, tags)
 - [ ] upload dist/* to pypi
