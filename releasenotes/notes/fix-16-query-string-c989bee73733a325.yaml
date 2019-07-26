@@ -1,0 +1,6 @@
+---
+issues:
+  - |
+    Fixed issue \#16 by converting string object passed as query_string
+    to bytes which is the type of the query string in werkzeug, and also allowing
+    bytes as the parameter.
