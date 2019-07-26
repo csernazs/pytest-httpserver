@@ -136,7 +136,9 @@ class RequestMatcher:
         by default, see `data_encoding`) or a bytes object.
     :param data_encoding: the encoding used for data parameter if data is a string.
     :param headers: dictionary of the headers of the request to be matched
-    :param query_string: the http query string starting with ``?``, such as ``?username=user``
+    :param query_string: the http query string, after ``?``, such as ``username=user``.
+        If string is specified it will be encoded to bytes with the encode method of
+        the string.
     """
 
     def __init__(
@@ -146,8 +148,11 @@ class RequestMatcher:
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Optional[str] = None,
+            query_string: Union[None, bytes, str] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None):
+
+        if query_string is not None and not isinstance(query_string, (str, bytes)):
+            raise TypeError("query_string must be a string, or a bytes-like object")
 
         self.uri = uri
         self.method = method
@@ -206,7 +211,15 @@ class RequestMatcher:
         if self.method != METHOD_ALL and self.method != request.method:
             retval.append(("method", request.method, self.method))
 
-        if self.query_string is not None and self.query_string != request.query_string:
+        if self.query_string is not None:
+            if isinstance(self.query_string, str):
+                query_string = self.query_string.encode()
+            elif isinstance(self.query_string, bytes):
+                query_string = self.query_string
+            else:
+                raise TypeError("query_string must be a string, or a bytes-like object")
+
+        if self.query_string is not None and query_string != request.query_string:
             retval.append(("query_string", request.query_string, self.query_string))
 
         request_headers = {}
