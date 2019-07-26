@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    Add more files to source distribution (sdist). It now contains tests,
+    assets, examples and other files.
