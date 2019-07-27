@@ -9,10 +9,14 @@ from contextlib import suppress, contextmanager
 from copy import copy
 from typing import Callable, Mapping, Optional, Union
 from ssl import SSLContext
+import urllib.parse
+import abc
 
 from werkzeug.http import parse_authorization_header
 from werkzeug.serving import make_server
 from werkzeug.wrappers import Request, Response
+import werkzeug.urls
+from werkzeug.datastructures import MultiDict
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -123,6 +127,83 @@ HeaderValueMatcher.DEFAULT_MATCHERS = defaultdict(
 )
 
 
+class QueryMatcher(abc.ABC):
+    def match(self, request_query_string: bytes) -> bool:
+        values = self.get_comparing_values(request_query_string)
+        return values[0] == values[1]
+
+    @abc.abstractmethod
+    def get_comparing_values(self, request_query_string: bytes) -> tuple:
+        pass
+
+class StringQueryMatcher(QueryMatcher):
+    def __init__(self, query_string: Union[bytes, str]):
+        if query_string is not None and not isinstance(query_string, (str, bytes)):
+            raise TypeError("query_string must be a string, or a bytes-like object")
+
+        self.query_string = query_string
+
+    def get_comparing_values(self, request_query_string: bytes) -> tuple:
+        if self.query_string is not None:
+            if isinstance(self.query_string, str):
+                query_string = self.query_string.encode()
+            elif isinstance(self.query_string, bytes):
+                query_string = self.query_string
+            else:
+                raise TypeError("query_string must be a string, or a bytes-like object")
+
+        return (request_query_string, query_string)
+
+
+class MappingQueryMatcher(QueryMatcher):
+    def __init__(self, query_dict: [Mapping, MultiDict]):
+        self.query_dict = query_dict
+
+    def get_comparing_values(self, request_query_string: bytes) -> tuple:
+        query = werkzeug.urls.url_decode(request_query_string)
+        if isinstance(self.query_dict, MultiDict):
+            return (query, self.query_dict)
+        else:
+            return (query.to_dict(), dict(self.query_dict))
+
+
+class BooleanQueryMatcher(QueryMatcher):
+    def __init__(self, result: bool):
+        self.result = result
+
+    def get_comparing_values(self, request_query_string):
+        if self.result:
+            return (True, True)
+        else:
+            return (True, False)
+
+
+def _get_dict_type(d: Mapping, default=bytes):
+        try:
+            first_key = next(iter(d.keys()))
+            key_type = type(first_key)
+        except StopIteration:
+            key_type = default
+
+        return key_type
+
+
+def _create_query_matcher(query_string: Union[None, QueryMatcher, str, bytes, Mapping]) -> QueryMatcher:
+    if isinstance(query_string, QueryMatcher):
+        return query_string
+
+    if query_string is None:
+        return BooleanQueryMatcher(True)
+
+    if isinstance(query_string, (str, bytes)):
+        return StringQueryMatcher(query_string)
+
+    if isinstance(query_string, Mapping):
+        return MappingQueryMatcher(query_string)
+
+    raise TypeError("Unable to cast this type to QueryMatcher: {!r}".format(type(query_string)))
+
+
 class RequestMatcher:
     """
     Matcher object for the incoming request.
@@ -151,12 +232,10 @@ class RequestMatcher:
             query_string: Union[None, bytes, str] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None):
 
-        if query_string is not None and not isinstance(query_string, (str, bytes)):
-            raise TypeError("query_string must be a string, or a bytes-like object")
-
         self.uri = uri
         self.method = method
         self.query_string = query_string
+        self.query_matcher = _create_query_matcher(self.query_string)
 
         if headers is None:
             self.headers = {}
@@ -211,15 +290,7 @@ class RequestMatcher:
         if self.method != METHOD_ALL and self.method != request.method:
             retval.append(("method", request.method, self.method))
 
-        if self.query_string is not None:
-            if isinstance(self.query_string, str):
-                query_string = self.query_string.encode()
-            elif isinstance(self.query_string, bytes):
-                query_string = self.query_string
-            else:
-                raise TypeError("query_string must be a string, or a bytes-like object")
-
-        if self.query_string is not None and query_string != request.query_string:
+        if not self.query_matcher.match(request.query_string):
             retval.append(("query_string", request.query_string, self.query_string))
 
         request_headers = {}
