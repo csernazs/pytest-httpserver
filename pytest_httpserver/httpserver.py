@@ -9,7 +9,6 @@ from contextlib import suppress, contextmanager
 from copy import copy
 from typing import Callable, Mapping, Optional, Union
 from ssl import SSLContext
-import urllib.parse
 import abc
 
 from werkzeug.http import parse_authorization_header
@@ -176,16 +175,6 @@ class BooleanQueryMatcher(QueryMatcher):
             return (True, True)
         else:
             return (True, False)
-
-
-def _get_dict_type(d: Mapping, default=bytes):
-        try:
-            first_key = next(iter(d.keys()))
-            key_type = type(first_key)
-        except StopIteration:
-            key_type = default
-
-        return key_type
 
 
 def _create_query_matcher(query_string: Union[None, QueryMatcher, str, bytes, Mapping]) -> QueryMatcher:
