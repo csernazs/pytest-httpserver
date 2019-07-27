@@ -476,7 +476,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Optional[str] = None,
+            query_string: Union[None, bytes, str] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None,
             handler_type: HandlerType = HandlerType.PERMANENT) -> RequestHandler:
         """
@@ -501,7 +501,9 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             by default, see `data_encoding`) or a bytes object.
         :param data_encoding: the encoding used for data parameter if data is a string.
         :param headers: dictionary of the headers of the request to be matched
-        :param query_string: the http query string starting with ``?``, such as ``?username=user``
+        :param query_string: the http query string, after ``?``, such as ``username=user``.
+            If string is specified it will be encoded to bytes with the encode method of
+            the string.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
         :param handler_type: type of handler
 
@@ -533,7 +535,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Optional[str] = None,
+            query_string: Union[None, bytes, str] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
         """
         Create and register a oneshot request handler.
@@ -547,7 +549,9 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             by default, see `data_encoding`) or a bytes object.
         :param data_encoding: the encoding used for data parameter if data is a string.
         :param headers: dictionary of the headers of the request to be matched
-        :param query_string: the http query string starting with ``?``, such as ``?username=user``
+        :param query_string: the http query string, after ``?``, such as ``username=user``.
+            If string is specified it will be encoded to bytes with the encode method of
+            the string.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
 
         :return: Created and register :py:class:`RequestHandler`.
@@ -571,7 +575,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Optional[str] = None,
+            query_string: Union[None, bytes, str] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
         """
         Create and register a ordered request handler.
@@ -585,7 +589,9 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             by default, see `data_encoding`) or a bytes object.
         :param data_encoding: the encoding used for data parameter if data is a string.
         :param headers: dictionary of the headers of the request to be matched
-        :param query_string: the http query string starting with ``?``, such as ``?username=user``
+        :param query_string: the http query string, after ``?``, such as ``username=user``.
+            If string is specified it will be encoded to bytes with the encode method of
+            the string.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
 
         :return: Created and register :py:class:`RequestHandler`.
