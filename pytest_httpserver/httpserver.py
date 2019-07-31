@@ -127,6 +127,12 @@ HeaderValueMatcher.DEFAULT_MATCHERS = defaultdict(
 
 
 class QueryMatcher(abc.ABC):
+    """
+    Abstract class for QueryMatchers
+
+    get_comparing_values should return a 2-element tuple whose elements will
+    be compared.
+    """
     def match(self, request_query_string: bytes) -> bool:
         values = self.get_comparing_values(request_query_string)
         return values[0] == values[1]
@@ -136,7 +142,16 @@ class QueryMatcher(abc.ABC):
         pass
 
 class StringQueryMatcher(QueryMatcher):
+    """
+    Matches a query for a string or bytes specified
+    """
     def __init__(self, query_string: Union[bytes, str]):
+        """
+        :param query_string: the query string will be compared to this string or bytes.
+            If string is specified, it will be encoded by the encode() method.
+            The query must not start with '?' but will be exactly (byte-by-byte) equal
+            the actual query string of the incoming request.
+        """
         if query_string is not None and not isinstance(query_string, (str, bytes)):
             raise TypeError("query_string must be a string, or a bytes-like object")
 
@@ -155,7 +170,18 @@ class StringQueryMatcher(QueryMatcher):
 
 
 class MappingQueryMatcher(QueryMatcher):
+    """
+    Matches a query string to a dictionary or MultiDict specified
+    """
+
     def __init__(self, query_dict: [Mapping, MultiDict]):
+        """
+        :param query_dict: if dictionary (Mapping) is specified, it will be used as a
+            key-value mapping where both key and value should be string. If there are multiple
+            values specified for the same key in the request, the first element will be used.
+            If you want to match multiple values, use a MultiDict object from werkzeug, which
+            represents multiple values for one key.
+        """
         self.query_dict = query_dict
 
     def get_comparing_values(self, request_query_string: bytes) -> tuple:
@@ -167,7 +193,14 @@ class MappingQueryMatcher(QueryMatcher):
 
 
 class BooleanQueryMatcher(QueryMatcher):
+    """
+    Matches the query depending on the boolean value
+    """
     def __init__(self, result: bool):
+        """
+        :param result: if this parameter is true, the query match will be always
+            successful. Otherwise, no query match will be successful.
+        """
         self.result = result
 
     def get_comparing_values(self, request_query_string):
@@ -208,7 +241,10 @@ class RequestMatcher:
     :param headers: dictionary of the headers of the request to be matched
     :param query_string: the http query string, after ``?``, such as ``username=user``.
         If string is specified it will be encoded to bytes with the encode method of
-        the string.
+        the string. If dict is specified, it will be matched to the ``key=value`` pairs
+        specified in the request. If multiple values specified for a given key, the first
+        value will be used. If multiple values needed to be handled, use ``MultiDict``
+        object from werkzeug.
     """
 
     def __init__(
@@ -218,7 +254,7 @@ class RequestMatcher:
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Union[None, bytes, str] = None,
+            query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None):
 
         self.uri = uri
@@ -536,7 +572,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Union[None, bytes, str] = None,
+            query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None,
             handler_type: HandlerType = HandlerType.PERMANENT) -> RequestHandler:
         """
@@ -563,7 +599,10 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param headers: dictionary of the headers of the request to be matched
         :param query_string: the http query string, after ``?``, such as ``username=user``.
             If string is specified it will be encoded to bytes with the encode method of
-            the string.
+            the string. If dict is specified, it will be matched to the ``key=value`` pairs
+            specified in the request. If multiple values specified for a given key, the first
+            value will be used. If multiple values needed to be handled, use ``MultiDict``
+            object from werkzeug.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
         :param handler_type: type of handler
 
@@ -595,7 +634,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Union[None, bytes, str] = None,
+            query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
         """
         Create and register a oneshot request handler.
@@ -611,7 +650,10 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param headers: dictionary of the headers of the request to be matched
         :param query_string: the http query string, after ``?``, such as ``username=user``.
             If string is specified it will be encoded to bytes with the encode method of
-            the string.
+            the string. If dict is specified, it will be matched to the ``key=value`` pairs
+            specified in the request. If multiple values specified for a given key, the first
+            value will be used. If multiple values needed to be handled, use ``MultiDict``
+            object from werkzeug.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
 
         :return: Created and register :py:class:`RequestHandler`.
@@ -635,7 +677,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
-            query_string: Union[None, bytes, str] = None,
+            query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
         """
         Create and register a ordered request handler.
@@ -651,7 +693,10 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param headers: dictionary of the headers of the request to be matched
         :param query_string: the http query string, after ``?``, such as ``username=user``.
             If string is specified it will be encoded to bytes with the encode method of
-            the string.
+            the string. If dict is specified, it will be matched to the ``key=value`` pairs
+            specified in the request. If multiple values specified for a given key, the first
+            value will be used. If multiple values needed to be handled, use ``MultiDict``
+            object from werkzeug.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
 
         :return: Created and register :py:class:`RequestHandler`.
