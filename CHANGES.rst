@@ -2,12 +2,12 @@
 Release Notes
 =============
 
-.. _Release Notes_0.3.1-10:
+.. _Release Notes_3.0.2:
 
-0.3.1-10
-========
+3.0.2
+=====
 
-.. _Release Notes_0.3.1-10_New Features:
+.. _Release Notes_3.0.2_New Features:
 
 New Features
 ------------
@@ -18,7 +18,7 @@ New Features
   the keys in the query_string when expecting a request.
 
 
-.. _Release Notes_0.3.1-10_Bug Fixes:
+.. _Release Notes_3.0.2_Bug Fixes:
 
 Bug Fixes
 ---------
@@ -28,7 +28,7 @@ Bug Fixes
   bytes as the parameter.
 
 
-.. _Release Notes_0.3.1-10_Other Notes:
+.. _Release Notes_3.0.2_Other Notes:
 
 Other Notes
 -----------
