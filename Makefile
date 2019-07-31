@@ -42,3 +42,6 @@ doc: .venv
 
 doc-clean:
 	rm -rf doc/_build
+
+changes:
+	reno report --output CHANGES.rst --no-show-source
