@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Besides bytes and string, dict and MultiDict objects can be specified as query_string.
+    When these objects are used, the query string gets parsed into a dict (or MultiDict),
+    and comparison is made accordingly. This enables the developer to ignore the order of
+    the keys in the query_string when expecting a request.
