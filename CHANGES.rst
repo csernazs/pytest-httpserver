@@ -2,12 +2,12 @@
 Release Notes
 =============
 
-.. _Release Notes_3.0.2:
+.. _Release Notes_0.3.3:
 
-3.0.2
+0.3.3
 =====
 
-.. _Release Notes_3.0.2_New Features:
+.. _Release Notes_0.3.3_New Features:
 
 New Features
 ------------
@@ -18,7 +18,7 @@ New Features
   the keys in the query_string when expecting a request.
 
 
-.. _Release Notes_3.0.2_Bug Fixes:
+.. _Release Notes_0.3.3_Bug Fixes:
 
 Bug Fixes
 ---------
@@ -27,8 +27,10 @@ Bug Fixes
   to bytes which is the type of the query string in werkzeug, and also allowing
   bytes as the parameter.
 
+- Fix release tagging. 0.3.2 was released in a mistake by tagging 3.0.2 to the branch.
 
-.. _Release Notes_3.0.2_Other Notes:
+
+.. _Release Notes_0.3.3_Other Notes:
 
 Other Notes
 -----------
