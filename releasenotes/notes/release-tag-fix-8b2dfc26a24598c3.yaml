@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Fix release tagging. 0.3.2 was released in a mistake by tagging 3.0.2 to the branch.
