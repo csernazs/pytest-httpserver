@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_0.3.4:
+
+0.3.4
+=====
+
+.. _Release Notes_0.3.4_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Fix the tests assets created for SSL/TLS tests by extending their expiration time. Also
+  update the Makefile which can be used to update these assets.
+
+
 .. _Release Notes_0.3.3:
 
 0.3.3
