@@ -20,7 +20,7 @@ def test_oneshot_and_permanent_happy_path1(httpserver: HTTPServer):
     httpserver.expect_oneshot_request("/oneshot2").respond_with_data("OK oneshot2")
 
     # query those handlers with a real HTTP client (requests in this example but could by anything)
-    # the 'url_for' method  formats the final URL, so there's need to wire-in any ports
+    # the 'url_for' method  formats the final URL, so there's no need to wire-in any ports
     assert requests.get(httpserver.url_for("/permanent")).text == "OK permanent"
     assert requests.get(httpserver.url_for("/oneshot1")).text == "OK oneshot1"
     assert requests.get(httpserver.url_for("/oneshot2")).text == "OK oneshot2"
