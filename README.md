@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/csernazs/pytest-httpserver.svg?branch=master)](https://travis-ci.org/csernazs/pytest-httpserver)
 [![Documentation Status](https://readthedocs.org/projects/pytest-httpserver/badge/?version=latest)](https://pytest-httpserver.readthedocs.io/en/latest/?badge=latest)
  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=K6PU3AGBZW4QC&item_name=pytest-httpserver&currency_code=EUR&source=url)
 
 ## pytest_httpserver
 
@@ -81,3 +82,14 @@ Similar to requests, you can fine-tune what response you want to send:
 * HTTP/2
 * Keepalive
 * ~~TLS~~
+
+### Donation
+
+If you want to donate to this project, you can find the donate button at the top
+of the README.
+
+Currently, this project is based heavily on werkzeug. Werkzeug does all the heavy lifting
+behind the scenes, parsing HTTP request and defining Request and Response objects, which
+are currently transparent in the API.
+
+If you wish to donate, please consider donating to them: https://palletsprojects.com/donate
