@@ -23,8 +23,7 @@ setup(
     ],
     extras_require={
         "dev": [
-            "pycodestyle",
-            "pylint",
+            "flake8",
             "wheel",
             "rope",
             "pytest",
