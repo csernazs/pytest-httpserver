@@ -8,5 +8,7 @@
         "tests"
     ],
     "python.testing.pytestEnabled": true,
-    "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest"
+    "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Path": "${workspaceFolder}/.venv/bin/autopep8"
 }
