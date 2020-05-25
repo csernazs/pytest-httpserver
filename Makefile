@@ -13,8 +13,7 @@ dev: venv
 	.venv/bin/pip3 install -e .[dev]
 
 cs: venv
-	.venv/bin/pylint pytest_httpserver
-	.venv/bin/pycodestyle pytest_httpserver
+	.venv/bin/flake8 pytest_httpserver tests
 
 mrproper: clean
 	rm -rf dist
