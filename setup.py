@@ -34,6 +34,7 @@ setup(
             "sphinx",
             "sphinx_rtd_theme",
             "reno",
+            "autopep8",
         ],
         "test": [
             "pytest",
