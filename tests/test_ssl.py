@@ -3,10 +3,7 @@ import ssl
 import os
 from os.path import join as pjoin
 
-import pytest
 import requests
-from werkzeug.wrappers import Response
-
 from pytest_httpserver import HTTPServer
 
 test_dir = os.path.dirname(os.path.realpath(__file__))
