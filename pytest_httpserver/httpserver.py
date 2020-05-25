@@ -133,6 +133,7 @@ class QueryMatcher(abc.ABC):
     get_comparing_values should return a 2-element tuple whose elements will
     be compared.
     """
+
     def match(self, request_query_string: bytes) -> bool:
         values = self.get_comparing_values(request_query_string)
         return values[0] == values[1]
@@ -141,10 +142,12 @@ class QueryMatcher(abc.ABC):
     def get_comparing_values(self, request_query_string: bytes) -> tuple:
         pass
 
+
 class StringQueryMatcher(QueryMatcher):
     """
     Matches a query for a string or bytes specified
     """
+
     def __init__(self, query_string: Union[bytes, str]):
         """
         :param query_string: the query string will be compared to this string or bytes.
@@ -196,6 +199,7 @@ class BooleanQueryMatcher(QueryMatcher):
     """
     Matches the query depending on the boolean value
     """
+
     def __init__(self, result: bool):
         """
         :param result: if this parameter is true, the query match will be always
