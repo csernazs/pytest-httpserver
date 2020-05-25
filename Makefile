@@ -15,6 +15,9 @@ dev: venv
 cs: venv
 	.venv/bin/flake8 pytest_httpserver tests
 
+autoformat: dev
+	.venv/bin/autopep8 --in-place --recursive pytest_httpserver tests
+
 mrproper: clean
 	rm -rf dist
 
