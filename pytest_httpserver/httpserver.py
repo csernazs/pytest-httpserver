@@ -178,7 +178,7 @@ class MappingQueryMatcher(QueryMatcher):
     Matches a query string to a dictionary or MultiDict specified
     """
 
-    def __init__(self, query_dict: [Mapping, MultiDict]):
+    def __init__(self, query_dict: Union[Mapping, MultiDict]):
         """
         :param query_dict: if dictionary (Mapping) is specified, it will be used as a
             key-value mapping where both key and value should be string. If there are multiple
