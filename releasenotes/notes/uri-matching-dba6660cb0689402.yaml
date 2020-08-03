@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Extend URI matching by allowing to specify URIPattern object or a compiled
+    regular expression, which will be matched against the URI. URIPattern class
+    is defined as abstract in the library so the user need to implement a new
+    class based on it.
