@@ -3,11 +3,12 @@ import queue
 import threading
 import json
 import time
+import re
 from collections import defaultdict
 from enum import Enum
 from contextlib import suppress, contextmanager
 from copy import copy
-from typing import Callable, Mapping, Optional, Union
+from typing import Callable, Mapping, Optional, Union, Pattern
 from ssl import SSLContext
 import abc
 
@@ -230,13 +231,27 @@ def _create_query_matcher(query_string: Union[None, QueryMatcher, str, bytes, Ma
     raise TypeError("Unable to cast this type to QueryMatcher: {!r}".format(type(query_string)))
 
 
+class URIPattern(abc.ABC):
+    @abc.abstractmethod
+    def match(self, uri: str) -> bool:
+        """
+            Matches the provided URI.
+
+            :param uri: URI of the request. This is an absolute path startting
+                with "/" and does not contain the query part.
+            :return: True if there's a match, False otherwise
+            """
+        pass
+
+
 class RequestMatcher:
     """
     Matcher object for the incoming request.
 
     It defines various parameters to match the incoming request.
 
-    :param uri: URI of the request. This must be an absolute path starting with ``/``.
+    :param uri: URI of the request. This must be an absolute path starting with ``/``, a
+        :py:class:`URIPattern` object, or a regular expression compiled by re.compile.
     :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
         specified), all HTTP requests will match.
     :param data: payload of the HTTP request. This could be a string (utf-8 encoded
@@ -253,7 +268,7 @@ class RequestMatcher:
 
     def __init__(
             self,
-            uri: str,
+            uri: Union[str, URIPattern, Pattern[str]],
             method: str = METHOD_ALL,
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
@@ -300,6 +315,27 @@ class RequestMatcher:
             return True
         return request.data == self.data
 
+    def match_uri(self, request: Request) -> bool:
+        path = request.path
+
+        if isinstance(self.uri, URIPattern):
+            return self.uri.match(path)
+
+        # this is python version depending
+        # in python 3.7 and above: it is re.Pattern
+        # below python 3.7 it is _sre.SRE_Pattern which cannot be accessed directly
+        elif isinstance(self.uri, re.compile("").__class__):
+            return bool(self.uri.match(path))
+
+        else:
+            # there could be a guard isinstance(self.uri, str) been here
+            # but we want to allow any object which provides the __eq__ parameter
+            # (note: in this case it will be not typeing correct)
+            #
+            # also, python will raise TypeError when self.uri is a conflicting type
+
+            return self.uri == URI_DEFAULT or path == self.uri
+
     def difference(self, request: Request) -> list:
         """
         Calculates the difference between the matcher and the request.
@@ -313,7 +349,8 @@ class RequestMatcher:
         """
 
         retval = []
-        if self.uri != URI_DEFAULT and request.path != self.uri:
+
+        if not self.match_uri(request):
             retval.append(("uri", request.path, self.uri))
 
         if self.method != METHOD_ALL and self.method != request.method:

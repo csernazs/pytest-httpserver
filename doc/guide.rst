@@ -40,8 +40,19 @@ Requests
 ~~~~~~~~
 When registering a :py:class:`pytest_httpserver.server.RequestMatcher`, it can use various parts
 of the HTTP request to be matched: URI, method, data, headers, and query string can be specified.
-All of these are based on simple equality checking, with the exception of method and URI where a special
-value specifying `any` can be given (variables `URI_DEFAULT` and `METHOD_ALL`, respectively).
+
+The following can be matched:
+
+* uri: a string, a regexp or an :py:class:`pytest_httpserver.server.URIPattern` object
+
+* method: GET/POST/..., specified as string
+
+* data: a string or bytes. It is possible to match with arbitrary byte data.
+
+* headers: a str-str dictionary or a :py:class:`pytest_httpserver.server.HeaderValueMatcher` object
+  which matches each header with its own provided callable
+
+* query_string: a string, bytes or a dict specifying the key-value pairs of the query string
 
 :py:class:`pytest_httpserver.server.HTTPServer` also determines how these matchers are looked up and
 what their lifetime is. You can register handlers which handle any amount of requests, but you can also
