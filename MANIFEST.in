@@ -1,8 +1,8 @@
+include CHANGES.rst
 include README.md
 include LICENSE
 include tests/*.py
 include tests/assets/*
 include example*.py
 include requirements*.txt
-include .travis.yml
 global-exclude *~ *.bak
