@@ -2,6 +2,22 @@
 Release Notes
 =============
 
+.. _Release Notes_0.3.5:
+
+0.3.5
+=====
+
+.. _Release Notes_0.3.5_New Features:
+
+New Features
+------------
+
+- Extend URI matching by allowing to specify URIPattern object or a compiled
+  regular expression, which will be matched against the URI. URIPattern class
+  is defined as abstract in the library so the user need to implement a new
+  class based on it.
+
+
 .. _Release Notes_0.3.4:
 
 0.3.4
