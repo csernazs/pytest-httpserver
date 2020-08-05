@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pytest_httpserver'
-copyright = '2018, Zsolt Cserna'
+copyright = '2020, Zsolt Cserna'
 author = 'Zsolt Cserna'
 
 # The version info for the project you're documenting, acts as replacement for
