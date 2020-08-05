@@ -250,7 +250,7 @@ class RequestMatcher:
     It defines various parameters to match the incoming request.
 
     :param uri: URI of the request. This must be an absolute path starting with ``/``, a
-        :py:class:`URIPattern` object, or a regular expression compiled by re.compile.
+        :py:class:`URIPattern` object, or a regular expression compiled by :py:func:`re.compile`.
     :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
         specified), all HTTP requests will match.
     :param data: payload of the HTTP request. This could be a string (utf-8 encoded
@@ -607,7 +607,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
     def expect_request(
             self,
-            uri: str,
+            uri: Union[str, URIPattern, Pattern[str]],
             method: str = METHOD_ALL,
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
@@ -630,7 +630,9 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         handlers registered, the first request must hit the first handler, and the second request must hit the second
         one, and not vice versa. If one or more ordered handler defined, those must be exhausted first.
 
-        :param uri: URI of the request. This must be an absolute path starting with ``/``.
+
+        :param uri: URI of the request. This must be an absolute path starting with ``/``, a
+            :py:class:`URIPattern` object, or a regular expression compiled by :py:func:`re.compile`.
         :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
             specified), all HTTP requests will match.
         :param data: payload of the HTTP request. This could be a string (utf-8 encoded
@@ -669,7 +671,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
     def expect_oneshot_request(
             self,
-            uri: str,
+            uri: Union[str, URIPattern, Pattern[str]],
             method: str = METHOD_ALL,
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
@@ -681,7 +683,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         This is a method for convenience. See :py:meth:`expect_request` for documentation.
 
-        :param uri: URI of the request. This must be an absolute path starting with ``/``.
+        :param uri: URI of the request. This must be an absolute path starting with ``/``, a
+            :py:class:`URIPattern` object, or a regular expression compiled by :py:func:`re.compile`.
         :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
             specified), all HTTP requests will match.
         :param data: payload of the HTTP request. This could be a string (utf-8 encoded
@@ -712,7 +715,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
     def expect_ordered_request(
             self,
-            uri: str,
+            uri: Union[str, URIPattern, Pattern[str]],
             method: str = METHOD_ALL,
             data: Union[str, bytes, None] = None,
             data_encoding: str = "utf-8",
@@ -724,7 +727,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         This is a method for convenience. See :py:meth:`expect_request` for documentation.
 
-        :param uri: URI of the request. This must be an absolute path starting with ``/``.
+        :param uri: URI of the request. This must be an absolute path starting with ``/``, a
+            :py:class:`URIPattern` object, or a regular expression compiled by :py:func:`re.compile`.
         :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
             specified), all HTTP requests will match.
         :param data: payload of the HTTP request. This could be a string (utf-8 encoded
