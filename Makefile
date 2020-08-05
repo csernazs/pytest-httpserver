@@ -58,4 +58,4 @@ doc-clean:
 
 .PHONY: changes
 changes:
-	reno report --output CHANGES.rst --no-show-source
+	.venv/bin/reno report --output CHANGES.rst --no-show-source
