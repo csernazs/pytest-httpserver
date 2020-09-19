@@ -39,4 +39,5 @@ For further details, please read the :doc:`guide` or the :doc:`api`.
     tutorial
     howto
     api
+    background
     changes
