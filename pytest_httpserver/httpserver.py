@@ -761,7 +761,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         """
         This method serves as a thread target when the server is started.
 
-        This should not be called directly, but can be overriden to tailor it to your needs.
+        This should not be called directly, but can be overridden to tailor it to your needs.
         """
 
         self.server.serve_forever()
@@ -781,7 +781,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         If the sever is not stopped by the caller and execution reaches the end, the
         program needs to be terminated by Ctrl+C or by signal as it will not terminate until
-        the thred is stopped.
+        the thread is stopped.
 
         If the sever is already running :py:class:`HTTPServerError` will be raised. If you are
         unsure, call :py:meth:`is_running` first.
@@ -803,7 +803,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         Notifies the server thread about the intention of the stopping, and the thread will
         terminate itself. This needs about 0.5 seconds in worst case.
 
-        Only a running server can be stopped. If the sever is not runnig, :py:class`HTTPServerError`
+        Only a running server can be stopped. If the sever is not running, :py:class`HTTPServerError`
         will be raised.
         """
         if not self.is_running():
@@ -845,7 +845,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         This method returns a human-readable string representation of the matchers
         registered. You can observe which requests will be served, etc.
 
-        This method is primairly used when reporting errors.
+        This method is primarily used when reporting errors.
         """
         def format_handlers(handlers):
             if handlers:
