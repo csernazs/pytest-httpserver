@@ -19,6 +19,8 @@ from werkzeug.wrappers import Response
 
 import werkzeug.urls
 from werkzeug.datastructures import MultiDict
+from wsgiprox.wsgiprox import WSGIProxMiddleware
+
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -1118,3 +1120,12 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         """
         if self.is_running():
             self.stop()
+
+
+class HTTPProxy(HTTPServer):
+    def start(self):
+        proxy = WSGIProxMiddleware(self.application, "/proxy/", "wsgiprox")
+        self.server = make_server(self.host, self.port, proxy, ssl_context=self.ssl_context)
+        self.port = self.server.port  # Update port (needed if `port` was set to 0)
+        self.server_thread = threading.Thread(target=self.thread_target)
+        self.server_thread.start()

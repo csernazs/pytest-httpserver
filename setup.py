@@ -19,6 +19,7 @@ setup(
     python_requires=">=3.4",
     install_requires=[
         "typing;python_version<'3.5'",
+        "wsgiprox",
         "werkzeug"
     ],
     extras_require={
