@@ -20,9 +20,9 @@ https://pytest-httpserver.readthedocs.io/en/latest/background.html
 
 There are a few rules you are kindly asked to accept:
 
-* there are no coding style rules enforced, however please follow the style of
-  the source code and try to make it consistent. pep8 is a rule of thumb,but
-  there's no enforcement (yet).
+* coding style is checked by flake8. You can run `make cs` before proceeding
+  with the PR. You can also use `autopep8` to fix the issues which gets executed
+  by the `make autoformat` command.
 
 * tests should be written for the new code. If there's a complex logic
   implemented, it should be tested on different valid and invalid inputs and
