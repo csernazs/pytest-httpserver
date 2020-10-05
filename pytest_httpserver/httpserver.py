@@ -1123,9 +1123,52 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
 
 class HTTPProxy(HTTPServer):
+    """
+    Proxy instance which manages handlers to serve pre-defined requests.
+
+    :param host: the host or IP where the proxy will listen
+    :param port: the TCP port where the proxy will listen
+    :param default_waiting_settings: the waiting settings object to use as default settings for :py:meth:`wait` context
+        manager
+
+    .. py:attribute:: log
+
+        Attribute containing the list of two-element tuples. Each tuple contains
+        :py:class:`Request` and :py:class:`Response` object which represents the
+        incoming request and the outgoing response which happened during the lifetime
+        of the server.
+    """
+
+    DEFAULT_LISTEN_HOST = "localhost"
+    DEFAULT_LISTEN_PORT = 0  # Use ephemeral port
+    DEFAULT_PREFIX = "/proxy/"
+    DEFAULT_PROXY_HOST = "wsgiprox"
+
+    def __init__(
+            self,
+            host=DEFAULT_LISTEN_HOST,
+            port=DEFAULT_LISTEN_PORT,
+            prefix=DEFAULT_PREFIX,
+            proxy_host=DEFAULT_PROXY_HOST,
+            proxy_options=None,
+            default_waiting_settings: Optional[WaitingSettings] = None):
+        """
+        Initializes the instance.
+
+        """
+
+        super().__init__(host, port, default_waiting_settings)
+        self.prefix = prefix
+        self.proxy_host = proxy_host
+        self.proxy_options = proxy_options
+
     def start(self):
-        proxy = WSGIProxMiddleware(self.application, "/proxy/", "wsgiprox")
-        self.server = make_server(self.host, self.port, proxy, ssl_context=self.ssl_context)
+        proxy = WSGIProxMiddleware(
+            self.application,
+            self.prefix,
+            self.proxy_host,
+            proxy_options=self.proxy_options)
+        self.server = make_server(self.host, self.port, proxy)
         self.port = self.server.port  # Update port (needed if `port` was set to 0)
         self.server_thread = threading.Thread(target=self.thread_target)
         self.server_thread.start()

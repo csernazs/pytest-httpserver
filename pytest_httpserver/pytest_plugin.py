@@ -3,11 +3,12 @@
 import os
 
 import pytest
-from .httpserver import HTTPServer
+from .httpserver import HTTPServer, HTTPProxy
 
 
 class Plugin:
     SERVER = None
+    PROXY = None
 
 
 class PluginHTTPServer(HTTPServer):
@@ -18,6 +19,16 @@ class PluginHTTPServer(HTTPServer):
     def stop(self):
         super().stop()
         Plugin.SERVER = None
+
+
+class PluginHTTPProxy(HTTPProxy):
+    def start(self):
+        super().start()
+        Plugin.PROXY = self
+
+    def stop(self):
+        super().stop()
+        Plugin.PROXY = None
 
 
 def get_httpserver_listen_address():
@@ -52,8 +63,29 @@ def httpserver(httpserver_listen_address):
     yield server
 
 
+@pytest.fixture
+def httpproxy(httpserver_listen_address, tmp_path):
+    if Plugin.PROXY:
+        Plugin.PROXY.clear()
+        yield Plugin.PROXY
+        return
+
+    host, port = httpserver_listen_address
+    if not host:
+        host = HTTPProxy.DEFAULT_LISTEN_HOST
+    if not port:
+        port = HTTPProxy.DEFAULT_LISTEN_PORT
+
+    ca_dir = tmp_path.joinpath("httpproxy_ca")
+    ca_dir.mkdir(exist_ok=True)
+    server = PluginHTTPProxy(host=host, port=port, proxy_options={"ca_file_cache": str(ca_dir.joinpath("wsgiprox-ca.pem"))})
+    server.start()
+    yield server
+
+
 def pytest_sessionfinish(session, exitstatus):  # pylint: disable=unused-argument
-    if Plugin.SERVER is not None:
-        Plugin.SERVER.clear()
-        if Plugin.SERVER.is_running():
-            Plugin.SERVER.stop()
+    for instance in (Plugin.SERVER, Plugin.PROXY):
+        if instance is not None:
+            instance.clear()
+            if instance.is_running():
+                instance.stop()
