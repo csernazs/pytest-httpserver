@@ -39,8 +39,8 @@ There are a few rules you are kindly asked to accept:
 * the development is arranged around a virtualenv which needs to be created by
   the `make dev` command. It will create it in the `.venv` directory.
 
-* you can let your IDE of your choice to use the `.venv/bin/python` interpreter to
-  use so it will know all the dependencies and so on.
+* you can let your IDE of your choice to use the `.venv/bin/python` interpreter
+  so it will know all the dependencies and so on.
 
 * running tests on the localhost can be done by issuing `make quick-test`. It is
   "quick" because it tests the software with only one interpreter. Note that the
