@@ -31,6 +31,17 @@ class PluginHTTPProxy(HTTPProxy):
         Plugin.PROXY = None
 
 
+@pytest.fixture(scope="session")
+def plugin_httpserver_class():
+    yield PluginHTTPServer
+
+
+@pytest.fixture(scope="session")
+def plugin_proxy_class():
+    print("plugin_proxy_class")
+    yield PluginHTTPProxy
+
+
 def get_httpserver_listen_address():
     listen_host = os.environ.get("PYTEST_HTTPSERVER_HOST")
     listen_port = os.environ.get("PYTEST_HTTPSERVER_PORT")
@@ -46,7 +57,7 @@ def httpserver_listen_address():
 
 
 @pytest.fixture
-def httpserver(httpserver_listen_address):
+def httpserver(httpserver_listen_address, plugin_httpserver_class):
     if Plugin.SERVER:
         Plugin.SERVER.clear()
         yield Plugin.SERVER
@@ -58,13 +69,13 @@ def httpserver(httpserver_listen_address):
     if not port:
         port = HTTPServer.DEFAULT_LISTEN_PORT
 
-    server = PluginHTTPServer(host=host, port=port)
+    server = plugin_httpserver_class(host=host, port=port)
     server.start()
     yield server
 
 
 @pytest.fixture
-def httpproxy(httpserver_listen_address, tmp_path):
+def httpproxy(httpserver_listen_address, tmp_path, plugin_proxy_class):
     if Plugin.PROXY:
         Plugin.PROXY.clear()
         yield Plugin.PROXY
@@ -78,7 +89,7 @@ def httpproxy(httpserver_listen_address, tmp_path):
 
     ca_dir = tmp_path.joinpath("httpproxy_ca")
     ca_dir.mkdir(exist_ok=True)
-    server = PluginHTTPProxy(host=host, port=port, proxy_options={"ca_file_cache": str(ca_dir.joinpath("wsgiprox-ca.pem"))})
+    server = plugin_proxy_class(host=host, port=port, proxy_options={"ca_file_cache": str(ca_dir.joinpath("wsgiprox-ca.pem"))})
     server.start()
     yield server
 

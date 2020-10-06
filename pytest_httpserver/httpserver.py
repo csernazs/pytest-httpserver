@@ -1162,6 +1162,13 @@ class HTTPProxy(HTTPServer):
         self.proxy_host = proxy_host
         self.proxy_options = proxy_options
 
+    @property
+    def ca_cert(self):
+        return self.proxy_options["ca_file_cache"]
+
+    def get_proxy_url(self):
+        return self.url_for("")
+
     def start(self):
         proxy = WSGIProxMiddleware(
             self.application,
