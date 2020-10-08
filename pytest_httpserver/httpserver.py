@@ -8,18 +8,28 @@ from collections import defaultdict
 from enum import Enum
 from contextlib import suppress, contextmanager
 from copy import copy
-from typing import Callable, Mapping, Optional, Union, Pattern
+from typing import Any, Callable, Mapping, Optional, Union, Pattern
 from ssl import SSLContext
 import abc
 
 from werkzeug.http import parse_authorization_header
 from werkzeug.serving import make_server
-from werkzeug.wrappers import Request, Response
+from werkzeug.wrappers import Request
+from werkzeug.wrappers import Response
+
 import werkzeug.urls
 from werkzeug.datastructures import MultiDict
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
+
+
+class Undefined:
+    def __repr__(self):
+        return "<UNDEFINED>"
+
+
+UNDEFINED = Undefined()
 
 
 class Error(Exception):
@@ -273,12 +283,17 @@ class RequestMatcher:
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
             query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-            header_value_matcher: Optional[HeaderValueMatcher] = None):
+            header_value_matcher: Optional[HeaderValueMatcher] = None,
+            json: Any = UNDEFINED):
+
+        if json is not UNDEFINED and data is not None:
+            raise ValueError("data and json parameters are mutually exclusive")
 
         self.uri = uri
         self.method = method
         self.query_string = query_string
         self.query_matcher = _create_query_matcher(self.query_string)
+        self.json = json
 
         if headers is None:
             self.headers = {}
@@ -289,6 +304,7 @@ class RequestMatcher:
             data = data.encode(data_encoding)
 
         self.data = data
+        self.data_encoding = data_encoding
 
         self.header_value_matcher = HeaderValueMatcher() if header_value_matcher is None else header_value_matcher
 
@@ -299,7 +315,8 @@ class RequestMatcher:
 
         class_name = self.__class__.__name__
         retval = "<{} ".format(class_name)
-        retval += "uri={uri!r} method={method!r} query_string={query_string!r} headers={headers!r} data={data!r}>".format_map(self.__dict__)
+        retval += "uri={uri!r} method={method!r} query_string={query_string!r} headers={headers!r} data={data!r} json={json!r}>".format_map(
+            self.__dict__)
         return retval
 
     def match_data(self, request: Request) -> bool:
@@ -334,6 +351,30 @@ class RequestMatcher:
             # also, python will raise TypeError when self.uri is a conflicting type
 
             return self.uri == URI_DEFAULT or path == self.uri
+
+    def match_json(self, request: Request) -> bool:
+        """
+        Matches the request data as json.
+
+        Load the request data as json and compare it to self.json which is a
+        json-serializable data structure (eg. a dict or list).
+
+        :param request: the HTTP request
+        :return: `True` when the data is matched or no matching is required. `False` otherwise.
+        """
+        if self.json is UNDEFINED:
+            return True
+
+        try:
+            # do the decoding here as python 3.5 requires string and does not
+            # accept bytes
+            json_received = json.loads(request.data.decode(self.data_encoding))
+        except json.JSONDecodeError:
+            return False
+        except UnicodeDecodeError:
+            return False
+
+        return json_received == self.json
 
     def difference(self, request: Request) -> list:
         """
@@ -371,6 +412,8 @@ class RequestMatcher:
         if not self.match_data(request):
             retval.append(("data", request.data, self.data))
 
+        if not self.match_json(request):
+            retval.append(("json", request.data, self.json))
         return retval
 
     def match(self, request: Request) -> bool:
@@ -614,7 +657,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             headers: Optional[Mapping[str, str]] = None,
             query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
             header_value_matcher: Optional[HeaderValueMatcher] = None,
-            handler_type: HandlerType = HandlerType.PERMANENT) -> RequestHandler:
+            handler_type: HandlerType = HandlerType.PERMANENT,
+            json: Any = UNDEFINED) -> RequestHandler:
         """
         Create and register a request handler.
 
@@ -647,8 +691,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             object from werkzeug.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
         :param handler_type: type of handler
+        :param json: a python object (eg. a dict) whose value will be compared to the request body after it
+            is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
+            If that's desired, add it to the headers parameter.
 
         :return: Created and register :py:class:`RequestHandler`.
+
+        Parameters `json` and `data` are mutually exclusive.
         """
 
         matcher = self.create_matcher(
@@ -659,6 +708,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             headers=headers,
             query_string=query_string,
             header_value_matcher=header_value_matcher,
+            json=json,
         )
         request_handler = RequestHandler(matcher)
         if handler_type == HandlerType.PERMANENT:
@@ -677,7 +727,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
             query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-            header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
+            header_value_matcher: Optional[HeaderValueMatcher] = None,
+            json: Any = UNDEFINED) -> RequestHandler:
         """
         Create and register a oneshot request handler.
 
@@ -698,8 +749,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             value will be used. If multiple values needed to be handled, use ``MultiDict``
             object from werkzeug.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+        :param json: a python object (eg. a dict) whose value will be compared to the request body after it
+            is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
+            If that's desired, add it to the headers parameter.
 
         :return: Created and register :py:class:`RequestHandler`.
+
+        Parameters `json` and `data` are mutually exclusive.
         """
 
         return self.expect_request(
@@ -711,6 +767,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             query_string=query_string,
             header_value_matcher=header_value_matcher,
             handler_type=HandlerType.ONESHOT,
+            json=json,
         )
 
     def expect_ordered_request(
@@ -721,7 +778,8 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             data_encoding: str = "utf-8",
             headers: Optional[Mapping[str, str]] = None,
             query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-            header_value_matcher: Optional[HeaderValueMatcher] = None) -> RequestHandler:
+            header_value_matcher: Optional[HeaderValueMatcher] = None,
+            json: Any = UNDEFINED) -> RequestHandler:
         """
         Create and register a ordered request handler.
 
@@ -742,8 +800,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             value will be used. If multiple values needed to be handled, use ``MultiDict``
             object from werkzeug.
         :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+        :param json: a python object (eg. a dict) whose value will be compared to the request body after it
+            is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
+            If that's desired, add it to the headers parameter.
 
         :return: Created and register :py:class:`RequestHandler`.
+
+        Parameters `json` and `data` are mutually exclusive.
         """
 
         return self.expect_request(
@@ -755,6 +818,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             query_string=query_string,
             header_value_matcher=header_value_matcher,
             handler_type=HandlerType.ORDERED,
+            json=json,
         )
 
     def thread_target(self):

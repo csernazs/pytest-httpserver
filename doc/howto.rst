@@ -153,6 +153,51 @@ order of the parameters in the ``Authorization`` header does not matter.
         assert response.text == 'OK'
 
 
+JSON matching
+-------------
+
+Matching the request data can be done in two different ways. One way is to
+provide a python string (or bytes object) whose value will be compared to the
+request body.
+
+When the request contains a json, matching to will be error prone as an object
+can be represented as json in different ways, for example when different length
+of indentation is used.
+
+To match the body as json, you need to add the python data structure (which
+could be dict, list or anything which can be the result of `json.loads()` call).
+The request's body will be loaded as json and the result will be compared to the
+provided object. If the request's body cannot be loaded as json, the matcher
+will fail and *pytest-httpserver* will proceed with the next registered matcher.
+
+Example:
+
+.. code:: python
+
+    def test_json_matcher(httpserver: HTTPServer):
+        httpserver.expect_request("/foo", json={"foo": "bar"}).respond_with_data("Hello world!")
+        resp = requests.get(httpserver.url_for("/foo"), json={"foo": "bar"})
+        assert resp.status_code == 200
+        assert resp.text == "Hello world!"
+
+
+.. note::
+    JSON requests usually come with ``Content-Type: application/json`` header.
+    *pytest-httpserver* provides the *headers* parameter to match the headers of
+    the request, however matching json body does not imply matching the
+    *Content-Type* header. If matching the header is intended, specify the expected
+    *Content-Type* header and its value to the headers parameter.
+
+.. note::
+    *json* and *data* parameters are mutually exclusive so both of then cannot
+    be specified as in such case the behavior is ambiguous.
+
+.. note::
+    The request body is decoded by using the *data_encoding* parameter, which is
+    default to *utf-8*. If the request comes in a different encoding, and the
+    decoding fails, the request won't match with the expected json.
+
+
 Advanced header matching
 ------------------------
 
