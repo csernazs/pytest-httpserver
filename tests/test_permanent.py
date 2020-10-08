@@ -41,6 +41,14 @@ def test_request_post(httpserver: HTTPServer):
     assert response.status_code == 200
 
 
+def test_request_post_case_insensitive_method(httpserver: HTTPServer):
+    httpserver.expect_request("/foobar", data='{"request": "example"}', method="post").respond_with_data("example_response")
+    response = requests.post(httpserver.url_for("/foobar"), json={"request": "example"})
+    httpserver.check_assertions()
+    assert response.text == "example_response"
+    assert response.status_code == 200
+
+
 def test_request_any_method(httpserver: HTTPServer):
     httpserver.expect_request("/foobar").respond_with_data("OK")
     response = requests.post(httpserver.url_for("/foobar"))

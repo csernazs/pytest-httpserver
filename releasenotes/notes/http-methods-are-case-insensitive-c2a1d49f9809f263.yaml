@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    HTTP methods are case insensitive. The HTTP method specified is converted to
+    uppercase in the library.

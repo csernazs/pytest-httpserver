@@ -634,7 +634,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :param uri: URI of the request. This must be an absolute path starting with ``/``, a
             :py:class:`URIPattern` object, or a regular expression compiled by :py:func:`re.compile`.
         :param method: HTTP method of the request. If not specified (or `METHOD_ALL`
-            specified), all HTTP requests will match.
+            specified), all HTTP requests will match. Case insensitive.
         :param data: payload of the HTTP request. This could be a string (utf-8 encoded
             by default, see `data_encoding`) or a bytes object.
         :param data_encoding: the encoding used for data parameter if data is a string.
@@ -653,7 +653,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         matcher = self.create_matcher(
             uri,
-            method=method,
+            method=method.upper(),
             data=data,
             data_encoding=data_encoding,
             headers=headers,
