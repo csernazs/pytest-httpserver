@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    It is now possible to specify a JSON-serializable python value (such as
+    dict, list, etc) and match the request to it as JSON. The request's body
+    is loaded as JSON and it will be compared to the expected value.
