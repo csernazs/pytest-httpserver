@@ -19,7 +19,7 @@ jobs:
     - name: Bootstrap test environment
       run: |
         sudo apt update
-        sudo apt install debootstrap python3-venv make
+        sudo apt install python3-venv make
         python -m pip install --upgrade pip
         make dev
     - name: Lint
