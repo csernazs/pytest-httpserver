@@ -79,6 +79,11 @@ def test_unexpected_request(httpserver: HTTPServer):
         httpserver.check_assertions()
 
 
+def test_no_handler_status_code(httpserver: HTTPServer):
+    httpserver.no_handler_status_code = 404
+    assert requests.get(httpserver.url_for("/foobar")).status_code == 404
+
+
 def test_server_cleared_for_each_test(httpserver: HTTPServer):
     assert httpserver.log == []
     assert httpserver.assertions == []

@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    The http response code sent when no handler is found for the
+    request can be changed. It is set to 500 by default.

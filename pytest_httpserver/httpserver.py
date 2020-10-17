@@ -553,6 +553,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         :py:class:`Request` and :py:class:`Response` object which represents the
         incoming request and the outgoing response which happened during the lifetime
         of the server.
+
+    .. py:attribute:: no_handler_status_code
+
+        Attribute containing the http status code (int) which will be the response
+        status when no matcher is found for the request. By default, it is set to *500*
+        but it can be overridden to any valid http status code such as *404* if needed.
+
     """
 
     DEFAULT_LISTEN_HOST = "localhost"
@@ -581,6 +588,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             self.default_waiting_settings = WaitingSettings()
         self._waiting_settings = copy(self.default_waiting_settings)
         self._waiting_result = queue.LifoQueue(maxsize=1)
+        self.no_handler_status_code = 500
 
     def clear(self):
         """
@@ -593,6 +601,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.clear_log()
         self.clear_all_handlers()
         self.permanently_failed = False
+        self.no_handler_status_code = 500
 
     def clear_assertions(self):
         """
@@ -941,7 +950,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             self._set_waiting_result(False)
         text = "No handler found for request {!r}.\n".format(request)
         self.add_assertion(text + self.format_matchers())
-        return Response("No handler found for this request", 500)
+        return Response("No handler found for this request", self.no_handler_status_code)
 
     def respond_permanent_failure(self):
         """
