@@ -69,7 +69,8 @@ You can also fine-tune the expected request. The following can be specified:
 - HTTP method
 - headers
 - query string
-- data (HTTP payload of the request)
+- data (HTTP body of the request)
+- JSON (HTTP body loaded as JSON)
 
 
 #### Responses
