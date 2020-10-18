@@ -2,6 +2,27 @@
 Release Notes
 =============
 
+.. _Release Notes_0.3.6:
+
+0.3.6
+=====
+
+.. _Release Notes_0.3.6_New Features:
+
+New Features
+------------
+
+- HTTP methods are case insensitive. The HTTP method specified is converted to
+  uppercase in the library.
+
+- It is now possible to specify a JSON-serializable python value (such as
+  dict, list, etc) and match the request to it as JSON. The request's body
+  is loaded as JSON and it will be compared to the expected value.
+
+- The http response code sent when no handler is found for the
+  request can be changed. It is set to 500 by default.
+
+
 .. _Release Notes_0.3.5:
 
 0.3.5
