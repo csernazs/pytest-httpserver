@@ -11,7 +11,7 @@ setup(
     url="https://www.github.com/csernazs/pytest-httpserver",
     packages=find_packages(),
     author="Zsolt Cserna",
-    author_email="zsolt.cserna@gmail.com",
+    author_email="cserna.zsolt@gmail.com",
     description="pytest-httpserver is a httpserver for pytest",
     entry_points={"pytest11": ["pytest_httpserver = pytest_httpserver.pytest_plugin"]},
     long_description=DESCRIPTION,
