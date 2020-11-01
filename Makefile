@@ -42,11 +42,12 @@ test-pdb:
 
 .PHONY: cov
 cov: cov-clean
-	.venv/bin/pytest --cov pytest_httpserver --cov-report=term --cov-report=html --cov-report=xml tests
+	.venv/bin/coverage run -m pytest -vv tests
+	.venv/bin/coverage xml
 
 .PHONY: cov-clean
 cov-clean:
-	rm -rf htmlcov
+	rm -rf htmlcov coverage.xml .coverage
 
 .PHONY: doc
 doc: .venv

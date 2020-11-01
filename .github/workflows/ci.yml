@@ -27,4 +27,6 @@ jobs:
         make cs
     - name: Test
       run: |
-        make quick-test
+        make cov
+    - name: Codecov upload
+      uses: codecov/codecov-action@v1
