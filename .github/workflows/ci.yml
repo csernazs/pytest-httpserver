@@ -16,7 +16,6 @@ jobs:
       run: |
         sudo apt update
         sudo apt install python3-venv make
-        python -m pip install --upgrade pip
         make dev
     - name: Lint
       run: |
@@ -39,7 +38,6 @@ jobs:
       run: |
         sudo apt update
         sudo apt install python3-venv make
-        python -m pip install --upgrade pip
         make dev
     - name: Test
       run: |
