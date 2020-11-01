@@ -25,7 +25,6 @@ setup(
         "dev": [
             "flake8",
             "wheel",
-            "rope",
             "pytest",
             "pytest-cov",
             "coverage",
