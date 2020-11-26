@@ -268,6 +268,21 @@ In case you don't want to change the defaults, you can provide the
         assert requests.get(httpserver.url_for("/"), headers={"X-Bar": "bar"}).status_code == 200
         assert requests.get(httpserver.url_for("/"), headers={"X-Bar": "BAR"}).status_code == 200
 
+Recorded calls
+--------------
+
+All calls to the handler are recorded and behave in a similar way as Mock from unittests library.
+All handlers have `calls` property that returns calls to the handler. Due to the fact that most of the
+time people use json format, there is a `calls_json` helper method that also loads this data as a json.
+
+    .. code:: python
+
+        httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
+        requests.post(endpoint_url, json={'foo': 'bar'})
+        assert handler.calls == ['{"foo": "bar"}']
+        assert handler.calls_json == [{"foo": "bar"}]
+
+
 Customizing host and port
 -------------------------
 

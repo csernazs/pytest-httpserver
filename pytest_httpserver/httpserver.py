@@ -438,6 +438,7 @@ class RequestHandler:
     def __init__(self, matcher: RequestMatcher):
         self.matcher = matcher
         self.request_handler = None
+        self.calls = []
 
     def respond(self, request: Request) -> Response:
         """
@@ -452,8 +453,17 @@ class RequestHandler:
 
         if self.request_handler is None:
             raise NoHandlerError("No handler found for request: {} {}".format(request.method, request.path))
-        else:
-            return self.request_handler(request)
+        self._store_request_data(request.data)
+        return self.request_handler(request)
+
+    def _store_request_data(self, received_data):
+        with suppress(Exception):
+            received_data = received_data.decode("utf-8")
+        self.calls.append(received_data or None)
+
+    @property
+    def calls_json(self):
+        return [json.loads(c) if c else c for c in self.calls]
 
     def respond_with_json(
             self,
