@@ -190,22 +190,6 @@ python versions, and tox.ini is provided if local testing is desired.
 When a bug is reported, there should be a test for it, which would re-produce
 the error and it should pass with the fix.
 
-Server starting and stopping
-----------------------------
-
-The server is started when the first test is run which uses the httpserver
-fixture. It will be running till the end of the session, and new tests will use
-the same instance. A cleanup is done between the tests which restores the clean
-state (no handlers registered, empty log, etc) to avoid cross-talk.
-
-The reason behind this is the time required to stop the server. For some reason,
-*werkzeug* (the http server used) needs about 1 second to stop itself. Adding this
-time to each test is not acceptable in most of the cases.
-
-Note that it is still compatible with *pytest-xdist* (a popular pytest extension
-to run the tests in parallel) as in such case, distinct test sessions will be
-run and those will have their own http server instance.
-
 
 Fixture scope
 -------------
