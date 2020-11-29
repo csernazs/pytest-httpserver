@@ -19,6 +19,7 @@ def httpserver1():
     finally:
         server.stop()
 
+
 @pytest.fixture
 def httpserver2():
     host, port = ('localhost', 9000)
