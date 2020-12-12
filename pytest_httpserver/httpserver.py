@@ -426,6 +426,19 @@ class RequestMatcher:
         return not difference
 
 
+def unpack_request_data(r: Request, auto_load: bool):
+    if auto_load:
+        data = r.data.decode(r.charset)
+        if not data:
+            return None
+        if r.content_type == 'application/json':
+            return json.loads(data)
+        if r.content_type == 'application/yaml':
+            import yaml
+            return yaml.safe_load(data)
+    return r.data
+
+
 class RequestHandler:
     """
     Represents a response function and a :py:class:`RequestHandler` object.
@@ -453,17 +466,17 @@ class RequestHandler:
 
         if self.request_handler is None:
             raise NoHandlerError("No handler found for request: {} {}".format(request.method, request.path))
-        self._store_request_data(request.data)
+        self.calls.append(request)
         return self.request_handler(request)
 
-    def _store_request_data(self, received_data):
-        with suppress(Exception):
-            received_data = received_data.decode("utf-8")
-        self.calls.append(received_data or None)
-
-    @property
-    def calls_json(self):
-        return [json.loads(c) if c else c for c in self.calls]
+    def calls_data(self, auto_load: bool = True):
+        """
+        :param auto_load: turn on/off auto load based on content type
+        :return: a list of payloads that the handler was calld with.
+        If content type is json or yaml, data will be automatically loaded
+        based on content type.
+        """
+        return [unpack_request_data(c, auto_load) for c in self.calls]
 
     def respond_with_json(
             self,
