@@ -272,15 +272,16 @@ Recorded calls
 --------------
 
 All calls to the handler are recorded and behave in a similar way as Mock from unittests library.
-All handlers have `calls` property that returns calls to the handler. Due to the fact that most of the
-time people use json format, there is a `calls_json` helper method that also loads this data as a json.
+All handlers have `calls` property that returns a list of requests to the handler(`werkzeug.Request`).
+There is helper method `calls_data` that automatically decodes, and in case of json or yaml loads the data.
 
     .. code:: python
 
         httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
         requests.post(endpoint_url, json={'foo': 'bar'})
-        assert handler.calls == ['{"foo": "bar"}']
-        assert handler.calls_json == [{"foo": "bar"}]
+        assert handler.calls[0].data == b'{"foo": "bar"}'
+        assert handler.calls[0].content_type == 'application/json'
+        assert handler.calls_data == [{"foo": "bar"}]
 
 
 Customizing host and port

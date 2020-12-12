@@ -427,16 +427,17 @@ class RequestMatcher:
 
 
 def unpack_request_data(r: Request, auto_load: bool):
-    if auto_load:
-        data = r.data.decode(r.charset)
-        if not data:
-            return None
-        if r.content_type == 'application/json':
-            return json.loads(data)
-        if r.content_type == 'application/yaml':
-            import yaml
-            return yaml.safe_load(data)
-    return r.data
+    if not auto_load:
+        return r.data
+    data = r.data.decode(r.charset)
+    if not data:
+        return None
+    if r.content_type == 'application/json':
+        return json.loads(data)
+    if r.content_type == 'application/yaml':
+        import yaml
+        return yaml.safe_load(data)
+    return data
 
 
 class RequestHandler:
