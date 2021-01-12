@@ -366,3 +366,92 @@ In the above code, all the request.get() calls could be in a different thread,
 eg. running in parallel, but the exit condition of the context object is to wait
 for the specified conditions.
 
+
+Emulating connection refused error
+----------------------------------
+
+If by any chance, you want to emulate network errors such as *Connection reset
+by peer* or *Connection refused*, you can simply do it by connecting to a random
+port number where no service is listening:
+
+.. code-block:: python
+
+    import pytest
+    import requests
+
+    def test_connection_refused():
+        # assumes that there's no server listening at localhost:1234
+        with pytest.raises(requests.exceptions.ConnectionError):
+            requests.get("http://localhost:1234")
+
+
+However connecting to the port where the httpserver had been started will still
+succeed as the server is running continuously. This is working by design as
+starting/stopping the server is costly.
+
+.. code-block:: python
+
+    import pytest
+    import requests
+
+    # setting a fixed port for httpserver
+    @pytest.fixture
+    def httpserver_listen_address():
+        return ("127.0.0.1", 8000)
+
+    # this test will pass
+    def test_normal_connection(httpserver):
+        httpserver.expect_request("/foo").respond_with_data("foo")
+        assert requests.get("http://localhost:8000/foo").text == "foo"
+
+
+    # this tess will FAIL, as httpserver started in test_normal_connection is
+    # still running
+    def test_connection_refused():
+        with pytest.raises(requests.exceptions.ConnectionError):
+            # this won't get Connection refused error as the server is still
+            # running.
+            # it will get HTTP status 500 as the handlers registered in
+            # test_normal_connection have been removed
+            requests.get("http://localhost:8000/foo")
+
+
+
+To solve the issue, the httpserver can be stopped explicitly. It will start
+implicitly when the first test starts to use it. So the
+``test_connection_refused`` test can be re-written to this:
+
+.. code-block:: python
+
+    def test_connection_refused(httpserver):
+        httpserver.stop() # stop the server explicitly
+        with pytest.raises(requests.exceptions.ConnectionError):
+            requests.get("http://localhost:8000/foo")
+
+
+Emulating timeout
+-----------------
+
+To emulate timeout, there's one way to register a handler function which will sleep for a
+given amount of time.
+
+.. code-block:: python
+
+    import time
+    from pytest_httpserver import HTTPServer
+    import pytest
+    import requests
+
+
+    def sleeping(request):
+        time.sleep(2)  # this should be greater than the client's timeout parameter
+
+
+    def test_timeout(httpserver: HTTPServer):
+        httpserver.expect_request("/baz").respond_with_handler(sleeping)
+        with pytest.raises(requests.exceptions.ReadTimeout):
+            assert requests.get(httpserver.url_for("/baz"), timeout=1)
+
+
+There's one drawback though: the test takes 2 seconds to run as it waits the
+handler thread to be completed.
