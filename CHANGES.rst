@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_0.3.7:
+
+0.3.7
+=====
+
+.. _Release Notes_0.3.7_Other Notes:
+
+Other Notes
+-----------
+
+- Removed pytest-runner from setup.py as it is deprecated and makes packaging inconvenient
+  as it needs to be installed before running setup.py.
+
+
 .. _Release Notes_0.3.6:
 
 0.3.6
