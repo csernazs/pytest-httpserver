@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    Removed pytest-runner from setup.py as it is deprecated and makes packaging inconvenient
+    as it needs to be installed before running setup.py.
