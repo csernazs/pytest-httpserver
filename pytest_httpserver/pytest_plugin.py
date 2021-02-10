@@ -19,14 +19,19 @@ def httpserver_listen_address():
 
 
 @pytest.fixture(scope="session")
-def _httpserver(httpserver_listen_address):
+def httpserver_ssl_context():
+    return None
+
+
+@pytest.fixture(scope="session")
+def _httpserver(httpserver_listen_address, httpserver_ssl_context):
     host, port = httpserver_listen_address
     if not host:
         host = HTTPServer.DEFAULT_LISTEN_HOST
     if not port:
         port = HTTPServer.DEFAULT_LISTEN_PORT
 
-    server = HTTPServer(host=host, port=port)
+    server = HTTPServer(host=host, port=port, ssl_context=httpserver_ssl_context)
     server.start()
     yield server
     server.clear()
