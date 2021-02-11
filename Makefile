@@ -31,6 +31,7 @@ clean: cov-clean doc-clean
 .PHONY: quick-test
 quick-test:
 	.venv/bin/pytest tests -s -vv
+	.venv/bin/pytest tests -s -vv --ssl
 
 .PHONY: test
 test:
@@ -43,6 +44,7 @@ test-pdb:
 .PHONY: cov
 cov: cov-clean
 	.venv/bin/coverage run -m pytest -vv tests
+	.venv/bin/coverage run -a -m pytest -vv tests --ssl
 	.venv/bin/coverage xml
 
 .PHONY: cov-clean

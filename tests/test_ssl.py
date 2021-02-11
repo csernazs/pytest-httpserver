@@ -4,6 +4,7 @@ from os.path import join as pjoin
 
 import pytest
 import requests
+pytestmark = pytest.mark.ssl
 
 test_dir = os.path.dirname(os.path.realpath(__file__))
 assets_dir = pjoin(test_dir, "assets")
