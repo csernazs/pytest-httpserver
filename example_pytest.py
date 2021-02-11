@@ -6,7 +6,7 @@ from pytest_httpserver import HTTPServer
 
 # specify where the server should bind to
 # you can return 0 as the port, in this case it will bind to a free (ephemeral) TCP port
-@pytest.fixture
+@pytest.fixture(scope="session")
 def httpserver_listen_address():
     return ("127.0.0.1", 8000)
 

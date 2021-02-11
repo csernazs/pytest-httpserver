@@ -312,7 +312,7 @@ the ``httpserver`` fixture).
 
     import pytest
 
-    @pytest.fixture
+    @pytest.fixture(scope="session")
     def httpserver_listen_address():
         return ("127.0.0.1", 8000)
 
@@ -395,7 +395,7 @@ starting/stopping the server is costly.
     import requests
 
     # setting a fixed port for httpserver
-    @pytest.fixture
+    @pytest.fixture(scope="session")
     def httpserver_listen_address():
         return ("127.0.0.1", 8000)
 
