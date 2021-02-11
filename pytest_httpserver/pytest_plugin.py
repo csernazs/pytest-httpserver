@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from pytest_httpserver import HTTPServer
+from .httpserver import HTTPServer
 
 
 def get_httpserver_listen_address():
@@ -24,7 +24,7 @@ def httpserver_ssl_context():
 
 
 @pytest.fixture(scope="session")
-def _httpserver(httpserver_listen_address, httpserver_ssl_context):
+def make_httpserver(httpserver_listen_address, httpserver_ssl_context):
     host, port = httpserver_listen_address
     if not host:
         host = HTTPServer.DEFAULT_LISTEN_HOST
@@ -40,6 +40,7 @@ def _httpserver(httpserver_listen_address, httpserver_ssl_context):
 
 
 @pytest.fixture
-def httpserver(_httpserver):
-    yield _httpserver
-    _httpserver.clear()
+def httpserver(make_httpserver):
+    server = make_httpserver
+    yield server
+    server.clear()
