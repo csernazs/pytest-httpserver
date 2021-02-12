@@ -1,2 +1,8 @@
 ignore:
-  - "tests/**"
+    - "tests/**"
+coverage:
+    status:
+        project:
+            default:
+                target: 90%
+                threshold: null
