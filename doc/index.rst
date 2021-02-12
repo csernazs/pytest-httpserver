@@ -41,3 +41,4 @@ For further details, please read the :doc:`guide` or the :doc:`api`.
     api
     background
     changes
+    upgrade
