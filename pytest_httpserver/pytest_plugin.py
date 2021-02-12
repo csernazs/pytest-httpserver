@@ -1,8 +1,9 @@
 
-
 import os
+import warnings
 
 import pytest
+
 from .httpserver import HTTPServer
 
 
@@ -57,3 +58,14 @@ def pytest_sessionfinish(session, exitstatus):  # pylint: disable=unused-argumen
         Plugin.SERVER.clear()
         if Plugin.SERVER.is_running():
             Plugin.SERVER.stop()
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_fixture_setup(fixturedef, request):  # pylint: disable=unused-argument
+    if fixturedef.argname == 'httpserver_listen_address' and fixturedef.scope != 'session':
+        warnings.warn("httpserver_listen_address fixture will be converted to session scope in version 1.0.0. "
+                      "Details: https://pytest-httpserver.readthedocs.io/en/latest/upgrade.html",
+                      DeprecationWarning)
+        yield
+    else:
+        yield
