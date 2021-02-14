@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    **Breaking change**: The scope of ``httpserver_listen_address`` fixture changed from **function**
+    to **session**. This is a requirement to implement the other features listed
+    in this release. See the `upgrade guide
+    <https://pytest-httpserver.readthedocs.io/en/latest/upgrade.html>`_ for the
+    details.
