@@ -1,0 +1,5 @@
+---
+deprecations:
+  - |
+    Deprecation warnings were added to prepare changes to 1.0.0. More details:
+    https://pytest-httpserver.readthedocs.io/en/latest/upgrade.html
