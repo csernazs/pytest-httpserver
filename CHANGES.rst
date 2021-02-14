@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_0.3.8:
+
+0.3.8
+=====
+
+.. _Release Notes_0.3.8_Deprecation Notes:
+
+Deprecation Notes
+-----------------
+
+- Deprecation warnings were added to prepare changes to 1.0.0. More details:
+  https://pytest-httpserver.readthedocs.io/en/latest/upgrade.html
+
+
 .. _Release Notes_0.3.7:
 
 0.3.7
