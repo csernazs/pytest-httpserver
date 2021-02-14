@@ -2,6 +2,44 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.0rc1:
+
+1.0.0rc1
+========
+
+.. _Release Notes_1.0.0rc1_New Features:
+
+New Features
+------------
+
+- Added a new session scoped fixture ``make_httpserver`` which creates the
+  object for the ``httpserver`` fixture. It can be overridden to add further
+  customizations and it must yield a ``HTTPServer`` object - see
+  ``pytest_plugin.py`` for an implementation. As this fixture is session
+  scoped, it will be called only once when the first test using httpserver is
+  started. This addition also deprecates the use of ``PluginHTTPServer`` which was
+  used in earlier versions as a way to customize server object creation.
+  ``PluginHTTPServer`` can still be used but it may be subject to deprecation
+  in the future.
+
+- Added a new session scoped fixture ``httpserver_ssl_context`` which provides
+  the SSL context for the server. By default it returns ``None``, so SSL is
+  not enabled, but can be overridden to return a valid ``ssl.SSLContext``
+  object which will be used for SSL connections. See test_ssl.py for example.
+
+
+.. _Release Notes_1.0.0rc1_Upgrade Notes:
+
+Upgrade Notes
+-------------
+
+- **Breaking change**: The scope of ``httpserver_listen_address`` fixture changed from **function**
+  to **session**. This is a requirement to implement the other features listed
+  in this release. See the `upgrade guide
+  <https://pytest-httpserver.readthedocs.io/en/latest/upgrade.html>`_ for the
+  details.
+
+
 .. _Release Notes_0.3.8:
 
 0.3.8
