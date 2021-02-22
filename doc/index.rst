@@ -38,6 +38,7 @@ For further details, please read the :doc:`guide` or the :doc:`api`.
 
     tutorial
     howto
+    fixtures
     api
     background
     changes
