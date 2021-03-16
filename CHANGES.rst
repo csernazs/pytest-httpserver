@@ -2,6 +2,19 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.0:
+
+1.0.0
+=====
+
+.. _Release Notes_1.0.0_Prelude:
+
+Prelude
+-------
+
+Functionally the same as 1.0.0rc1. For the list of changes between 0.3.8 and 1.0.0 see the changelist for 1.0.0rc1.
+
+
 .. _Release Notes_1.0.0rc1:
 
 1.0.0rc1
