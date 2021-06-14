@@ -455,3 +455,32 @@ given amount of time.
 
 There's one drawback though: the test takes 2 seconds to run as it waits the
 handler thread to be completed.
+
+
+Running and HTTPS server
+------------------------
+
+To run an https server, `trustme` can be used to do the heavy lifting:
+
+.. code-block:: python
+
+    @pytest.fixture(scope="session")
+    def ca():
+        return trustme.CA()
+
+
+    @pytest.fixture(scope="session")
+    def localhost_cert(ca):
+        return ca.issue_cert("localhost")
+
+
+    @pytest.fixture(scope="session")
+    def httpserver_ssl_context(localhost_cert):
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+
+        crt = localhost_cert.cert_chain_pems[0]
+        key = localhost_cert.private_key_pem
+        with crt.tempfile() as crt_file, key.tempfile() as key_file:
+            context.load_cert_chain(crt_file, key_file)
+
+        return context
