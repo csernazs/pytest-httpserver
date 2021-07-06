@@ -484,3 +484,37 @@ To run an https server, `trustme` can be used to do the heavy lifting:
             context.load_cert_chain(crt_file, key_file)
 
         return context
+
+Using httpserver on a dual-stack (IPv4 and IPv6) system
+-------------------------------------------------------
+
+*pytest-httpserver* can only listen on one address and it also means that
+address family is determined by that. As it relies on *Werkzeug*, it passes the
+provided host parameter to it and then it is up to *Werkzeug* how the port
+binding is done.
+
+*Werkzeug* determines the address family by examining the string provided. If it
+contains a colon (``:``) then it will be an IPv6 (``AF_INET6``) socket, otherwise, it
+will be an IPv4 (``AF_INET``) socket. The default string in *pytest-httpserver* is
+``localhost`` so by default, the httpserver listens on IPv4. If you want it to
+listen on IPv6 address, provide an IPv6 address (``::1`` for example) to it.
+
+It should be noted that dual-stack systems are still working with
+*pytest-httpserver* because the clients obtain the possible addresses for the a
+given name by calling ``getaddrinfo()`` or similar function which returns the
+addresses together with address families, and the client iterates over this
+list. In the case when *pytest-httpserver* is listening on ``127.0.0.1``, and
+the client uses ``localhost`` name in the url, it will try ``::1`` first, and
+then it will move on to ``127.0.0.1``, which will succeed, or vica-versa, where
+``127.0.0.1`` will be successful first.
+
+If you want to test a connection error case in your test (such as TLS error),
+the client can fail in a strange way as we seen in `this issue
+<https://github.com/csernazs/pytest-httpserver/issues/61>`_. In such case,
+client tries with ``127.0.0.1`` first, then reaches a TLS error (which is normal
+as the test case is about testing for the TLS issue), then it moves on to
+``::1``, then it fails with ``Connection reset``. In such case fixing the bind
+address to ``127.0.0.1`` (and thereby fixing the host part of the URL returned
+by the `url_for` call) solves the issue as the client will receive the address
+(``127.0.0.1``) instead of the name (``localhost``) so it won't move on to the
+IPv6 address.
