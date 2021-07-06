@@ -457,8 +457,8 @@ There's one drawback though: the test takes 2 seconds to run as it waits the
 handler thread to be completed.
 
 
-Running and HTTPS server
-------------------------
+Running an HTTPS server
+-----------------------
 
 To run an https server, `trustme` can be used to do the heavy lifting:
 
