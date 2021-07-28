@@ -13,3 +13,4 @@ doc/_build/
 .tox/
 .idea/
 .python-version
+__pycache__/
