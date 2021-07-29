@@ -576,6 +576,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.server = None
         self.server_thread = None
         self.assertions = []
+        self.handler_errors = []
         self.log = []
         self.ordered_handlers = []
         self.oneshot_handlers = RequestHandlerList()
@@ -598,6 +599,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
         """
         self.clear_assertions()
+        self.clear_handler_errors()
         self.clear_log()
         self.clear_all_handlers()
         self.permanently_failed = False
@@ -609,6 +611,13 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         """
 
         self.assertions = []
+
+    def clear_handler_errors(self):
+        """
+        Clears the list of collected errors from handler invocations
+        """
+
+        self.handler_errors = []
 
     def clear_log(self):
         """
@@ -893,9 +902,18 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         Assertions can be added here, and when :py:meth:`check_assertions` is called,
         it will raise AssertionError for pytest with the object specified here.
 
-        :param obj: An object which will be passed to AssertionError.
+        :param obj: An AssertionError, or an object which will be passed to an AssertionError.
         """
         self.assertions.append(obj)
+
+    def check(self):
+        """
+        Raises AssertionError or Errors raised in handlers.
+
+        Runs both :py:meth:`check_assertions` and :py:meth:`check_handler_errors`
+        """
+        self.check_assertions()
+        self.check_handler_errors()
 
     def check_assertions(self):
         """
@@ -909,7 +927,21 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         """
 
         if self.assertions:
-            raise AssertionError(self.assertions.pop(0))
+            assertion = self.assertions.pop(0)
+            if isinstance(assertion, AssertionError):
+                raise assertion
+
+            raise AssertionError(assertion)
+
+    def check_handler_errors(self):
+        """
+        Re-Raises any errors caused in request handlers
+
+        The first error raised by a handler will be re-raised here, and then
+        removed from the list.
+        """
+        if self.handler_errors:
+            raise self.handler_errors.pop(0)
 
     def format_matchers(self) -> str:
         """
@@ -1007,7 +1039,17 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             if not handler:
                 return self.respond_nohandler(request)
 
-        response = handler.respond(request)
+        try:
+            response = handler.respond(request)
+        except Error:
+            # don't collect package-internal errors
+            raise
+        except AssertionError as e:
+            self.add_assertion(e)
+            raise
+        except Exception as e:
+            self.handler_errors.append(e)
+            raise
 
         if response is None:
             response = Response("")
