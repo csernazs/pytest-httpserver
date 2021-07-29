@@ -2,7 +2,7 @@ import pytest
 import requests
 import werkzeug
 
-from pytest_httpserver import HTTPServer, Error
+from pytest_httpserver import HTTPServer
 
 
 def test_check_assertions_raises_handler_assertions(httpserver: HTTPServer):
@@ -65,3 +65,28 @@ def test_missing_matcher_raises_exception(httpserver):
 
     with pytest.raises(AssertionError):
         httpserver.check_assertions()
+
+
+def test_check_raises_errors_in_order(httpserver):
+    def handler1(_):
+        assert 1 == 2
+
+    def handler2(_):
+        pass  # does nothing
+
+    def handler3(_):
+        raise ValueError
+
+    httpserver.expect_request("/foobar1").respond_with_handler(handler1)
+    httpserver.expect_request("/foobar2").respond_with_handler(handler2)
+    httpserver.expect_request("/foobar3").respond_with_handler(handler3)
+
+    requests.get(httpserver.url_for("/foobar1"))
+    requests.get(httpserver.url_for("/foobar2"))
+    requests.get(httpserver.url_for("/foobar3"))
+
+    with pytest.raises(AssertionError):
+        httpserver.check()
+
+    with pytest.raises(ValueError):
+        httpserver.check()

@@ -906,6 +906,15 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         """
         self.assertions.append(obj)
 
+    def check(self):
+        """
+        Raises AssertionError or Errors raised in handlers.
+
+        Runs both :py:meth:`check_assertions` and :py:meth:`check_handler_errors`
+        """
+        self.check_assertions()
+        self.check_handler_errors()
+
     def check_assertions(self):
         """
         Raise AssertionError when at least one assertion added
@@ -925,6 +934,12 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
             raise AssertionError(assertion)
 
     def check_handler_errors(self):
+        """
+        Re-Raises any errors caused in request handlers
+
+        The first error raised by a handler will be re-raised here, and then
+        removed from the list.
+        """
         if self.handler_errors:
             raise self.handler_errors.pop(0)
 
