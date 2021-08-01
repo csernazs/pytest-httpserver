@@ -27,7 +27,7 @@ There's an explicit place where the query string should go:
     def test_query_params(httpserver):
         httpserver.expect_request("/foo", query_string="user=bar")
 
-The ``query_string`` is the parameter which does not contains the leading
+The ``query_string`` is the parameter which does not contain the leading
 question mark ``?``.
 
 .. note::
