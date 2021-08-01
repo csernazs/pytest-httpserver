@@ -268,6 +268,97 @@ In case you don't want to change the defaults, you can provide the
         assert requests.get(httpserver.url_for("/"), headers={"X-Bar": "bar"}).status_code == 200
         assert requests.get(httpserver.url_for("/"), headers={"X-Bar": "BAR"}).status_code == 200
 
+Using custom request handler
+----------------------------
+In the case the repsonse is not static, for example it depends on the request,
+you can pass a function to the ``respond_with_handler`` function. This function
+will be called with a request object and it should return a Response object.
+
+.. code:: python
+
+    from werkzeug.wrappers import Request, Response
+    from random import randint
+
+    def test_expected_request_handler(httpserver: HTTPServer):
+        def handler(request: Request):
+            return Response(str(random.randint(1, 10))
+
+        httpserver.expect_request("/foobar").respond_with_handler(handler)
+
+
+The above code implements a handler which returns a random number between 1 and
+10. Not particularly useful but shows that the handler can return any computed
+or derived value.
+
+In the response handler you can also use the ``assert`` statement, similar to
+the tests, but there's a big difference. As the server is running in its own
+thread, this will cause a HTTP 500 error returned, and the exception registered
+into a list. To get that error, you need to call ``check_assertions()`` method
+of the httpserver.
+
+In case you want to ensure that there was no other exception raised which was
+unhandled, you can call the ``check_handler_errors()`` method of the httpserver.
+
+Two notable examples for this:
+
+.. code:: python
+
+    def test_check_assertions_raises_handler_assertions(httpserver: HTTPServer):
+        def handler(_):
+            assert 1 == 2
+
+        httpserver.expect_request("/foobar").respond_with_handler(handler)
+
+        requests.get(httpserver.url_for("/foobar"))
+
+        # if you leave this "with" statement out, check_assertions() will break
+        # the test by re-raising the assertion error caused by the handler
+        # pytest will pick this exception as it was happened in the main thread
+        with pytest.raises(AssertionError):
+            httpserver.check_assertions()
+
+        httpserver.check_handler_errors()
+
+
+    def test_check_handler_errors_raises_handler_error(httpserver: HTTPServer):
+        def handler(_):
+            raise ValueError("should be propagated")
+
+        httpserver.expect_request("/foobar").respond_with_handler(handler)
+
+        requests.get(httpserver.url_for("/foobar"))
+
+        httpserver.check_assertions()
+
+        # if you leave this "with" statement out, check_handler_errors() will
+        # break the test with the original exception
+        with pytest.raises(ValueError):
+            httpserver.check_handler_errors()
+
+
+If you want to call both methods (``check_handler_errors()`` and
+``check_assertions()``) you can call the ``check()`` method, which will call
+these.
+
+
+.. code:: python
+
+    def test_check_assertions(httpserver: HTTPServer):
+        def handler(_):
+            assert 1 == 2
+
+        httpserver.expect_request("/foobar").respond_with_handler(handler)
+
+        requests.get(httpserver.url_for("/foobar"))
+
+        httpserver.check()
+
+.. note::
+    The scope of the errors checked by the ``check()`` method may
+    change in the future - it is added to check all possible errors happened in
+    the server.
+
+
 Customizing host and port
 -------------------------
 
