@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Improved error handling of custom request handlers. Request handlers added
+    with ``respond_with_handler`` now can use the ``assert`` statement. Those
+    errors will be reported when a further ``check_assertions()`` call is made.
+    Also, unhandled exceptions raised in the request handlers can be re-raised
+    by calling the new ``check_handler_errors()`` method. A new method called
+    ``check()`` has been added which calls these two in sequence.
