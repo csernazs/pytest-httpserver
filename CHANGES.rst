@@ -2,6 +2,24 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.1:
+
+1.0.1
+=====
+
+.. _Release Notes_1.0.1_New Features:
+
+New Features
+------------
+
+- Improved error handling of custom request handlers. Request handlers added
+  with ``respond_with_handler`` now can use the ``assert`` statement. Those
+  errors will be reported when a further ``check_assertions()`` call is made.
+  Also, unhandled exceptions raised in the request handlers can be re-raised
+  by calling the new ``check_handler_errors()`` method. A new method called
+  ``check()`` has been added which calls these two in sequence.
+
+
 .. _Release Notes_1.0.0:
 
 1.0.0
