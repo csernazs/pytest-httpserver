@@ -7,7 +7,7 @@ DESCRIPTION = open("README.md").read()
 
 setup(
     name="pytest_httpserver",
-    version="1.0.0",
+    version="1.0.1",
     url="https://www.github.com/csernazs/pytest-httpserver",
     packages=find_packages(),
     author="Zsolt Cserna",
