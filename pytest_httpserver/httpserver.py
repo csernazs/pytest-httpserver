@@ -8,7 +8,7 @@ from collections import defaultdict
 from enum import Enum
 from contextlib import suppress, contextmanager
 from copy import copy
-from typing import Any, Callable, Mapping, Optional, Union, Pattern
+from typing import Any, Callable, List, Mapping, Optional, Tuple, Union, Pattern
 from ssl import SSLContext
 import abc
 
@@ -109,20 +109,20 @@ class HeaderValueMatcher:
     :param matchers: mapping from header name to comparator function that accepts actual and expected header values
         and return whether they are equal as bool.
     """
-    DEFAULT_MATCHERS = {}
+    DEFAULT_MATCHERS: Mapping[str, Callable[[Optional[str], str], bool]] = {}
 
-    def __init__(self, matchers: Optional[Mapping[str, Callable[[str, str], bool]]] = None):
+    def __init__(self, matchers: Optional[Mapping[str, Callable[[Optional[str], str], bool]]] = None):
         self.matchers = self.DEFAULT_MATCHERS if matchers is None else matchers
 
     @staticmethod
-    def authorization_header_value_matcher(actual: str, expected: str) -> bool:
+    def authorization_header_value_matcher(actual: Optional[str], expected: str) -> bool:
         return parse_authorization_header(actual) == parse_authorization_header(expected)
 
     @staticmethod
-    def default_header_value_matcher(actual: str, expected: str) -> bool:
+    def default_header_value_matcher(actual: Optional[str], expected: str) -> bool:
         return actual == expected
 
-    def __call__(self, header_name: str, actual: str, expected: str) -> bool:
+    def __call__(self, header_name: str, actual: Optional[str], expected: str) -> bool:
         try:
             matcher = self.matchers[header_name]
         except KeyError:
@@ -295,9 +295,8 @@ class RequestMatcher:
         self.query_matcher = _create_query_matcher(self.query_string)
         self.json = json
 
-        if headers is None:
-            self.headers = {}
-        else:
+        self.headers: Mapping[str, str] = {}
+        if headers is not None:
             self.headers = headers
 
         if isinstance(data, str):
@@ -376,7 +375,7 @@ class RequestMatcher:
 
         return json_received == self.json
 
-    def difference(self, request: Request) -> list:
+    def difference(self, request: Request) -> List[Tuple]:
         """
         Calculates the difference between the matcher and the request.
 
@@ -388,7 +387,7 @@ class RequestMatcher:
         matches the fields set in the matcher object.
         """
 
-        retval = []
+        retval: List[Tuple] = []
 
         if not self.match_uri(request):
             retval.append(("uri", request.path, self.uri))
@@ -437,7 +436,7 @@ class RequestHandler:
 
     def __init__(self, matcher: RequestMatcher):
         self.matcher = matcher
-        self.request_handler = None
+        self.request_handler: Optional[Callable[[Request], Response]] = None
 
     def respond(self, request: Request) -> Response:
         """
@@ -521,7 +520,7 @@ class RequestHandlerList(list):
 
     """
 
-    def match(self, request: Request) -> RequestHandler:
+    def match(self, request: Request) -> Optional[RequestHandler]:
         """
         Returns the first request handler which matches the specified request. Otherwise, it returns `None`.
         """
@@ -575,10 +574,10 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         self.port = port
         self.server = None
         self.server_thread = None
-        self.assertions = []
-        self.handler_errors = []
-        self.log = []
-        self.ordered_handlers = []
+        self.assertions: List[str] = []
+        self.handler_errors: List[Exception] = []
+        self.log: List[Tuple[Request, Response]] = []
+        self.ordered_handlers: List[RequestHandler] = []
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
         self.permanently_failed = False
@@ -588,7 +587,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         else:
             self.default_waiting_settings = WaitingSettings()
         self._waiting_settings = copy(self.default_waiting_settings)
-        self._waiting_result = queue.LifoQueue(maxsize=1)
+        self._waiting_result: queue.LifoQueue[bool] = queue.LifoQueue(maxsize=1)
         self.no_handler_status_code = 500
 
     def clear(self):
@@ -1124,7 +1123,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
         if self._waiting_settings.raise_assertions and not waiting.result:
             self.check_assertions()
 
-    @Request.application
+    @Request.application  # type: ignore
     def application(self, request: Request):
         """
         Entry point of werkzeug.

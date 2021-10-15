@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Type hints updated to conform to 'mypy' type checking tool.
+    Also, py.typed file is added as package data according to PEP 561.

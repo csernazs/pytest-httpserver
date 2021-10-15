@@ -17,7 +17,7 @@ jobs:
         make dev
     - name: Lint
       run: |
-        make cs
+        make cs mypy
 
   test:
     name: Test with python ${{ matrix.python-version }}
