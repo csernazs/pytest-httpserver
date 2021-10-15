@@ -16,6 +16,10 @@ dev: venv
 cs: venv
 	.venv/bin/flake8 pytest_httpserver tests
 
+.PHONY: mypy
+mypy: venv
+	.venv/bin/mypy pytest_httpserver
+
 .PHONY: autoformat
 autoformat: dev
 	.venv/bin/autopep8 --in-place --recursive pytest_httpserver tests
