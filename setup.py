@@ -10,6 +10,7 @@ setup(
     version="1.0.1",
     url="https://www.github.com/csernazs/pytest-httpserver",
     packages=find_packages(),
+    package_data={"pytest_httpserver": ["py.typed"]},
     author="Zsolt Cserna",
     author_email="cserna.zsolt@gmail.com",
     description="pytest-httpserver is a httpserver for pytest",
