@@ -17,9 +17,8 @@ setup(
     entry_points={"pytest11": ["pytest_httpserver = pytest_httpserver.pytest_plugin"]},
     long_description=DESCRIPTION,
     long_description_content_type="text/markdown",
-    python_requires=">=3.4",
+    python_requires=">=3.6",
     install_requires=[
-        "typing;python_version<'3.5'",
         "werkzeug"
     ],
     extras_require={
@@ -54,8 +53,6 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
