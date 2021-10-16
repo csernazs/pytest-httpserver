@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    Python 3.4 and 3.5 versions have been deprecated in order to support type
+    hints in the source code. Users using 3.5 and earlier releases encouraged
+    to upgrade to later versions. Please node that 3.5 reached EOL in September
+    of 2020 and no longer receives security fixes.
