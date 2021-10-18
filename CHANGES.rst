@@ -2,12 +2,12 @@
 Release Notes
 =============
 
-.. _Release Notes_1.0.1-6:
+.. _Release Notes_1.0.2:
 
-1.0.1-6
-=======
+1.0.2
+=====
 
-.. _Release Notes_1.0.1-6_New Features:
+.. _Release Notes_1.0.2_New Features:
 
 New Features
 ------------
@@ -16,14 +16,15 @@ New Features
   Also, py.typed file is added as package data according to PEP 561.
 
 
-.. _Release Notes_1.0.1-6_Deprecation Notes:
+.. _Release Notes_1.0.2_Deprecation Notes:
 
 Deprecation Notes
 -----------------
 
 - Python 3.4 and 3.5 versions have been deprecated in order to support type
   hints in the source code. Users using 3.5 and earlier releases encouraged
-  to upgrade to later versions. Node that 3.5 reached EOL in September of 2020.
+  to upgrade to later versions. Please node that 3.5 reached EOL in September
+  of 2020 and no longer receives security fixes.
 
 
 .. _Release Notes_1.0.1:
