@@ -25,7 +25,7 @@ def test_custom_headers(httpserver: HTTPServer):
         expected_dict = parse_dict_header(expected_dict_str)
         return actual_scheme == expected_scheme and actual_dict == expected_dict
 
-    matchers = HeaderValueMatcher.DEFAULT_MATCHERS.copy()
+    matchers = HeaderValueMatcher.DEFAULT_MATCHERS.copy()  # type: ignore
     matchers['Custom'] = custom_header_value_matcher
     header_value_matcher = HeaderValueMatcher(matchers)
 

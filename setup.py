@@ -35,6 +35,7 @@ setup(
             "reno",
             "autopep8",
             "mypy",
+            "types-requests",
         ],
         "test": [
             "pytest",

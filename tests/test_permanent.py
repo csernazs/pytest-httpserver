@@ -19,7 +19,7 @@ def test_expected_request_data(httpserver: HTTPServer):
 
 
 def test_expected_request_handler(httpserver: HTTPServer):
-    httpserver.expect_request("/foobar").respond_with_handler(lambda request: JSON_STRING)
+    httpserver.expect_request("/foobar").respond_with_handler(lambda request: JSON_STRING)  # type: ignore
     assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
 
 
@@ -29,7 +29,7 @@ def test_expected_request_response(httpserver: HTTPServer):
 
 
 def test_expected_request_response_as_string(httpserver: HTTPServer):
-    httpserver.expect_request("/foobar").respond_with_response(JSON_STRING)
+    httpserver.expect_request("/foobar").respond_with_response(JSON_STRING)  # type: ignore
     assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
 
 
