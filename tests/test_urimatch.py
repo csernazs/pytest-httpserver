@@ -44,7 +44,7 @@ def test_regexp(httpserver: HTTPServer):
 
 
 def test_object_with_eq(httpserver: HTTPServer):
-    httpserver.expect_request(PrefixMatchEq("/foo")).respond_with_json({"foo": "bar"})
+    httpserver.expect_request(PrefixMatchEq("/foo")).respond_with_json({"foo": "bar"})  # type: ignore
     assert requests.get(httpserver.url_for("/foo")).json() == {"foo": "bar"}
     assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
     assert requests.get(httpserver.url_for("/foobaz")).json() == {"foo": "bar"}

@@ -18,7 +18,7 @@ cs: venv
 
 .PHONY: mypy
 mypy: venv
-	.venv/bin/mypy pytest_httpserver
+	.venv/bin/mypy
 
 .PHONY: autoformat
 autoformat: dev
