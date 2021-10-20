@@ -442,7 +442,7 @@ class RequestHandler:
         """
         Calls the request handler registered for this object.
 
-        If no request handler was specified previously, it raises
+        If no response was specified previously, it raises
         :py:class:`NoHandlerError` exception.
 
         :param request: the incoming request object
@@ -450,7 +450,7 @@ class RequestHandler:
         """
 
         if self.request_handler is None:
-            raise NoHandlerError("No handler found for request: {} {}".format(request.method, request.path))
+            raise NoHandlerError("Matching request handler found but no response defined: {} {}".format(request.method, request.path))
         else:
             return self.request_handler(request)
 
