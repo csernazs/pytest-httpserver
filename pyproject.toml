@@ -1,0 +1,96 @@
+[tool.poetry]
+name = "pytest_httpserver"
+version = "1.0.2"
+description = "pytest-httpserver is a httpserver for pytest"
+authors = ["Zsolt Cserna <cserna.zsolt@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+documentation = "https://pytest-httpserver.readthedocs.io/en/latest/"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Framework :: Pytest",
+]
+repository = "https://github.com/csernazs/pytest-httpserver"
+
+include = [
+    "tests",
+    "CHANGES.rst",
+    "CONTRIBUTION.md",
+    "tests/*.py",
+    "tests/assets/*",
+    "example*.py",
+    "requirements-doc.txt",
+    "doc",
+    "setup.cfg",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.6,<4.0"
+Werkzeug = ">= 2.0.0"
+flake8 = { version = "*", optional = true }
+pytest = { version = "*", optional = true }
+pytest-cov = { version = "*", optional = true }
+coverage = { version = "*", optional = true }
+ipdb = { version = "*", optional = true }
+requests = { version = "*", optional = true }
+sphinx = { version = "*", optional = true }
+sphinx_rtd_theme = { version = "*", optional = true }
+reno = { version = "*", optional = true }
+autopep8 = { version = "*", optional = true }
+mypy = { version = "*", optional = true }
+types-requests = { version = "*", optional = true }
+
+
+[tool.poetry.extras]
+dev = [
+    "flake8",
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "ipdb",
+    "requests",
+    "sphinx",
+    "sphinx_rtd_theme",
+    "reno",
+    "autopep8",
+    "mypy",
+    "types-requests",
+]
+
+test = [
+    "flake8",
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "requests",
+    "mypy",
+    "types-requests",
+]
+
+doc = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "reno",
+]
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.plugins.pytest11]
+pytest_httpserver = "pytest_httpserver.pytest_plugin"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/csernazs/pytest-httpserver/issues"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

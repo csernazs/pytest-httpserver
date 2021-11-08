@@ -1,16 +1,16 @@
 
-PYTHON ?= python3
+export POETRY_VIRTUALENVS_IN_PROJECT=true
+EXTRAS ?= dev
 
-.venv/bin/pip:
-	${PYTHON} -m venv .venv
-	.venv/bin/pip3 install --upgrade pip wheel
+.venv/.st-venv-completed:
+	poetry install --verbose --extras $(EXTRAS)
+	touch .venv/.st-venv-completed
 
 .PHONY: venv
-venv: .venv/bin/pip
+venv: .venv/.st-venv-completed
 
 .PHONY: dev
 dev: venv
-	.venv/bin/pip3 install -e .[dev]
 
 .PHONY: cs
 cs: venv
@@ -30,16 +30,12 @@ mrproper: clean
 
 .PHONY: clean
 clean: cov-clean doc-clean
-	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__ .tox
-
-.PHONY: quick-test
-quick-test:
-	.venv/bin/pytest tests -s -vv
-	.venv/bin/pytest tests -s -vv --ssl
+	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__ .tox poetry.lock
 
 .PHONY: test
-test:
-	tox
+test: venv
+	.venv/bin/pytest tests -s -vv
+	.venv/bin/pytest tests -s -vv --ssl
 
 .PHONY: test-pdb
 test-pdb:
