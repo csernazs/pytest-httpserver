@@ -5,7 +5,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import Iterable
 
 
 class UsageError(Exception):
@@ -19,8 +19,8 @@ def parse_version():
                 return m.groups()[0]
 
 
-def bump_version(path: Path, prefixes: List[str], current_version: str, new_version: str):
-    prefixes = tuple(prefixes)
+def bump_version(path: Path, prefix_list: Iterable[str], current_version: str, new_version: str):
+    prefixes = tuple(prefix_list)
     lines = []
     for line in path.open():
         if line.startswith(prefixes):
