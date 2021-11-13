@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 
 import argparse
-import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Iterable
+from shutil import which
 
 
 class UsageError(Exception):
     pass
 
 
-def parse_version():
-    with Path("setup.py").open() as infile:
-        for line in infile:
-            if m := re.match(r"VERSION\s*=\s*\"(.*)\"$", line):
-                return m.groups()[0]
+def parse_version() -> str:
+    output = subprocess.check_output(["poetry", "version", "--short"], encoding="utf-8")
+    version = output.strip()
+
+    return version
 
 
 def bump_version(path: Path, prefix_list: Iterable[str], current_version: str, new_version: str):
@@ -46,6 +46,12 @@ def check_changelog():
         raise UsageError("No new changelog entries")
 
 
+def check_environment():
+    for binary in ("git", "make", "poetry"):
+        if not which(binary):
+            raise UsageError("No such binary: {}".format(binary))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version", help="Version to release")
@@ -64,10 +70,10 @@ def main():
 
     check_changelog()
 
-    bump_version(Path("setup.py"), ["VERSION"], current_version, new_version)
     bump_version(Path("doc/conf.py"), ["version"], current_version, new_version)
+    subprocess.check_call(["poetry", "version", new_version])
 
-    git("add", "setup.py", "doc/conf.py")
+    git("add", "pyproject.toml", "doc/conf.py")
     git("commit", "-m", "Version bump to {}".format(new_version))
     git("tag", new_version)
     make("changes")
