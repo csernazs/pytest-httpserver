@@ -19,7 +19,7 @@ flexibility for the advanced cases. When increasing flexibility of the API it
 should not change the simple API unless it is absolutely required.
 
 API compatibility is paramount. API breaking is only allowed when it is on par
-with the the the gain of the new functionality.
+with the gain of the new functionality.
 
 Adding new parameters to functions which have default value is not considered a
 breaking API change.
@@ -81,7 +81,7 @@ Higher-level API
 
 In the early days of this library, it wanted to support the low-level http
 protocol elements: request status, headers, etc to provide full coverage for the
-protocol itself. This was made in order to made the most advanced customizations
+protocol itself. This was made in order to make the most advanced customizations
 possible.
 
 Then the project received a few PRs adding `HeaderValueMatcher` and support for
