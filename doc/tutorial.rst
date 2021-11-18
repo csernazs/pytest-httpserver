@@ -310,7 +310,7 @@ There are two other additional limitations which can be used:
 Ordered handling
 ~~~~~~~~~~~~~~~~
 
-The ordered handling specifies the order of the requests. It must be the sam
+The ordered handling specifies the order of the requests. It must be the same
 as the order of the registration:
 
 .. code:: python
