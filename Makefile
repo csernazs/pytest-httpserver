@@ -30,7 +30,7 @@ mrproper: clean
 
 .PHONY: clean
 clean: cov-clean doc-clean
-	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__ .tox poetry.lock
+	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__ .tox
 
 .PHONY: test
 test: venv
