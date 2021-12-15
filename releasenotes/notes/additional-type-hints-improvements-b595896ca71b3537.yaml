@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Additional type hints improvements to make the library more mypy compliant.
+    Imports in `__init__.py` have been updated to indicate that this is a
+    namespace package.

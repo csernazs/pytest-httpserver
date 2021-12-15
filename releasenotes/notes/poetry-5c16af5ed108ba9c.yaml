@@ -1,0 +1,8 @@
+---
+other:
+  - |
+    Package deployment and CI has been migrated to poetry. poetry.lock will be kept
+    up to date. Make target "quick-test" renamed to "test". Also, minor adjustments
+    were made regarding documentation generation. Make targets should be identical.
+    Build results like sdist, and wheel are almost identical to the one which was
+    made by setuptools.
