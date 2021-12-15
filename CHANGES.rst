@@ -2,6 +2,33 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.3:
+
+1.0.3
+=====
+
+.. _Release Notes_1.0.3_New Features:
+
+New Features
+------------
+
+- Additional type hints improvements to make the library more mypy compliant.
+  Imports in `__init__.py` have been updated to indicate that this is a
+  namespace package.
+
+
+.. _Release Notes_1.0.3_Other Notes:
+
+Other Notes
+-----------
+
+- Package deployment and CI has been migrated to poetry. poetry.lock will be kept
+  up to date. Make target "quick-test" renamed to "test". Also, minor adjustments
+  were made regarding documentation generation. Make targets should be identical.
+  Build results like sdist, and wheel are almost identical to the one which was
+  made by setuptools.
+
+
 .. _Release Notes_1.0.2:
 
 1.0.2
