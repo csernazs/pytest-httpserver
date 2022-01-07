@@ -787,7 +787,7 @@ python-versions = "*"
 
 [[package]]
 name = "types-requests"
-version = "2.26.3"
+version = "2.27.0"
 description = "Typing stubs for requests"
 category = "main"
 optional = true
@@ -1325,8 +1325,8 @@ typed-ast = [
     {file = "typed_ast-1.4.3.tar.gz", hash = "sha256:fb1bbeac803adea29cedd70781399c99138358c26d05fcbd23c13016b7f5ec65"},
 ]
 types-requests = [
-    {file = "types-requests-2.26.3.tar.gz", hash = "sha256:d63fa617846dcefff5aa2d59e47ab4ffd806e4bb0567115f7adbb5e438302fe4"},
-    {file = "types_requests-2.26.3-py3-none-any.whl", hash = "sha256:ad18284931c5ddbf050ccdd138f200d18fd56f88aa3567019d8da9b2d4fe0344"},
+    {file = "types-requests-2.27.0.tar.gz", hash = "sha256:bc5ced0dcf0674e3f1f9ded734cee9fa45c57cf644b089e62c8fb12ca28eb215"},
+    {file = "types_requests-2.27.0-py3-none-any.whl", hash = "sha256:640f03c66e89a5077b4399e0bcfbe458a0330c46769a65ece806b28ad899a84b"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.0-py3-none-any.whl", hash = "sha256:829704698b22e13ec9eaf959122315eabb370b0884400e9818334d8b677023d9"},
