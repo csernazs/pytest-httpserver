@@ -8,7 +8,7 @@ from collections import defaultdict
 from enum import Enum
 from contextlib import suppress, contextmanager
 from copy import copy
-from typing import Any, Callable, List, Mapping, Optional, Tuple, Union, Pattern
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, Pattern
 from ssl import SSLContext
 import abc
 
@@ -109,7 +109,7 @@ class HeaderValueMatcher:
     :param matchers: mapping from header name to comparator function that accepts actual and expected header values
         and return whether they are equal as bool.
     """
-    DEFAULT_MATCHERS: Mapping[str, Callable[[Optional[str], str], bool]] = {}
+    DEFAULT_MATCHERS: Dict[str, Callable[[Optional[str], str], bool]] = {}
 
     def __init__(self, matchers: Optional[Mapping[str, Callable[[Optional[str], str], bool]]] = None):
         self.matchers = self.DEFAULT_MATCHERS if matchers is None else matchers
