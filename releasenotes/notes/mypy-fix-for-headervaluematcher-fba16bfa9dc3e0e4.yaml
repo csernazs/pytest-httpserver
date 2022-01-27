@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixed type hinting of ``HeaderValueMatcher.DEFAULT_MATCHERS``, which did
+    not allow modifications, however it is explicitly allowed in the documentation.
