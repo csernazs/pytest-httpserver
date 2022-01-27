@@ -2,6 +2,29 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.4:
+
+1.0.4
+=====
+
+.. _Release Notes_1.0.4_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Fixed type hinting of ``HeaderValueMatcher.DEFAULT_MATCHERS``, which did
+  not allow modifications, however it is explicitly allowed in the documentation.
+
+
+.. _Release Notes_1.0.4_Other Notes:
+
+Other Notes
+-----------
+
+- Version of flake8 library updated to require 4.0.0+ at minimum. This is
+  required to make flake8 working on recent python versions.
+
+
 .. _Release Notes_1.0.3:
 
 1.0.3
