@@ -1,0 +1,5 @@
+other:
+  - |
+    Version of flake8 library updated to require 4.0.0+ at minimum. This is
+    required to make flake8 working on recent python versions.
+
