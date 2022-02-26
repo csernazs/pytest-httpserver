@@ -305,7 +305,7 @@ Upgrade Notes
 - The following methods of HTTPServer have been changed in a backward-incompatible way:
     * :py:meth:`pytest_httpserver.HTTPServer.expect_request` becomes a general function accepting handler_type parameter so it can create any kind of request handlers
     * :py:meth:`pytest_httpserver.HTTPServer.expect_oneshot_request` no longer accepts the ordered parameter, and it creates an unordered oneshot request handler
-    * :py:meth:`pytest_httpserver.HTTPServer.expect_ordered_request` is a new method craeting an ordered request handler
+    * :py:meth:`pytest_httpserver.HTTPServer.expect_ordered_request` is a new method creating an ordered request handler
 
 
 .. _Release Notes_0.2.2:

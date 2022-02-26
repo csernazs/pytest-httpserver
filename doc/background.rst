@@ -157,7 +157,7 @@ packages. However, if there's an API breaking change which affects
 HTTP server
 -----------
 
-The chosen HTTP server which drives this library is imlemented by the *werkzeug*
+The chosen HTTP server which drives this library is implemented by the *werkzeug*
 library. The reason behind this decision is that *werkzeug* is used by Flask, a
 very popular web framework and it provides a proven, stable API in the long
 term.
