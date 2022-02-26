@@ -246,7 +246,7 @@ class URIPattern(abc.ABC):
         """
             Matches the provided URI.
 
-            :param uri: URI of the request. This is an absolute path startting
+            :param uri: URI of the request. This is an absolute path starting
                 with "/" and does not contain the query part.
             :return: True if there's a match, False otherwise
             """

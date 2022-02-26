@@ -270,7 +270,7 @@ In case you don't want to change the defaults, you can provide the
 
 Using custom request handler
 ----------------------------
-In the case the repsonse is not static, for example it depends on the request,
+In the case the response is not static, for example it depends on the request,
 you can pass a function to the ``respond_with_handler`` function. This function
 will be called with a request object and it should return a Response object.
 
