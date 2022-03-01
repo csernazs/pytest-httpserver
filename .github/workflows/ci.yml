@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2.3.1
+      uses: actions/setup-python@v3
       with:
         python-version: '3.8'
     - uses: Gr1N/setup-poetry@v7
@@ -30,7 +30,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2.3.1
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - uses: Gr1N/setup-poetry@v7
