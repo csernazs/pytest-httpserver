@@ -481,7 +481,7 @@ class RequestHandler:
         """
         Registers a respond handler function which responds raw data.
 
-        For detailed description please see the :py:class:`Response` object as the
+        For detailed description please see the :py:class:`werkzeug.wrappers.Response` object as the
         parameters are analogue.
 
         :param response_data: a string or bytes object representing the body of the response
@@ -549,7 +549,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
     .. py:attribute:: log
 
         Attribute containing the list of two-element tuples. Each tuple contains
-        :py:class:`Request` and :py:class:`Response` object which represents the
+        :py:class:`werkzeug.wrappers.Request` and :py:class:`werkzeug.wrappers.Response` object which represents the
         incoming request and the outgoing response which happened during the lifetime
         of the server.
 
@@ -658,7 +658,7 @@ class HTTPServer:   # pylint: disable=too-many-instance-attributes
 
     def create_matcher(self, *args, **kwargs) -> RequestMatcher:
         """
-        Creates a :py:class:`RequestMatcher` instance with the specified parameters.
+        Creates a :py:class:`.RequestMatcher` instance with the specified parameters.
 
         This method can be overridden if you want to use your own matcher.
         """

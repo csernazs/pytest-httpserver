@@ -1,6 +1,7 @@
 
 export POETRY_VIRTUALENVS_IN_PROJECT=true
 EXTRAS ?= dev
+SPHINXOPTS ?= -n
 
 .venv/.st-venv-completed:
 	poetry install --verbose --extras $(EXTRAS)

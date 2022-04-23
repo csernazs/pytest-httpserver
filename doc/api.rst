@@ -33,6 +33,25 @@ RequestHandler
     .. autoclass:: RequestHandler
         :members:
 
+URIPattern
+~~~~~~~~~~
+
+    .. autoclass:: URIPattern
+        :members:
+
+
+HTTPServerError
+~~~~~~~~~~~~~~~
+
+    .. autoclass:: HTTPServerError
+        :members:
+
+NoHandlerError
+~~~~~~~~~~~~~~
+
+    .. autoclass:: NoHandlerError
+        :members:
+
 
 pytest_httpserver.httpserver
 ----------------------------

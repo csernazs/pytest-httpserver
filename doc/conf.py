@@ -17,10 +17,12 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+
 from typing import Dict
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- General configuration ------------------------------------------------
@@ -35,7 +37,13 @@ from typing import Dict
 extensions = [
     'sphinx.ext.autodoc',
     'reno.sphinxext',
+    'sphinx.ext.intersphinx',
 ]
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', (None, 'python-inv.txt')),
+    'werkzeug': ('https://werkzeug.palletsprojects.com/en/2.1.x', None)
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
