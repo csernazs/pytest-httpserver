@@ -80,7 +80,6 @@ test = [
 doc = [
     "sphinx",
     "sphinx_rtd_theme",
-    "reno",
 ]
 
 [tool.poetry.dev-dependencies]

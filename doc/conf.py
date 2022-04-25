@@ -36,7 +36,6 @@ sys.path.insert(0, os.path.abspath('..'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'reno.sphinxext',
     'sphinx.ext.intersphinx',
 ]
 

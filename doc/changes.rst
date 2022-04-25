@@ -1,4 +1,3 @@
 .. _changes:
 
-.. release-notes:: Release Notes
-
+.. include:: ../CHANGES.rst
