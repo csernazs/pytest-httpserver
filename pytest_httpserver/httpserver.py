@@ -8,7 +8,7 @@ from collections import defaultdict
 from enum import Enum
 from contextlib import suppress, contextmanager
 from copy import copy
-from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Tuple, Union, Pattern
+from typing import Any, Callable, Iterable, List, Mapping, MutableMapping, Optional, Tuple, Union, Pattern
 from ssl import SSLContext
 import abc
 
@@ -22,6 +22,11 @@ from werkzeug.datastructures import MultiDict
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
+
+HEADERS_T = Union[
+    Mapping[str, Union[str, int, Iterable[Union[str, int]]]],
+    Iterable[Tuple[str, Union[str, int]]],
+]
 
 
 class Undefined:
@@ -475,7 +480,7 @@ class RequestHandler:
             self,
             response_data: Union[str, bytes] = "",
             status: int = 200,
-            headers: Optional[Mapping[str, str]] = None,
+            headers: Optional[HEADERS_T] = None,
             mimetype: Optional[str] = None,
             content_type: Optional[str] = None):
         """
