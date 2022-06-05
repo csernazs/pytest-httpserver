@@ -1,8 +1,10 @@
+import http.client
+
 import requests
 from pytest_httpserver import HTTPServer
-from werkzeug.http import parse_dict_header
-
 from pytest_httpserver.httpserver import HeaderValueMatcher
+from werkzeug.http import parse_dict_header
+from werkzeug.datastructures import Headers
 
 
 def test_custom_headers(httpserver: HTTPServer):
@@ -72,3 +74,24 @@ def test_authorization_headers(httpserver: HTTPServer):
     response = requests.get(httpserver.url_for('/'), headers=headers_with_values_in_modified_order)
     assert response.status_code == 200
     assert response.text == 'OK'
+
+
+def test_header_one_key_multiple_values(httpserver: HTTPServer):
+    httpserver.expect_request(uri="/t1").respond_with_data(headers=[("X-Foo", "123"), ("X-Foo", "456")])
+    httpserver.expect_request(uri="/t2").respond_with_data(headers={"X-Foo": ["123", "456"]})
+    httpserver.expect_request(uri="/t3").respond_with_data(headers={"X-Foo": [123, 456]})
+
+    headers = Headers()
+    headers.add("X-Foo", "123")
+    headers.add("X-Foo", "456")
+
+    httpserver.expect_request(uri="/t4").respond_with_data(headers=headers)
+
+    for uri in ("/t1", "/t2", "/t3", "/t4"):
+        conn = http.client.HTTPConnection("localhost:{}".format(httpserver.port))
+        conn.request("GET", uri)
+        response = conn.getresponse()
+        conn.close()
+
+        assert response.status == 200
+        assert response.headers.get_all("X-Foo") == ["123", "456"]
