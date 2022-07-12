@@ -90,3 +90,7 @@ pytest_httpserver = "pytest_httpserver.pytest_plugin"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+files = ["pytest_httpserver", "scripts", "tests", "doc"]
+implicit_reexport = false
