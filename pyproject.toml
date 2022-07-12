@@ -29,9 +29,7 @@ include = [
     "tests/*.py",
     "tests/assets/*",
     "example*.py",
-    "requirements-doc.txt",
     "doc",
-    "setup.cfg",
 ]
 
 [tool.poetry.dependencies]
