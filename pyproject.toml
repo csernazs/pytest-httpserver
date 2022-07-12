@@ -49,7 +49,6 @@ reno = { version = "*", optional = true }
 autopep8 = { version = "*", optional = true }
 mypy = { version = "*", optional = true }
 types-requests = { version = "*", optional = true }
-pre-commit = "~=2.0"
 
 
 [tool.poetry.extras]
@@ -64,7 +63,6 @@ dev = [
     "reno",
     "mypy",
     "types-requests",
-    "pre-commit==2.0",
 ]
 
 test = [
@@ -75,7 +73,6 @@ test = [
     "requests",
     "mypy",
     "types-requests",
-    "pre-commit==2.0",
 ]
 
 doc = [
@@ -84,6 +81,7 @@ doc = [
 ]
 
 [tool.poetry.dev-dependencies]
+pre-commit = { version = ">2.9.0", python = ">=3.7,<4.0"}
 
 [tool.poetry.plugins.pytest11]
 pytest_httpserver = "pytest_httpserver.pytest_plugin"
