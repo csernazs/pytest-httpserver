@@ -87,6 +87,11 @@ pytest_httpserver = "pytest_httpserver.pytest_plugin"
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/csernazs/pytest-httpserver/issues"
 
+[tool.pytest.ini_options]
+markers = [
+    "ssl: set up ssl context",
+]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
