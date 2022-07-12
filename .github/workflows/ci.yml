@@ -16,9 +16,12 @@ jobs:
     - name: Bootstrap environment
       run: |
         make dev EXTRAS=test
+    - name: Style
+      run: |
+        make precommit
     - name: Lint
       run: |
-        make cs mypy
+        make mypy
 
   test:
     name: Test with python ${{ matrix.python-version }}
