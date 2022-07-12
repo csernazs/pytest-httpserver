@@ -13,9 +13,9 @@ venv: .venv/.st-venv-completed
 .PHONY: dev
 dev: venv
 
-.PHONY: cs
-cs: venv
-	.venv/bin/flake8 pytest_httpserver tests
+.PHONY: precommit
+precommit: venv
+	pre-commit run -a -v
 
 .PHONY: mypy
 mypy: venv

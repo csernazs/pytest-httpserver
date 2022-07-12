@@ -53,7 +53,6 @@ types-requests = { version = "*", optional = true }
 
 [tool.poetry.extras]
 dev = [
-    "flake8",
     "pytest",
     "pytest-cov",
     "coverage",
@@ -62,9 +61,9 @@ dev = [
     "sphinx",
     "sphinx_rtd_theme",
     "reno",
-    "autopep8",
     "mypy",
     "types-requests",
+    "pre-commit",
 ]
 
 test = [
@@ -75,6 +74,7 @@ test = [
     "requests",
     "mypy",
     "types-requests",
+    "pre-commit",
 ]
 
 doc = [
