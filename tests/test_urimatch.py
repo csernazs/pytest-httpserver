@@ -1,9 +1,9 @@
-
-
 import re
 
-from pytest_httpserver import HTTPServer, URIPattern
 import requests
+
+from pytest_httpserver import HTTPServer
+from pytest_httpserver import URIPattern
 
 
 class PrefixMatch(URIPattern):

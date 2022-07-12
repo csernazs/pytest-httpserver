@@ -43,7 +43,9 @@ Example:
 .. code-block:: python
 
     def test_query_params(httpserver):
-        httpserver.expect_request("/foo", query_string={"user": "user1"}).respond_with_data("OK")
+        httpserver.expect_request("/foo", query_string={"user": "user1"}).respond_with_data(
+            "OK"
+        )
 
 It is simple in the most simple cases, but once the expectation is more
 specific, the line can grow significantly, so here the user is expected to put
@@ -52,7 +54,9 @@ the literals into variables:
 .. code-block:: python
 
     def test_query_params(httpserver):
-        httpserver.expect_request("/foo", query_string=expected_query).respond_with_data("OK")
+        httpserver.expect_request("/foo", query_string=expected_query).respond_with_data(
+            "OK"
+        )
 
 
 If the user wants something more complex, classes are available for this which

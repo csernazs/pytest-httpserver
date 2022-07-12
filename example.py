@@ -1,10 +1,9 @@
 #!.venv/bin/python3
 
-import urllib.request
 import urllib.error
+import urllib.request
 
 from pytest_httpserver import HTTPServer
-
 
 server = HTTPServer(port=4000)
 server.expect_request("/foobar").respond_with_json({"foo": "bar"})

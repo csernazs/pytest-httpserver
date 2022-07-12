@@ -74,4 +74,3 @@ by the user.
 
     .. autoclass:: pytest_httpserver.httpserver.RequestHandlerList
         :members:
-

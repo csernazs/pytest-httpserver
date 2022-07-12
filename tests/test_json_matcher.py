@@ -1,9 +1,9 @@
-
 import json
-from pytest_httpserver import HTTPServer
 
-import requests
 import pytest
+import requests
+
+from pytest_httpserver import HTTPServer
 
 
 def test_json_matcher(httpserver: HTTPServer):

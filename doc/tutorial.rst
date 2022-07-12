@@ -15,9 +15,10 @@ With pytest-httpserver, a test looks like this:
 
     import requests
 
+
     def test_json_client(httpserver: HTTPServer):
         httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
-        assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+        assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 
 In the first line of the code, we are setting up an expectation. The
 expectation contains the http request which is expected to be made:
@@ -42,7 +43,7 @@ In the next line, an http request is sent with the *requests* library:
 
 .. code:: python
 
-    assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 
 
 There's no customization (such as mocking) to be made. You don't need to
@@ -227,7 +228,9 @@ of the key-value pairs does not matter:
 
 .. code:: python
 
-    httpserver.expect_request("/foobar", query_string={"user": "user1", "group": "group1"}, method="GET")
+    httpserver.expect_request(
+        "/foobar", query_string={"user": "user1", "group": "group1"}, method="GET"
+    )
 
 Similar to query parameters, it is possible to specify constraints for http
 headers also.
@@ -240,7 +243,9 @@ compiled regexp object:
 
 .. code:: python
 
-    httpserver.expect_request(re.compile("^/foo"), query_string={"user": "user1", "group": "group1"}, method="GET")
+    httpserver.expect_request(
+        re.compile("^/foo"), query_string={"user": "user1", "group": "group1"}, method="GET"
+    )
 
 The above will match every URI starting with "/foo".
 
@@ -279,7 +284,7 @@ respond_with_data is sufficient:
 
     respond_with_response(Response("Hello world!"))
     # same as
-    respond_with_data("Hello world!"))
+    respond_with_data("Hello world!")
 
 If you need to produce dynamic content, use the ``respond_with_handler``
 method, which accepts a callable (eg. a python function):
@@ -289,6 +294,7 @@ method, which accepts a callable (eg. a python function):
     def my_handler(request):
         # here, examine the request object
         return Response("Hello world!")
+
 
     respond_with_handler(my_handler)
 
@@ -335,7 +341,7 @@ When making the requests in a reverse order, it will fail:
         httpserver.expect_ordered_request("/foobaz").respond_with_data("OK foobaz")
 
         requests.get(httpserver.url_for("/foobaz"))
-        requests.get(httpserver.url_for("/foobar")) # <- fail?
+        requests.get(httpserver.url_for("/foobar"))  # <- fail?
 
 If you run the above code you will notice that no test failed. This is
 because the http server is running in its own thread, separately from the
@@ -351,7 +357,7 @@ Checking the http status code would make it fail:
         httpserver.expect_ordered_request("/foobaz").respond_with_data("OK foobaz")
 
         assert requests.get(httpserver.url_for("/foobaz")).status_code == 200
-        assert requests.get(httpserver.url_for("/foobar")).status_code == 200 # <- fail!
+        assert requests.get(httpserver.url_for("/foobar")).status_code == 200  # <- fail!
 
 
 For further details about error handling, please read the
@@ -372,7 +378,7 @@ will be erroneous.
         httpserver.expect_oneshot_request("/foobar").respond_with_data("OK")
 
         requests.get(httpserver.url_for("/foobar"))
-        requests.get(httpserver.url_for("/foobar")) # this will get http status 500
+        requests.get(httpserver.url_for("/foobar"))  # this will get http status 500
 
 
 If you run the above code you will notice that no test failed. This is
@@ -388,7 +394,7 @@ Checking the http status code would make it fail:
         httpserver.expect_oneshot_request("/foobar").respond_with_data("OK")
 
         assert requests.get(httpserver.url_for("/foobar")).status_code == 200
-        assert requests.get(httpserver.url_for("/foobar")).status_code == 200 # fail!
+        assert requests.get(httpserver.url_for("/foobar")).status_code == 200  # fail!
 
 
 For further details about error handling, please read the
@@ -420,9 +426,9 @@ your test will properly fail:
         httpserver.expect_ordered_request("/foobaz").respond_with_data("OK foobaz")
 
         requests.get(httpserver.url_for("/foobaz"))
-        requests.get(httpserver.url_for("/foobar")) # gets 500
+        requests.get(httpserver.url_for("/foobar"))  # gets 500
 
-        httpserver.check_assertions() # this will raise AssertionError and make the test failing
+        httpserver.check_assertions()  # this will raise AssertionError and make the test failing
 
 
 The server writes a log about the requests and responses which were
@@ -452,6 +458,7 @@ soon as possible.
 
     import requests
 
+
     def test_json_client(httpserver: HTTPServer):
         httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
         requests.get(httpserver.url_for("/foo"))
@@ -477,6 +484,7 @@ Adding more call of ``check_assertions()`` will help.
 .. code:: python
 
     import requests
+
 
     def test_json_client(httpserver: HTTPServer):
         httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})

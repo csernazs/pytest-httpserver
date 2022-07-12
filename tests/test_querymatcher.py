@@ -1,5 +1,8 @@
-from pytest_httpserver.httpserver import StringQueryMatcher, BooleanQueryMatcher, MappingQueryMatcher
 from werkzeug.datastructures import MultiDict
+
+from pytest_httpserver.httpserver import BooleanQueryMatcher
+from pytest_httpserver.httpserver import MappingQueryMatcher
+from pytest_httpserver.httpserver import StringQueryMatcher
 
 
 def assert_match(qm, query_string):

@@ -4,8 +4,8 @@ import argparse
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable
 from shutil import which
+from typing import Iterable
 
 
 class UsageError(Exception):

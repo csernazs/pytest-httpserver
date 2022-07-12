@@ -10,4 +10,3 @@ features:
     used in earlier versions as a way to customize server object creation.
     ``PluginHTTPServer`` can still be used but it may be subject to deprecation
     in the future.
-

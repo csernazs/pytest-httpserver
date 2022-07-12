@@ -378,4 +378,3 @@ Prelude
 -------
 
 First release
-
