@@ -63,7 +63,7 @@ dev = [
     "reno",
     "mypy",
     "types-requests",
-    "pre-commit",
+    "pre-commit==2.0",
 ]
 
 test = [
@@ -74,7 +74,7 @@ test = [
     "requests",
     "mypy",
     "types-requests",
-    "pre-commit",
+    "pre-commit==2.0",
 ]
 
 doc = [
