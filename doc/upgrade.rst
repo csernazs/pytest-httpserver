@@ -49,6 +49,7 @@ Old code:
 
     import pytest
 
+
     @pytest.fixture
     def httpserver_listen_address():
         return ("127.0.0.1", 8888)
@@ -58,6 +59,7 @@ New code:
 .. code-block:: python
 
     import pytest
+
 
     @pytest.fixture(scope="session")
     def httpserver_listen_address():

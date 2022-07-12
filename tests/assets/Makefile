@@ -17,5 +17,3 @@ server.crt: server.csr rootCA.crt rootCA.key v3.ext
 
 clean:
 	rm -f rootCA.key rootCA.crt server.csr server.key server.crt
-
-

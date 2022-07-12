@@ -15,7 +15,7 @@ dev: venv
 
 .PHONY: precommit
 precommit: venv
-	pre-commit run -a -v
+	pre-commit run -a
 
 .PHONY: mypy
 mypy: venv

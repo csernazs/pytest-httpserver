@@ -1,6 +1,5 @@
-
-import requests
 import pytest
+import requests
 from werkzeug.wrappers import Response
 
 from pytest_httpserver import HTTPServer
@@ -10,31 +9,33 @@ JSON_STRING = '{"foo": "bar"}'
 
 def test_expected_request_json(httpserver: HTTPServer):
     httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
-    assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 
 
 def test_expected_request_data(httpserver: HTTPServer):
     httpserver.expect_request("/foobar").respond_with_data(JSON_STRING)
-    assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 
 
 def test_expected_request_handler(httpserver: HTTPServer):
     httpserver.expect_request("/foobar").respond_with_handler(lambda request: JSON_STRING)  # type: ignore
-    assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 
 
 def test_expected_request_response(httpserver: HTTPServer):
     httpserver.expect_request("/foobar").respond_with_response(Response(JSON_STRING))
-    assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 
 
 def test_expected_request_response_as_string(httpserver: HTTPServer):
     httpserver.expect_request("/foobar").respond_with_response(JSON_STRING)  # type: ignore
-    assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 
 
 def test_request_post(httpserver: HTTPServer):
-    httpserver.expect_request("/foobar", data='{"request": "example"}', method="POST").respond_with_data("example_response")
+    httpserver.expect_request("/foobar", data='{"request": "example"}', method="POST").respond_with_data(
+        "example_response"
+    )
     response = requests.post(httpserver.url_for("/foobar"), json={"request": "example"})
     httpserver.check_assertions()
     assert response.text == "example_response"
@@ -42,7 +43,9 @@ def test_request_post(httpserver: HTTPServer):
 
 
 def test_request_post_case_insensitive_method(httpserver: HTTPServer):
-    httpserver.expect_request("/foobar", data='{"request": "example"}', method="post").respond_with_data("example_response")
+    httpserver.expect_request("/foobar", data='{"request": "example"}', method="post").respond_with_data(
+        "example_response"
+    )
     response = requests.post(httpserver.url_for("/foobar"), json={"request": "example"})
     httpserver.check_assertions()
     assert response.text == "example_response"

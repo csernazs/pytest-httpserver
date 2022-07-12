@@ -5,4 +5,3 @@ features:
     the SSL context for the server. By default it returns ``None``, so SSL is
     not enabled, but can be overridden to return a valid ``ssl.SSLContext``
     object which will be used for SSL connections. See test_ssl.py for example.
-

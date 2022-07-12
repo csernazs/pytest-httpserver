@@ -19,20 +19,28 @@ the pre-defined expected http requests and their responses.
 
 #### Handling a simple GET request
 ```python
-def test_my_client(httpserver): # httpserver is a pytest fixture which starts the server
+def test_my_client(
+    httpserver,
+):  # httpserver is a pytest fixture which starts the server
     # set up the server to serve /foobar with the json
     httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
     # check that the request is served
-    assert requests.get(httpserver.url_for("/foobar")).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar")).json() == {"foo": "bar"}
 ```
 
 #### Handing a POST request with an expected json body
 ```python
-def test_json_request(httpserver): # httpserver is a pytest fixture which starts the server
+def test_json_request(
+    httpserver,
+):  # httpserver is a pytest fixture which starts the server
     # set up the server to serve /foobar with the json
-    httpserver.expect_request("/foobar", method="POST", json={"id": 12, "name": "foo"}).respond_with_json({"foo": "bar"})
+    httpserver.expect_request(
+        "/foobar", method="POST", json={"id": 12, "name": "foo"}
+    ).respond_with_json({"foo": "bar"})
     # check that the request is served
-    assert requests.post(httpserver.url_for("/foobar"), json={"id": 12, "name": "foo"}).json() == {'foo': 'bar'}
+    assert requests.post(
+        httpserver.url_for("/foobar"), json={"id": 12, "name": "foo"}
+    ).json() == {"foo": "bar"}
 ```
 
 

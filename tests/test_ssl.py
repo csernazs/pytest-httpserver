@@ -4,6 +4,7 @@ from os.path import join as pjoin
 
 import pytest
 import requests
+
 pytestmark = pytest.mark.ssl
 
 test_dir = os.path.dirname(os.path.realpath(__file__))
@@ -29,11 +30,12 @@ def test_ssl(httpserver):
     root_ca = pjoin(assets_dir, "rootCA.crt")
     context = httpserver.ssl_context
 
-    assert context is not None, \
-        "SSLContext not set. The session was probably started with a test that did not define an SSLContext."
+    assert (
+        context is not None
+    ), "SSLContext not set. The session was probably started with a test that did not define an SSLContext."
 
     httpserver.ssl_context.load_cert_chain(server_crt, server_key)
     httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
 
     assert httpserver.is_running()
-    assert requests.get(httpserver.url_for("/foobar"), verify=root_ca).json() == {'foo': 'bar'}
+    assert requests.get(httpserver.url_for("/foobar"), verify=root_ca).json() == {"foo": "bar"}

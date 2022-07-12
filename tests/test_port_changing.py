@@ -1,6 +1,7 @@
-
 import os
+
 import pytest
+
 from pytest_httpserver import HTTPServer
 from pytest_httpserver.pytest_plugin import get_httpserver_listen_address
 
@@ -26,14 +27,12 @@ def tmpenv():
             del os.environ[key]
 
 
-@pytest.mark.skipif(HOST_KEY not in os.environ,
-                    reason="requires {} environment variable".format(HOST_KEY))
+@pytest.mark.skipif(HOST_KEY not in os.environ, reason="requires {} environment variable".format(HOST_KEY))
 def test_host_changing_by_environment(httpserver: HTTPServer):
     assert httpserver.host == os.environ[HOST_KEY]
 
 
-@pytest.mark.skipif(PORT_KEY not in os.environ,
-                    reason="requires {} environment variable".format(PORT_KEY))
+@pytest.mark.skipif(PORT_KEY not in os.environ, reason="requires {} environment variable".format(PORT_KEY))
 def test_port_changing_by_environment(httpserver: HTTPServer):
     assert httpserver.port == int(os.environ[PORT_KEY])
 

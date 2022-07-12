@@ -18,7 +18,7 @@ not work:
 .. code-block:: python
 
     def test_query_params(httpserver):
-        httpserver.expect_request("/foo?user=bar") # never do this
+        httpserver.expect_request("/foo?user=bar")  # never do this
 
 There's an explicit place where the query string should go:
 
@@ -46,7 +46,9 @@ was added later).
 .. code-block:: python
 
     def test_query_params(httpserver):
-        httpserver.expect_request("/foo", query_string={"user": "user1", "group": "group1"}).respond_with_data("OK")
+        httpserver.expect_request(
+            "/foo", query_string={"user": "user1", "group": "group1"}
+        ).respond_with_data("OK")
 
         assert requests.get("/foo?user=user1&group=group1").status_code == 200
         assert requests.get("/foo?group=group1&user=user1").status_code == 200
@@ -89,6 +91,7 @@ string and should return a boolean value.
         def match(self, uri):
             return uri.startswith(self.prefix)
 
+
     def test_uripattern_object(httpserver: HTTPServer):
         httpserver.expect_request(PrefixMatch("/foo")).respond_with_json({"foo": "bar"})
 
@@ -122,35 +125,45 @@ order of the parameters in the ``Authorization`` header does not matter.
 
     def test_authorization_headers(httpserver: HTTPServer):
         headers_with_values_in_direct_order = {
-            'Authorization': ('Digest username="Mufasa",'
-                            'realm="testrealm@host.com",'
-                            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
-                            'uri="/dir/index.html",'
-                            'qop=auth,'
-                            'nc=00000001,'
-                            'cnonce="0a4f113b",'
-                            'response="6629fae49393a05397450978507c4ef1",'
-                            'opaque="5ccc069c403ebaf9f0171e9517f40e41"')
+            "Authorization": (
+                'Digest username="Mufasa",'
+                'realm="testrealm@host.com",'
+                'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
+                'uri="/dir/index.html",'
+                "qop=auth,"
+                "nc=00000001,"
+                'cnonce="0a4f113b",'
+                'response="6629fae49393a05397450978507c4ef1",'
+                'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+            )
         }
-        httpserver.expect_request(uri='/', headers=headers_with_values_in_direct_order).respond_with_data('OK')
-        response = requests.get(httpserver.url_for('/'), headers=headers_with_values_in_direct_order)
+        httpserver.expect_request(
+            uri="/", headers=headers_with_values_in_direct_order
+        ).respond_with_data("OK")
+        response = requests.get(
+            httpserver.url_for("/"), headers=headers_with_values_in_direct_order
+        )
         assert response.status_code == 200
-        assert response.text == 'OK'
+        assert response.text == "OK"
 
         headers_with_values_in_modified_order = {
-            'Authorization': ('Digest qop=auth,'
-                            'username="Mufasa",'
-                            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
-                            'uri="/dir/index.html",'
-                            'nc=00000001,'
-                            'realm="testrealm@host.com",'
-                            'response="6629fae49393a05397450978507c4ef1",'
-                            'cnonce="0a4f113b",'
-                            'opaque="5ccc069c403ebaf9f0171e9517f40e41"')
+            "Authorization": (
+                "Digest qop=auth,"
+                'username="Mufasa",'
+                'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
+                'uri="/dir/index.html",'
+                "nc=00000001,"
+                'realm="testrealm@host.com",'
+                'response="6629fae49393a05397450978507c4ef1",'
+                'cnonce="0a4f113b",'
+                'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+            )
         }
-        response = requests.get(httpserver.url_for('/'), headers=headers_with_values_in_modified_order)
+        response = requests.get(
+            httpserver.url_for("/"), headers=headers_with_values_in_modified_order
+        )
         assert response.status_code == 200
-        assert response.text == 'OK'
+        assert response.text == "OK"
 
 
 JSON matching
@@ -175,7 +188,9 @@ Example:
 .. code:: python
 
     def test_json_matcher(httpserver: HTTPServer):
-        httpserver.expect_request("/foo", json={"foo": "bar"}).respond_with_data("Hello world!")
+        httpserver.expect_request("/foo", json={"foo": "bar"}).respond_with_data(
+            "Hello world!"
+        )
         resp = requests.get(httpserver.url_for("/foo"), json={"foo": "bar"})
         assert resp.status_code == 200
         assert resp.text == "Hello world!"
@@ -217,10 +232,18 @@ You need to implement such a function and then use it:
 
 
     def test_case_insensitive_matching(httpserver: HTTPServer):
-        httpserver.expect_request("/", header_value_matcher=case_insensitive_matcher, headers={"X-Foo": "bar"}).respond_with_data("OK")
+        httpserver.expect_request(
+            "/", header_value_matcher=case_insensitive_matcher, headers={"X-Foo": "bar"}
+        ).respond_with_data("OK")
 
-        assert requests.get(httpserver.url_for("/"), headers={"X-Foo": "bar"}).status_code == 200
-        assert requests.get(httpserver.url_for("/"), headers={"X-Foo": "BAR"}).status_code == 200
+        assert (
+            requests.get(httpserver.url_for("/"), headers={"X-Foo": "bar"}).status_code
+            == 200
+        )
+        assert (
+            requests.get(httpserver.url_for("/"), headers={"X-Foo": "BAR"}).status_code
+            == 200
+        )
 
 
 .. note::
@@ -238,16 +261,25 @@ to the ``HeaderValueMatcher.DEFAULT_MATCHERS`` dict.
 
     from pytest_httpserver import HeaderValueMatcher
 
+
     def case_insensitive_compare(actual: str, expected: str) -> bool:
         return actual.lower() == expected.lower()
 
+
     HeaderValueMatcher.DEFAULT_MATCHERS["X-Foo"] = case_insensitive_compare
+
 
     def test_case_insensitive_matching(httpserver: HTTPServer):
         httpserver.expect_request("/", headers={"X-Foo": "bar"}).respond_with_data("OK")
 
-        assert requests.get(httpserver.url_for("/"), headers={"X-Foo": "bar"}).status_code == 200
-        assert requests.get(httpserver.url_for("/"), headers={"X-Foo": "BAR"}).status_code == 200
+        assert (
+            requests.get(httpserver.url_for("/"), headers={"X-Foo": "bar"}).status_code
+            == 200
+        )
+        assert (
+            requests.get(httpserver.url_for("/"), headers={"X-Foo": "BAR"}).status_code
+            == 200
+        )
 
 
 In case you don't want to change the defaults, you can provide the
@@ -257,16 +289,26 @@ In case you don't want to change the defaults, you can provide the
 
     from pytest_httpserver import HeaderValueMatcher
 
+
     def case_insensitive_compare(actual: str, expected: str) -> bool:
         return actual.lower() == expected.lower()
+
 
     def test_own_matcher_object(httpserver: HTTPServer):
         matcher = HeaderValueMatcher({"X-Bar": case_insensitive_compare})
 
-        httpserver.expect_request("/", headers={"X-Bar": "bar"}, header_value_matcher=matcher).respond_with_data("OK")
+        httpserver.expect_request(
+            "/", headers={"X-Bar": "bar"}, header_value_matcher=matcher
+        ).respond_with_data("OK")
 
-        assert requests.get(httpserver.url_for("/"), headers={"X-Bar": "bar"}).status_code == 200
-        assert requests.get(httpserver.url_for("/"), headers={"X-Bar": "BAR"}).status_code == 200
+        assert (
+            requests.get(httpserver.url_for("/"), headers={"X-Bar": "bar"}).status_code
+            == 200
+        )
+        assert (
+            requests.get(httpserver.url_for("/"), headers={"X-Bar": "BAR"}).status_code
+            == 200
+        )
 
 Using custom request handler
 ----------------------------
@@ -279,9 +321,10 @@ will be called with a request object and it should return a Response object.
     from werkzeug.wrappers import Request, Response
     from random import randint
 
+
     def test_expected_request_handler(httpserver: HTTPServer):
         def handler(request: Request):
-            return Response(str(random.randint(1, 10))
+            return Response(str(randint(1, 10)))
 
         httpserver.expect_request("/foobar").respond_with_handler(handler)
 
@@ -403,6 +446,7 @@ the ``httpserver`` fixture).
 
     import pytest
 
+
     @pytest.fixture(scope="session")
     def httpserver_listen_address():
         return ("127.0.0.1", 8000)
@@ -470,6 +514,7 @@ port number where no service is listening:
     import pytest
     import requests
 
+
     def test_connection_refused():
         # assumes that there's no server listening at localhost:1234
         with pytest.raises(requests.exceptions.ConnectionError):
@@ -489,6 +534,7 @@ starting/stopping the server is costly.
     @pytest.fixture(scope="session")
     def httpserver_listen_address():
         return ("127.0.0.1", 8000)
+
 
     # this test will pass
     def test_normal_connection(httpserver):
@@ -515,7 +561,7 @@ implicitly when the first test starts to use it. So the
 .. code-block:: python
 
     def test_connection_refused(httpserver):
-        httpserver.stop() # stop the server explicitly
+        httpserver.stop()  # stop the server explicitly
         with pytest.raises(requests.exceptions.ConnectionError):
             requests.get("http://localhost:8000/foo")
 

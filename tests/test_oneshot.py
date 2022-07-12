@@ -1,5 +1,5 @@
-
 import requests
+
 from pytest_httpserver import HTTPServer
 
 
