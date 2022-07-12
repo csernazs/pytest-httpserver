@@ -49,6 +49,7 @@ reno = { version = "*", optional = true }
 autopep8 = { version = "*", optional = true }
 mypy = { version = "*", optional = true }
 types-requests = { version = "*", optional = true }
+pre-commit = "~=2.0"
 
 
 [tool.poetry.extras]
