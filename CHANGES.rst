@@ -2,6 +2,19 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.5:
+
+1.0.5
+=====
+
+.. _Release Notes_1.0.5_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Packaging of sdist and the wheel fixed by adding the extra files only to the sdist and not to the wheel.
+
+
 .. _Release Notes_1.0.4:
 
 1.0.4
