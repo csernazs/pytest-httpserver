@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Packaging of sdist and the wheel fixed by adding the extra files only to the sdist and not to the wheel.
