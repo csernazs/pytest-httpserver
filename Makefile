@@ -61,5 +61,7 @@ doc-clean:
 	rm -rf doc/_build
 
 .PHONY: changes
-changes:
+changes: venv
 	.venv/bin/reno report --output CHANGES.rst --no-show-source
+	poetry run pre-commit run --files CHANGES.rst || true
+	poetry run pre-commit run --files CHANGES.rst
