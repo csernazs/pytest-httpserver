@@ -23,13 +23,11 @@ classifiers = [
 repository = "https://github.com/csernazs/pytest-httpserver"
 
 include = [
-    "tests",
-    "CHANGES.rst",
-    "CONTRIBUTION.md",
-    "tests/*.py",
-    "tests/assets/*",
-    "example*.py",
-    "doc",
+    { path = "tests", format = "sdist" },
+    { path = "CHANGES.rst", format = "sdist" },
+    { path = "CONTRIBUTION.md", format = "sdist" },
+    { path = "example*.py", format = "sdist" },
+    { path = "doc", format = "sdist" },
 ]
 
 [tool.poetry.dependencies]
