@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest_httpserver"
-version = "1.0.4"
+version = "1.0.5"
 description = "pytest-httpserver is a httpserver for pytest"
 authors = ["Zsolt Cserna <cserna.zsolt@gmail.com>"]
 license = "MIT"
