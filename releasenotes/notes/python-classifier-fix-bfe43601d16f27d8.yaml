@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Python version classifier updated in pyproject.toml (which updates pypi also)
