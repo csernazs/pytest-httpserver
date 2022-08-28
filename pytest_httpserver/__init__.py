@@ -13,8 +13,10 @@ __all__ = [
     "URIPattern",
     "URI_DEFAULT",
     "METHOD_ALL",
+    "BlockingHttpServer",
 ]
 
+from .blocking_http_server import BlockingHttpServer
 from .httpserver import METHOD_ALL
 from .httpserver import URI_DEFAULT
 from .httpserver import Error
