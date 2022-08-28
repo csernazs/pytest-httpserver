@@ -100,6 +100,12 @@ Similar to requests, you can fine-tune what response you want to send:
 - data
 
 
+#### Behave support
+
+Using the `BlockingHttpServer` class, the assertion for a request and the response can be performed in real order.
+For more info, see the [test](tests/test_blocking_http_server.py) and the API documentation.
+
+
 ### Missing features
 * HTTP/2
 * Keepalive
