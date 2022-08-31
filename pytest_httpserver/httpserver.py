@@ -567,15 +567,13 @@ class HandlerType(Enum):
     ORDERED = "ordered"
 
 
-class HTTPServer:  # pylint: disable=too-many-instance-attributes
+class HttpServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
     """
-    Server instance which manages handlers to serve pre-defined requests.
+    Abstract HTTP server with error handling.
 
     :param host: the host or IP where the server will listen
     :param port: the TCP port where the server will listen
     :param ssl_context: the ssl context object to use for https connections
-    :param default_waiting_settings: the waiting settings object to use as default settings for :py:meth:`wait` context
-        manager
 
     .. py:attribute:: log
 
@@ -600,7 +598,6 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
         host=DEFAULT_LISTEN_HOST,
         port=DEFAULT_LISTEN_PORT,
         ssl_context: Optional[SSLContext] = None,
-        default_waiting_settings: Optional[WaitingSettings] = None,
     ):
         """
         Initializes the instance.
@@ -613,17 +610,7 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
         self.assertions: List[str] = []
         self.handler_errors: List[Exception] = []
         self.log: List[Tuple[Request, Response]] = []
-        self.ordered_handlers: List[RequestHandler] = []
-        self.oneshot_handlers = RequestHandlerList()
-        self.handlers = RequestHandlerList()
-        self.permanently_failed = False
         self.ssl_context = ssl_context
-        if default_waiting_settings is not None:
-            self.default_waiting_settings = default_waiting_settings
-        else:
-            self.default_waiting_settings = WaitingSettings()
-        self._waiting_settings = copy(self.default_waiting_settings)
-        self._waiting_result: queue.LifoQueue[bool] = queue.LifoQueue(maxsize=1)
         self.no_handler_status_code = 500
 
     def clear(self):
@@ -636,8 +623,6 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
         self.clear_assertions()
         self.clear_handler_errors()
         self.clear_log()
-        self.clear_all_handlers()
-        self.permanently_failed = False
         self.no_handler_status_code = 500
 
     def clear_assertions(self):
@@ -660,15 +645,6 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
         """
 
         self.log = []
-
-    def clear_all_handlers(self):
-        """
-        Clears all types of the handlers (ordered, oneshot, permanent)
-        """
-
-        self.ordered_handlers = []
-        self.oneshot_handlers = RequestHandlerList()
-        self.handlers = RequestHandlerList()
 
     def url_for(self, suffix: str):
         """
@@ -700,6 +676,219 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
         """
 
         return RequestMatcher(*args, **kwargs)
+
+    def thread_target(self):
+        """
+        This method serves as a thread target when the server is started.
+
+        This should not be called directly, but can be overridden to tailor it to your needs.
+        """
+
+        self.server.serve_forever()
+
+    def is_running(self) -> bool:
+        """
+        Returns `True` when the server is running, otherwise `False`.
+        """
+        return bool(self.server)
+
+    def start(self):
+        """
+        Start the server in a thread.
+
+        This method returns immediately (e.g. does not block), and it's the caller's
+        responsibility to stop the server (by calling :py:meth:`stop`) when it is no longer needed).
+
+        If the sever is not stopped by the caller and execution reaches the end, the
+        program needs to be terminated by Ctrl+C or by signal as it will not terminate until
+        the thread is stopped.
+
+        If the sever is already running :py:class:`HTTPServerError` will be raised. If you are
+        unsure, call :py:meth:`is_running` first.
+
+        There's a context interface of this class which stops the server when the context block ends.
+        """
+        if self.is_running():
+            raise HTTPServerError("Server is already running")
+
+        self.server = make_server(self.host, self.port, self.application, ssl_context=self.ssl_context)
+        self.port = self.server.port  # Update port (needed if `port` was set to 0)
+        self.server_thread = threading.Thread(target=self.thread_target)
+        self.server_thread.start()
+
+    def stop(self):
+        """
+        Stop the running server.
+
+        Notifies the server thread about the intention of the stopping, and the thread will
+        terminate itself. This needs about 0.5 seconds in worst case.
+
+        Only a running server can be stopped. If the sever is not running, :py:class`HTTPServerError`
+        will be raised.
+        """
+        if not self.is_running():
+            raise HTTPServerError("Server is not running")
+        self.server.shutdown()
+        self.server_thread.join()
+        self.server = None
+        self.server_thread = None
+
+    def add_assertion(self, obj):
+        """
+        Add a new assertion
+
+        Assertions can be added here, and when :py:meth:`check_assertions` is called,
+        it will raise AssertionError for pytest with the object specified here.
+
+        :param obj: An AssertionError, or an object which will be passed to an AssertionError.
+        """
+        self.assertions.append(obj)
+
+    def check(self):
+        """
+        Raises AssertionError or Errors raised in handlers.
+
+        Runs both :py:meth:`check_assertions` and :py:meth:`check_handler_errors`
+        """
+        self.check_assertions()
+        self.check_handler_errors()
+
+    def check_assertions(self):
+        """
+        Raise AssertionError when at least one assertion added
+
+        The first assertion added by :py:meth:`add_assertion` will be raised and
+        it will be removed from the list.
+
+        This method can be useful to get some insights into the errors happened in
+        the sever, and to have a proper error reporting in pytest.
+        """
+
+        if self.assertions:
+            assertion = self.assertions.pop(0)
+            if isinstance(assertion, AssertionError):
+                raise assertion
+
+            raise AssertionError(assertion)
+
+    def check_handler_errors(self):
+        """
+        Re-Raises any errors caused in request handlers
+
+        The first error raised by a handler will be re-raised here, and then
+        removed from the list.
+        """
+        if self.handler_errors:
+            raise self.handler_errors.pop(0)
+
+    def respond_nohandler(self, request: Request, extra_message: str = ""):
+        """
+        Add a 'no handler' assertion.
+
+        This method is called when the server wasn't able to find any handler to serve the request.
+        As the result, there's an assertion added (which can be raised by :py:meth:`check_assertions`).
+
+        """
+        text = "No handler found for request {!r}.\n".format(request)
+        self.add_assertion(text + extra_message)
+        return Response("No handler found for this request", self.no_handler_status_code)
+
+    @abc.abstractmethod
+    def dispatch(self, request: Request) -> Response:
+        """
+        Dispatch a request to the appropriate request handler.
+
+        :param request: the request object from the werkzeug library
+        :return: the response object what the handler responded, or a response which contains the error
+        """
+        pass
+
+    @Request.application  # type: ignore
+    def application(self, request: Request):
+        """
+        Entry point of werkzeug.
+
+        This method is called for each request, and it then calls the undecorated
+        :py:meth:`dispatch` method to serve the request.
+
+        :param request: the request object from the werkzeug library
+        :return: the response object what the dispatch returned
+        """
+        request.get_data()
+        response = self.dispatch(request)
+        self.log.append((request, response))
+        return response
+
+    def __enter__(self):
+        """
+        Provide the context API
+
+        It starts the server in a thread if the server is not already running.
+        """
+
+        if not self.is_running():
+            self.start()
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        """
+        Provide the context API
+
+        It stops the server if the server is running.
+        Please note that depending on the internal things of werkzeug, it may take 0.5 seconds.
+        """
+        if self.is_running():
+            self.stop()
+
+
+class HTTPServer(HttpServerBase):  # pylint: disable=too-many-instance-attributes
+    """
+    Server instance which manages handlers to serve pre-defined requests.
+
+    :param default_waiting_settings: the waiting settings object to use as default settings for :py:meth:`wait` context
+        manager
+    """
+
+    def __init__(
+        self,
+        default_waiting_settings: Optional[WaitingSettings] = None,
+        **kwargs,
+    ):
+        """
+        Initializes the instance.
+        """
+        super().__init__(**kwargs)
+
+        self.ordered_handlers: List[RequestHandler] = []
+        self.oneshot_handlers = RequestHandlerList()
+        self.handlers = RequestHandlerList()
+        self.permanently_failed = False
+        if default_waiting_settings is not None:
+            self.default_waiting_settings = default_waiting_settings
+        else:
+            self.default_waiting_settings = WaitingSettings()
+        self._waiting_settings = copy(self.default_waiting_settings)
+        self._waiting_result: queue.LifoQueue[bool] = queue.LifoQueue(maxsize=1)
+
+    def clear(self):
+        """
+        Clears and resets the state attributes of the object.
+
+        This method is useful when the object needs to be re-used but stopping the server is not feasible.
+
+        """
+        super().clear()
+        self.clear_all_handlers()
+        self.permanently_failed = False
+
+    def clear_all_handlers(self):
+        """
+        Clears all types of the handlers (ordered, oneshot, permanent)
+        """
+
+        self.ordered_handlers = []
+        self.oneshot_handlers = RequestHandlerList()
+        self.handlers = RequestHandlerList()
 
     def expect_request(
         self,
@@ -877,110 +1066,6 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
             json=json,
         )
 
-    def thread_target(self):
-        """
-        This method serves as a thread target when the server is started.
-
-        This should not be called directly, but can be overridden to tailor it to your needs.
-        """
-
-        self.server.serve_forever()
-
-    def is_running(self) -> bool:
-        """
-        Returns `True` when the server is running, otherwise `False`.
-        """
-        return bool(self.server)
-
-    def start(self):
-        """
-        Start the server in a thread.
-
-        This method returns immediately (e.g. does not block), and it's the caller's
-        responsibility to stop the server (by calling :py:meth:`stop`) when it is no longer needed).
-
-        If the sever is not stopped by the caller and execution reaches the end, the
-        program needs to be terminated by Ctrl+C or by signal as it will not terminate until
-        the thread is stopped.
-
-        If the sever is already running :py:class:`HTTPServerError` will be raised. If you are
-        unsure, call :py:meth:`is_running` first.
-
-        There's a context interface of this class which stops the server when the context block ends.
-        """
-        if self.is_running():
-            raise HTTPServerError("Server is already running")
-
-        self.server = make_server(self.host, self.port, self.application, ssl_context=self.ssl_context)
-        self.port = self.server.port  # Update port (needed if `port` was set to 0)
-        self.server_thread = threading.Thread(target=self.thread_target)
-        self.server_thread.start()
-
-    def stop(self):
-        """
-        Stop the running server.
-
-        Notifies the server thread about the intention of the stopping, and the thread will
-        terminate itself. This needs about 0.5 seconds in worst case.
-
-        Only a running server can be stopped. If the sever is not running, :py:class`HTTPServerError`
-        will be raised.
-        """
-        if not self.is_running():
-            raise HTTPServerError("Server is not running")
-        self.server.shutdown()
-        self.server_thread.join()
-        self.server = None
-        self.server_thread = None
-
-    def add_assertion(self, obj):
-        """
-        Add a new assertion
-
-        Assertions can be added here, and when :py:meth:`check_assertions` is called,
-        it will raise AssertionError for pytest with the object specified here.
-
-        :param obj: An AssertionError, or an object which will be passed to an AssertionError.
-        """
-        self.assertions.append(obj)
-
-    def check(self):
-        """
-        Raises AssertionError or Errors raised in handlers.
-
-        Runs both :py:meth:`check_assertions` and :py:meth:`check_handler_errors`
-        """
-        self.check_assertions()
-        self.check_handler_errors()
-
-    def check_assertions(self):
-        """
-        Raise AssertionError when at least one assertion added
-
-        The first assertion added by :py:meth:`add_assertion` will be raised and
-        it will be removed from the list.
-
-        This method can be useful to get some insights into the errors happened in
-        the sever, and to have a proper error reporting in pytest.
-        """
-
-        if self.assertions:
-            assertion = self.assertions.pop(0)
-            if isinstance(assertion, AssertionError):
-                raise assertion
-
-            raise AssertionError(assertion)
-
-    def check_handler_errors(self):
-        """
-        Re-Raises any errors caused in request handlers
-
-        The first error raised by a handler will be re-raised here, and then
-        removed from the list.
-        """
-        if self.handler_errors:
-            raise self.handler_errors.pop(0)
-
     def format_matchers(self) -> str:
         """
         Return a string representation of the matchers
@@ -1009,7 +1094,7 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
 
         return "\n".join(lines)
 
-    def respond_nohandler(self, request: Request):
+    def respond_nohandler(self, request: Request, extra_message: str = ""):
         """
         Add a 'no handler' assertion.
 
@@ -1019,9 +1104,8 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
         """
         if self._waiting_settings.stop_on_nohandler:
             self._set_waiting_result(False)
-        text = "No handler found for request {!r}.\n".format(request)
-        self.add_assertion(text + self.format_matchers())
-        return Response("No handler found for this request", self.no_handler_status_code)
+
+        return super().respond_nohandler(request, self.format_matchers() + extra_message)
 
     def respond_permanent_failure(self):
         """
@@ -1169,40 +1253,3 @@ class HTTPServer:  # pylint: disable=too-many-instance-attributes
                 )
         if self._waiting_settings.raise_assertions and not waiting.result:
             self.check_assertions()
-
-    @Request.application  # type: ignore
-    def application(self, request: Request):
-        """
-        Entry point of werkzeug.
-
-        This method is called for each request, and it then calls the undecorated
-        :py:meth:`dispatch` method to serve the request.
-
-        :param request: the request object from the werkzeug library
-        :return: the response object what the dispatch returned
-        """
-        request.get_data()
-        response = self.dispatch(request)
-        self.log.append((request, response))
-        return response
-
-    def __enter__(self):
-        """
-        Provide the context API
-
-        It starts the server in a thread if the server is not already running.
-        """
-
-        if not self.is_running():
-            self.start()
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        """
-        Provide the context API
-
-        It stops the server if the server is running.
-        Please note that depending on the internal things of werkzeug, it may take 0.5 seconds.
-        """
-        if self.is_running():
-            self.stop()
