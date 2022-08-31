@@ -443,11 +443,70 @@ class RequestMatcher:
         return not difference
 
 
-class RequestHandler:
+class RequestHandlerBase(abc.ABC):
+    """
+    Represents a :py:class:`RequestHandler` object providing a response for the corresponding request.
+    """
+
+    def respond_with_json(
+        self,
+        response_json,
+        status: int = 200,
+        headers: Optional[Mapping[str, str]] = None,
+        content_type: str = "application/json",
+    ):
+        """
+        Prepares a response with a serialized JSON object.
+
+        :param response_json: a JSON-serializable python object
+        :param status: the HTTP status of the response
+        :param headers: the HTTP headers to be sent (excluding the Content-Type header)
+        :param content_type: the content type header to be sent
+        """
+
+        response_data = json.dumps(response_json, indent=4)
+        self.respond_with_data(response_data, status, headers, content_type=content_type)
+
+    def respond_with_data(
+        self,
+        response_data: Union[str, bytes] = "",
+        status: int = 200,
+        headers: Optional[HEADERS_T] = None,
+        mimetype: Optional[str] = None,
+        content_type: Optional[str] = None,
+    ):
+        """
+        Prepares a response with raw data.
+
+        For detailed description please see the :py:class:`werkzeug.wrappers.Response` object as the
+        parameters are analogue.
+
+        :param response_data: a string or bytes object representing the body of the response
+        :param status: the HTTP status of the response
+        :param headers: the HTTP headers to be sent (excluding the Content-Type header)
+        :param content_type: the content type header to be sent
+        :param mimetype: the mime type of the request
+        """
+
+        self.respond_with_response(Response(response_data, status, headers, mimetype, content_type))
+
+    @abc.abstractmethod
+    def respond_with_response(self, response: Response):
+        """
+        Prepares a response with the specified response object.
+
+        :param response: the response object which will be responded
+        """
+
+        pass
+
+
+class RequestHandler(RequestHandlerBase):
     """
     Represents a response function and a :py:class:`RequestHandler` object.
 
     This class connects the matcher object with the function responsible for the response.
+    The respond handler function can be registered with the `respond_with_` methods.
 
     :param matcher: the matcher object
     """
@@ -474,60 +533,6 @@ class RequestHandler:
         else:
             return self.request_handler(request)
 
-    def respond_with_json(
-        self,
-        response_json,
-        status: int = 200,
-        headers: Optional[Mapping[str, str]] = None,
-        content_type: str = "application/json",
-    ):
-        """
-        Registers a respond handler function which responds with a serialized JSON object.
-
-        :param response_json: a JSON-serializable python object
-        :param status: the HTTP status of the response
-        :param headers: the HTTP headers to be sent (excluding the Content-Type header)
-        :param content_type: the content type header to be sent
-        """
-        response_data = json.dumps(response_json, indent=4)
-        self.respond_with_data(response_data, status, headers, content_type=content_type)
-
-    def respond_with_data(
-        self,
-        response_data: Union[str, bytes] = "",
-        status: int = 200,
-        headers: Optional[HEADERS_T] = None,
-        mimetype: Optional[str] = None,
-        content_type: Optional[str] = None,
-    ):
-        """
-        Registers a respond handler function which responds raw data.
-
-        For detailed description please see the :py:class:`werkzeug.wrappers.Response` object as the
-        parameters are analogue.
-
-        :param response_data: a string or bytes object representing the body of the response
-        :param status: the HTTP status of the response
-        :param headers: the HTTP headers to be sent (excluding the Content-Type header)
-        :param content_type: the content type header to be sent
-        :param mimetype: the mime type of the request
-
-        """
-
-        def handler(request):  # pylint: disable=unused-argument
-            return Response(response_data, status, headers, mimetype, content_type)
-
-        self.request_handler = handler
-
-    def respond_with_response(self, response: Response):
-        """
-        Registers a respond handler function which responds the specified response object.
-
-        :param response: the response object which will be responded
-
-        """
-        self.request_handler = lambda request: response
-
     def respond_with_handler(self, func: Callable[[Request], Response]):
         """
         Registers the specified function as a responder.
@@ -535,6 +540,9 @@ class RequestHandler:
         The function will receive the request object and must return with the response object.
         """
         self.request_handler = func
+
+    def respond_with_response(self, response: Response):
+        self.request_handler = lambda request: response
 
 
 class RequestHandlerList(list):
