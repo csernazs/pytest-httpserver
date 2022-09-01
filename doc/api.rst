@@ -14,6 +14,14 @@ HTTPServer
 
     .. autoclass:: HTTPServer
         :members:
+        :inherited-members:
+
+BlockingHttpServer
+~~~~~~~~~~~~~~~~~~
+
+    .. autoclass:: BlockingHttpServer
+        :members:
+        :inherited-members:
 
 WaitingSettings
 ~~~~~~~~~~~~~~~
@@ -32,6 +40,7 @@ RequestHandler
 
     .. autoclass:: RequestHandler
         :members:
+        :inherited-members:
 
 URIPattern
 ~~~~~~~~~~
@@ -73,4 +82,7 @@ by the user.
         :members:
 
     .. autoclass:: pytest_httpserver.httpserver.RequestHandlerList
+        :members:
+
+    .. autoclass:: pytest_httpserver.httpserver.HttpServerBase
         :members:
