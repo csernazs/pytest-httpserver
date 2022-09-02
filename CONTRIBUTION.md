@@ -20,27 +20,26 @@ https://pytest-httpserver.readthedocs.io/en/latest/background.html
 
 There are a few rules you are kindly asked to accept:
 
-* coding style is checked by flake8. You can run `make cs` before proceeding
-  with the PR. You can also use `autopep8` to fix the issues which gets executed
-  by the `make autoformat` command.
+* Coding style is checked by `pre-commit`. You can run `make precommit` before proceeding
+  with the PR.
 
-* tests should be written for the new code. If there's a complex logic
+* Tests should be written for the new code. If there's a complex logic
   implemented, it should be tested on different valid and invalid inputs and
   scenarios.
 
-* the software is released under the MIT license, which is simple and liberal.
-  Due to the size of the project, there are no contribution agreements but you
+* The software is released under the MIT license, which is simple and liberal.
+  Due to the size of the project, there are no contribution agreements, but you
   are informally advised to accept that license.
 
-* it may be obvious but your code should make the software better, not worse.
+* Tt may be obvious but your code should make the software better, not worse.
 
 ## How to start developing
 
-* the development is arranged around a virtualenv which needs to be created by
+* The development is arranged around a virtualenv which needs to be created by
   the `make dev` command. It will create it in the `.venv` directory.
 
-* you can let your IDE of your choice to use the `.venv/bin/python` interpreter
-  so it will know all the dependencies and so on.
+* You can let your IDE of your choice to use the `.venv/bin/python` interpreter,
+  so it will know all the dependencies.
 
 * running tests on the localhost can be done by issuing `make quick-test`. It is
   "quick" because it tests the software with only one interpreter. Note that the
