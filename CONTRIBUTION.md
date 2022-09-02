@@ -31,7 +31,7 @@ There are a few rules you are kindly asked to accept:
   Due to the size of the project, there are no contribution agreements, but you
   are informally advised to accept that license.
 
-* Tt may be obvious but your code should make the software better, not worse.
+* It may be obvious but your code should make the software better, not worse.
 
 ## How to start developing
 
@@ -48,12 +48,11 @@ There are a few rules you are kindly asked to accept:
 
 ## More technical details
 
-* for some bigger changes, release notes needs to be written. This is done by
-  the 'reno' tool. If you don't write any notes, no problem, it will be written
+* Release notes must be written for significant changes. This is done by
+  the `reno` tool. If you don't write any notes, no problem, it will be written
   by someone who merges your PR.
 
-* documentation also needs to be written and updated. It means mostly
+* Documentation also needs to be written and updated. It means mostly
   docstrings, but if the PR changes the code and the way of working
   conceptually, the main documentation (located in the doc directory) needs to
-  be updated and extended. This can be also done by someone else if you don't
-  want.
+  be updated and extended.
