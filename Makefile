@@ -2,6 +2,8 @@ export POETRY_VIRTUALENVS_IN_PROJECT=true
 EXTRAS ?= develop
 SPHINXOPTS ?= -n
 
+# do poetry install only in case if poetry.lock or pyproject.toml where updated and
+# we require a rebuilt.
 .venv/.st-venv-completed: poetry.lock pyproject.toml
 	poetry install --verbose --with $(EXTRAS)
 	touch .venv/.st-venv-completed
@@ -9,7 +11,6 @@ SPHINXOPTS ?= -n
 
 .PHONY: dev
 dev: .venv/.st-venv-completed
-
 
 .PHONY: precommit
 precommit: dev
