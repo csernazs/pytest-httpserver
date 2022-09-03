@@ -2,11 +2,14 @@ export POETRY_VIRTUALENVS_IN_PROJECT=true
 EXTRAS ?= develop
 SPHINXOPTS ?= -n
 
-
-.PHONY: dev
-dev:
+.venv/.st-venv-completed: poetry.lock pyproject.toml
 	poetry install --verbose --with $(EXTRAS)
 	touch .venv/.st-venv-completed
+
+
+.PHONY: dev
+dev: .venv/.st-venv-completed
+
 
 .PHONY: precommit
 precommit: dev

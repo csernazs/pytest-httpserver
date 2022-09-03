@@ -92,3 +92,4 @@ markers = [
 [tool.mypy]
 files = ["pytest_httpserver", "scripts", "tests", "doc"]
 implicit_reexport = false
+
