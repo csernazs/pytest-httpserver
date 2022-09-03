@@ -1,10 +1,10 @@
 
 export POETRY_VIRTUALENVS_IN_PROJECT=true
-EXTRAS ?= dev
+EXTRAS ?= develop
 SPHINXOPTS ?= -n
 
 .venv/.st-venv-completed:
-	poetry install --verbose --extras $(EXTRAS)
+	poetry install --verbose --with $(EXTRAS)
 	touch .venv/.st-venv-completed
 
 .PHONY: venv
