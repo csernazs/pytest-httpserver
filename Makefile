@@ -1,29 +1,24 @@
-
 export POETRY_VIRTUALENVS_IN_PROJECT=true
 EXTRAS ?= develop
 SPHINXOPTS ?= -n
 
-.venv/.st-venv-completed:
+# do poetry install only in case if poetry.lock or pyproject.toml where updated and
+# we require a rebuilt.
+.venv/.st-venv-completed: poetry.lock pyproject.toml
 	poetry install --verbose --with $(EXTRAS)
 	touch .venv/.st-venv-completed
 
-.PHONY: venv
-venv: .venv/.st-venv-completed
 
 .PHONY: dev
-dev: venv
+dev: .venv/.st-venv-completed
 
 .PHONY: precommit
-precommit: venv
+precommit: dev
 	poetry run pre-commit run -a
 
 .PHONY: mypy
-mypy: venv
+mypy: dev
 	.venv/bin/mypy
-
-.PHONY: autoformat
-autoformat: dev
-	.venv/bin/autopep8 --in-place --recursive pytest_httpserver tests
 
 .PHONY: mrproper
 mrproper: clean
@@ -34,7 +29,7 @@ clean: cov-clean doc-clean
 	rm -rf .venv *.egg-info build .eggs __pycache__ */__pycache__ .tox
 
 .PHONY: test
-test: venv
+test: dev
 	.venv/bin/pytest tests -s -vv --release
 	.venv/bin/pytest tests -s -vv --ssl
 
@@ -53,7 +48,7 @@ cov-clean:
 	rm -rf htmlcov coverage.xml .coverage
 
 .PHONY: doc
-doc: .venv
+doc: dev
 	.venv/bin/sphinx-build -M html doc doc/_build $(SPHINXOPTS) $(O)
 
 .PHONY: doc-clean
@@ -61,7 +56,7 @@ doc-clean:
 	rm -rf doc/_build
 
 .PHONY: changes
-changes: venv
+changes: dev
 	.venv/bin/reno report --output CHANGES.rst --no-show-source
 	poetry run pre-commit run --files CHANGES.rst || true
 	poetry run pre-commit run --files CHANGES.rst
