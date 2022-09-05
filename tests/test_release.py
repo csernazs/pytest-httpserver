@@ -137,7 +137,7 @@ def test_wheel_no_extra_contents(build: Build, version: str):
     package_contents = {path.name for path in wheel_dir.joinpath(NAME_UNDERSCORE).iterdir()}
     assert package_contents == {
         "__init__.py",
-        "blocking_http_server.py",
+        "blocking_httpserver.py",
         "httpserver.py",
         "py.typed",
         "pytest_plugin.py",
@@ -178,7 +178,7 @@ def test_sdist_contents(build: Build, version: str):
         },
         "pytest_httpserver": {
             "__init__.py",
-            "blocking_http_server.py",
+            "blocking_httpserver.py",
             "httpserver.py",
             "py.typed",
             "pytest_plugin.py",
@@ -186,7 +186,7 @@ def test_sdist_contents(build: Build, version: str):
         "tests": {
             "assets",
             "conftest.py",
-            "test_blocking_http_server.py",
+            "test_blocking_httpserver.py",
             "test_handler_errors.py",
             "test_headers.py",
             "test_json_matcher.py",
