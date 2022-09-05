@@ -14,6 +14,29 @@ HTTPServer
 
     .. autoclass:: HTTPServer
         :members:
+        :inherited-members:
+
+RequestHandler
+~~~~~~~~~~~~~~
+
+    .. autoclass:: RequestHandler
+        :members:
+        :inherited-members:
+
+
+BlockingHTTPServer
+~~~~~~~~~~~~~~~~~~
+
+    .. autoclass:: BlockingHTTPServer
+        :members:
+        :inherited-members:
+
+BlockingRequestHandler
+~~~~~~~~~~~~~~~~~~~~~~
+
+    .. autoclass:: BlockingRequestHandler
+        :members:
+        :inherited-members:
 
 WaitingSettings
 ~~~~~~~~~~~~~~~
@@ -27,18 +50,11 @@ HeaderValueMatcher
     .. autoclass:: HeaderValueMatcher
         :members:
 
-RequestHandler
-~~~~~~~~~~~~~~
-
-    .. autoclass:: RequestHandler
-        :members:
-
 URIPattern
 ~~~~~~~~~~
 
     .. autoclass:: URIPattern
         :members:
-
 
 HTTPServerError
 ~~~~~~~~~~~~~~~
@@ -61,6 +77,9 @@ by the user.
 .. automodule:: pytest_httpserver.httpserver
 
     .. autoclass:: RequestMatcher
+        :members:
+
+    .. autoclass:: pytest_httpserver.httpserver.HTTPServerBase
         :members:
 
     .. autoclass:: pytest_httpserver.httpserver.Error

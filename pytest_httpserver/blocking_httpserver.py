@@ -24,7 +24,7 @@ class BlockingRequestHandler(RequestHandlerBase):
     """
     Provides responding to a request synchronously.
 
-    This class should only be instantiated inside the implementation of the :py:class:`BlockingHttpServer`.
+    This class should only be instantiated inside the implementation of the :py:class:`BlockingHTTPServer`.
     """
 
     def __init__(self):

@@ -14,9 +14,11 @@ __all__ = [
     "URI_DEFAULT",
     "METHOD_ALL",
     "BlockingHTTPServer",
+    "BlockingRequestHandler",
 ]
 
 from .blocking_httpserver import BlockingHTTPServer
+from .blocking_httpserver import BlockingRequestHandler
 from .httpserver import METHOD_ALL
 from .httpserver import URI_DEFAULT
 from .httpserver import Error
