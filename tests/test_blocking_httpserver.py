@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import pytest
 import requests
 
-from pytest_httpserver import BlockingHttpServer
+from pytest_httpserver import BlockingHTTPServer
 
 
 @contextmanager
@@ -42,7 +42,7 @@ def then_the_response_is_got_from(server_connection, response):
 
 @pytest.fixture
 def httpserver():
-    server = BlockingHttpServer(timeout=1)
+    server = BlockingHTTPServer(timeout=1)
     server.start()
 
     yield server
@@ -52,7 +52,7 @@ def httpserver():
         server.stop()
 
 
-def test_behave_workflow(httpserver: BlockingHttpServer):
+def test_behave_workflow(httpserver: BlockingHTTPServer):
     request = dict(
         method="GET",
         url=httpserver.url_for("/my/path"),
@@ -69,7 +69,7 @@ def test_behave_workflow(httpserver: BlockingHttpServer):
         then_the_response_is_got_from(server_connection, response)
 
 
-def test_raises_assertion_error_when_request_does_not_match(httpserver: BlockingHttpServer):
+def test_raises_assertion_error_when_request_does_not_match(httpserver: BlockingHTTPServer):
     request = dict(
         method="GET",
         url=httpserver.url_for("/my/path"),
@@ -84,7 +84,7 @@ def test_raises_assertion_error_when_request_does_not_match(httpserver: Blocking
         assert "does not match" in str(exc)
 
 
-def test_raises_assertion_error_when_request_was_not_sent(httpserver: BlockingHttpServer):
+def test_raises_assertion_error_when_request_was_not_sent(httpserver: BlockingHTTPServer):
     with pytest.raises(AssertionError) as exc:
         httpserver.assert_request(uri="/my/path/", timeout=1)
 
@@ -92,7 +92,7 @@ def test_raises_assertion_error_when_request_was_not_sent(httpserver: BlockingHt
     assert "timed out" in str(exc)
 
 
-def test_ignores_when_request_is_not_asserted(httpserver: BlockingHttpServer):
+def test_ignores_when_request_is_not_asserted(httpserver: BlockingHTTPServer):
     request = dict(
         method="GET",
         url=httpserver.url_for("/my/path"),
@@ -103,7 +103,7 @@ def test_ignores_when_request_is_not_asserted(httpserver: BlockingHttpServer):
         assert server_connection.get(timeout=9).text == "No handler found for this request"
 
 
-def test_raises_assertion_error_when_request_was_not_responded(httpserver: BlockingHttpServer):
+def test_raises_assertion_error_when_request_was_not_responded(httpserver: BlockingHTTPServer):
     request = dict(
         method="GET",
         url=httpserver.url_for("/my/path"),

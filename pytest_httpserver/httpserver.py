@@ -567,7 +567,7 @@ class HandlerType(Enum):
     ORDERED = "ordered"
 
 
-class HttpServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
+class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
     """
     Abstract HTTP server with error handling.
 
@@ -841,7 +841,7 @@ class HttpServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
             self.stop()
 
 
-class HTTPServer(HttpServerBase):  # pylint: disable=too-many-instance-attributes
+class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attributes
     """
     Server instance which manages handlers to serve pre-defined requests.
 

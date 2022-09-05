@@ -103,7 +103,7 @@ Similar to requests, you can fine-tune what response you want to send:
 #### Behave support
 
 Using the `BlockingHttpServer` class, the assertion for a request and the response can be performed in real order.
-For more info, see the [test](tests/test_blocking_http_server.py) and the API documentation.
+For more info, see the [test](tests/test_blocking_httpserver.py) and the API documentation.
 
 
 ### Missing features

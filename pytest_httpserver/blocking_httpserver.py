@@ -13,7 +13,7 @@ from werkzeug.wrappers import Response
 from pytest_httpserver.httpserver import METHOD_ALL
 from pytest_httpserver.httpserver import UNDEFINED
 from pytest_httpserver.httpserver import HeaderValueMatcher
-from pytest_httpserver.httpserver import HttpServerBase
+from pytest_httpserver.httpserver import HTTPServerBase
 from pytest_httpserver.httpserver import QueryMatcher
 from pytest_httpserver.httpserver import RequestHandlerBase
 from pytest_httpserver.httpserver import URIPattern
@@ -33,7 +33,7 @@ class BlockingRequestHandler(RequestHandlerBase):
         self.response_queue.put_nowait(response)
 
 
-class BlockingHttpServer(HttpServerBase):
+class BlockingHTTPServer(HTTPServerBase):
     """
     Server instance which enables synchronous matching for incoming requests.
 
