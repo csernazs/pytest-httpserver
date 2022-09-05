@@ -655,3 +655,19 @@ address to ``127.0.0.1`` (and thereby fixing the host part of the URL returned
 by the `url_for` call) solves the issue as the client will receive the address
 (``127.0.0.1``) instead of the name (``localhost``) so it won't move on to the
 IPv6 address.
+
+Running httpserver in blocking mode
+-----------------------------------
+
+In this mode, the code which is being tested (the client) is executed in a
+background thread, while the server events are synchronized to the main thread,
+so it looks like it is running in the main thread. This allows to catch the
+assertions occured on the server side synchronously, it is not needed to call
+the `check_assertions` method, assertions are raised to the main thread.
+
+This is an experimental feature so *pytest-httpserver* has no fixture for it.
+
+Example:
+
+.. literalinclude :: ../tests/test_blocking_httpserver_howto.py
+   :language: python
