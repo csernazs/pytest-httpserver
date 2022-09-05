@@ -2,6 +2,29 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.6:
+
+1.0.6
+=====
+
+.. _Release Notes_1.0.6_New Features:
+
+New Features
+------------
+
+- Add a new way of running tests with the blocking mode. In this mode, the
+  http server is synchronized to the main thread and the client code is run in
+  a separate thread.
+
+
+.. _Release Notes_1.0.6_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Python version classifier updated in pyproject.toml (which updates pypi also)
+
+
 .. _Release Notes_1.0.5:
 
 1.0.5
