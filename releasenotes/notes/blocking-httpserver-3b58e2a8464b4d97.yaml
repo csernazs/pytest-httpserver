@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add a new way of running tests with the blocking mode. In this mode, the
+    http server is synchronized to the main thread and the client code is run in
+    a separate thread.
