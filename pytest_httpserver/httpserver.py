@@ -590,13 +590,10 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
     """
 
-    DEFAULT_LISTEN_HOST = "localhost"
-    DEFAULT_LISTEN_PORT = 0  # Use ephemeral port
-
     def __init__(
         self,
-        host=DEFAULT_LISTEN_HOST,
-        port=DEFAULT_LISTEN_PORT,
+        host: str,
+        port: int,
         ssl_context: Optional[SSLContext] = None,
     ):
         """
@@ -845,19 +842,34 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
     """
     Server instance which manages handlers to serve pre-defined requests.
 
+    :param host: the host or IP where the server will listen
+    :param port: the TCP port where the server will listen
+    :param ssl_context: the ssl context object to use for https connections
+
     :param default_waiting_settings: the waiting settings object to use as default settings for :py:meth:`wait` context
         manager
+
+    .. py:attribute:: no_handler_status_code
+
+        Attribute containing the http status code (int) which will be the response
+        status when no matcher is found for the request. By default, it is set to *500*
+        but it can be overridden to any valid http status code such as *404* if needed.
     """
+
+    DEFAULT_LISTEN_HOST = "localhost"
+    DEFAULT_LISTEN_PORT = 0  # Use ephemeral port
 
     def __init__(
         self,
+        host=DEFAULT_LISTEN_HOST,
+        port=DEFAULT_LISTEN_PORT,
+        ssl_context: Optional[SSLContext] = None,
         default_waiting_settings: Optional[WaitingSettings] = None,
-        **kwargs,
     ):
         """
         Initializes the instance.
         """
-        super().__init__(**kwargs)
+        super().__init__(host, port, ssl_context)
 
         self.ordered_handlers: List[RequestHandler] = []
         self.oneshot_handlers = RequestHandlerList()
