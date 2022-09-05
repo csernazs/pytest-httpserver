@@ -1,5 +1,6 @@
 from queue import Empty
 from queue import Queue
+from ssl import SSLContext
 from typing import Any
 from typing import Dict
 from typing import Mapping
@@ -37,14 +38,31 @@ class BlockingHTTPServer(HTTPServerBase):
     """
     Server instance which enables synchronous matching for incoming requests.
 
+    :param host: the host or IP where the server will listen
+    :param port: the TCP port where the server will listen
+    :param ssl_context: the ssl context object to use for https connections
+
     :param timeout: waiting time in seconds for matching and responding to an incoming request.
         manager
 
-    For further parameters and attributes see :py:class:`HttpServerBase`.
+    .. py:attribute:: no_handler_status_code
+
+        Attribute containing the http status code (int) which will be the response
+        status when no matcher is found for the request. By default, it is set to *500*
+        but it can be overridden to any valid http status code such as *404* if needed.
     """
 
-    def __init__(self, timeout: int = 30, **kwargs):
-        super().__init__(**kwargs)
+    DEFAULT_LISTEN_HOST = "localhost"
+    DEFAULT_LISTEN_PORT = 0  # Use ephemeral port
+
+    def __init__(
+        self,
+        host=DEFAULT_LISTEN_HOST,
+        port=DEFAULT_LISTEN_PORT,
+        ssl_context: Optional[SSLContext] = None,
+        timeout: int = 30,
+    ):
+        super().__init__(host, port, ssl_context)
         self.timeout = timeout
         self.request_queue: Queue[Request] = Queue()
         self.request_handlers: Dict[Request, Queue[BlockingRequestHandler]] = {}
