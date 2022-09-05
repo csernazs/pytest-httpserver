@@ -28,6 +28,13 @@ jobs:
         path: .venv
         key: venv-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
 
+    - name: Cache pre-commit
+      id: cache-pre-commit
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
     - uses: Gr1N/setup-poetry@v7
     - name: Bootstrap environment
       run: |
