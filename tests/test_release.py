@@ -187,6 +187,7 @@ def test_sdist_contents(build: Build, version: str):
             "assets",
             "conftest.py",
             "test_blocking_httpserver.py",
+            "test_blocking_httpserver_howto.py",
             "test_handler_errors.py",
             "test_headers.py",
             "test_json_matcher.py",
