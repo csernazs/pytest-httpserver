@@ -102,8 +102,12 @@ Similar to requests, you can fine-tune what response you want to send:
 
 #### Behave support
 
-Using the `BlockingHTTPServer` class, the assertion for a request and the response can be performed in real order.
-For more info, see the [test](tests/test_blocking_httpserver.py) and the API documentation.
+Using the `BlockingHTTPServer` class, the assertion for a request and the
+response can be performed in real order. For more info, see the
+[test](tests/test_blocking_httpserver.py), the
+[howto](https://pytest-httpserver.readthedocs.io/en/latest/howto.html#running-httpserver-in-blocking-mode)
+and the [API
+documentation](https://pytest-httpserver.readthedocs.io/en/latest/api.html#blockinghttpserver).
 
 
 ### Missing features
