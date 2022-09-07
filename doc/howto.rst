@@ -662,10 +662,13 @@ Running httpserver in blocking mode
 In this mode, the code which is being tested (the client) is executed in a
 background thread, while the server events are synchronized to the main thread,
 so it looks like it is running in the main thread. This allows to catch the
-assertions occured on the server side synchronously, it is not needed to call
-the `check_assertions` method, assertions are raised to the main thread.
+assertions occured on the server side synchronously, and assertions are raised
+to the main thread. You need to call `check_assertions` at the end for only the
+unexpected requests.
 
-This is an experimental feature so *pytest-httpserver* has no fixture for it.
+This is an experimental feature so *pytest-httpserver* has no fixture for it
+yet. If you find this feature useful any you have ideas or suggestions related
+to this, feel free to open an issue.
 
 Example:
 
