@@ -20,6 +20,12 @@ def httpserver():
     if server.is_running():
         server.stop()
 
+    # this is to check if the client has made any request where no
+    # `assert_request` was called on it from the test
+
+    server.check_assertions()
+    server.clear()
+
 
 def test_simplified(httpserver: BlockingHTTPServer):
     def client(response_queue: Queue):
