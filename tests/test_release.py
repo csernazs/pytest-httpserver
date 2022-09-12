@@ -107,6 +107,15 @@ def version_to_tuple(version: str) -> Tuple:
     return tuple([int(x) for x in version.split(".")])
 
 
+def test_no_duplicate_classifiers(build: Build, pyproject):
+    pyproject_meta = pyproject["tool"]["poetry"]
+    wheel_meta = build.wheel.get_meta(version=pyproject_meta["version"])
+    classifiers = sorted(wheel_meta.get_all("Classifier"))
+    unique_classifiers = sorted(set(wheel_meta.get_all("Classifier")))
+
+    assert classifiers == unique_classifiers
+
+
 def test_python_version(build: Build, pyproject):
     pyproject_meta = pyproject["tool"]["poetry"]
     wheel_meta = build.wheel.get_meta(version=pyproject_meta["version"])
