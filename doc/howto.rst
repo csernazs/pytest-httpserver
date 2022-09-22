@@ -607,20 +607,46 @@ To run an https server, `trustme` can be used to do the heavy lifting:
 
 
     @pytest.fixture(scope="session")
-    def localhost_cert(ca):
-        return ca.issue_cert("localhost")
+    def httpserver_ssl_context(ca):
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        localhost_cert = ca.issue_cert("localhost")
+        localhost_cert.configure_cert(context)
+        return context
 
 
     @pytest.fixture(scope="session")
-    def httpserver_ssl_context(localhost_cert):
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    def httpclient_ssl_context(ca):
+        with ca.cert_pem.tempfile() as ca_temp_path:
+            return ssl.create_default_context(cafile=ca_temp_path)
 
-        crt = localhost_cert.cert_chain_pems[0]
-        key = localhost_cert.private_key_pem
-        with crt.tempfile() as crt_file, key.tempfile() as key_file:
-            context.load_cert_chain(crt_file, key_file)
 
-        return context
+    @pytest.mark.asyncio
+    async def test_aiohttp(httpserver, httpclient_ssl_context):
+        import aiohttp
+
+        httpserver.expect_request("/").respond_with_data("hello world!")
+        connector = aiohttp.TCPConnector(ssl=httpclient_ssl_context)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            async with session.get(httpserver.url_for("/")) as result:
+                assert (await result.text()) == "hello world!"
+
+
+    def test_requests(httpserver, ca):
+        import requests
+
+        httpserver.expect_request("/").respond_with_data("hello world!")
+        with ca.cert_pem.tempfile() as ca_temp_path:
+            result = requests.get(httpserver.url_for("/"), verify=ca_temp_path)
+        assert result.text == "hello world!"
+
+
+    def test_httpx(httpserver, httpclient_ssl_context):
+        import httpx
+
+        httpserver.expect_request("/").respond_with_data("hello world!")
+        result = httpx.get(httpserver.url_for("/"), verify=httpclient_ssl_context)
+        assert result.text == "hello world!"
+
 
 Using httpserver on a dual-stack (IPv4 and IPv6) system
 -------------------------------------------------------
