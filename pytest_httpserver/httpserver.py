@@ -1,4 +1,5 @@
 import abc
+import ipaddress
 import json
 import queue
 import re
@@ -663,7 +664,9 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         else:
             protocol = "https"
 
-        return "{}://{}:{}{}".format(protocol, self.host, self.port, suffix)
+        host = self.format_host(self.host)
+
+        return "{}://{}:{}{}".format(protocol, host, self.port, suffix)
 
     def create_matcher(self, *args, **kwargs) -> RequestMatcher:
         """
@@ -836,6 +839,24 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         """
         if self.is_running():
             self.stop()
+
+    @staticmethod
+    def format_host(host):
+        """
+        Formats a hostname so it can be used in a URL.
+        Notably, this adds brackets around IPV6 addresses when
+        they are missing.
+        """
+        try:
+            ipaddress.IPv6Address(host)
+            is_ipv6 = True
+        except ValueError:
+            is_ipv6 = False
+
+        if is_ipv6 and not host.startswith("[") and not host.endswith("]"):
+            return f"[{host}]"
+
+        return host
 
 
 class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attributes
