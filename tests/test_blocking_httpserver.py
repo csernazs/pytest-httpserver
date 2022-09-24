@@ -120,3 +120,7 @@ def test_raises_assertion_error_when_request_was_not_responded(httpserver: Block
 
         assert "/my/path" in str(exc)
         assert "no response" in str(exc).lower()
+
+
+def test_repr(httpserver: BlockingHTTPServer):
+    assert repr(httpserver) == f"<BlockingHTTPServer host=localhost port={httpserver.port}>"

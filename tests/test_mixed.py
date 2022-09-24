@@ -82,3 +82,7 @@ def test_all_ordered_missing(httpserver: HTTPServer):
     assert len(httpserver.ordered_handlers) == 2
     assert len(httpserver.oneshot_handlers) == 2
     assert len(httpserver.handlers) == 1
+
+
+def test_repr(httpserver: HTTPServer):
+    assert repr(httpserver) == f"<HTTPServer host=localhost port={httpserver.port}>"
