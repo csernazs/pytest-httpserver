@@ -610,6 +610,9 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.ssl_context = ssl_context
         self.no_handler_status_code = 500
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} host={self.host} port={self.port}>"
+
     def clear(self):
         """
         Clears and resets the state attributes of the object.
