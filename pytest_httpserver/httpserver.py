@@ -654,6 +654,11 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         This basically means that it prepends the string ``http://$HOST:$PORT/`` to the `suffix` parameter
         (where $HOST and $PORT are the parameters given to the constructor).
 
+        When host is an IPv6 address, the required square brackets will be added
+        to it, forming a valid URL.
+
+        When SSL or TLS is in use, the protocol of the returned URL will be ``https``.
+
         :param suffix: the suffix which will be added to the base url. It can start with ``/`` (slash) or
             not, the url will be the same.
         :return: the full url which refers to the server
