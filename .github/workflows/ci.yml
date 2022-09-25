@@ -8,99 +8,111 @@ on:
     branches:
       - master
 
-
 jobs:
   cs:
     name: Coding style checks
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v4
-      id: setup_python
-      with:
-        python-version: '3.8'
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Cache venv
-      id: cache-venv
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        id: setup_python
+        with:
+          python-version: "3.8"
 
-    - name: Cache pre-commit
-      id: cache-pre-commit
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pre-commit
-        key: pre-commit-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Cache venv
+        id: cache-venv
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
 
-    - uses: Gr1N/setup-poetry@v7
-    - name: Bootstrap environment
-      run: |
-        make dev EXTRAS=test
-    - name: Style
-      run: |
-        make precommit
-    - name: Lint
-      run: |
-        make mypy
+      - name: Cache pre-commit
+        id: cache-pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Setup poetry
+        uses: Gr1N/setup-poetry@v7
+
+      - name: Bootstrap environment
+        run: |
+          make dev EXTRAS=test
+
+      - name: Style
+        run: |
+          make precommit
+
+      - name: Lint
+        run: |
+          make mypy
 
   test:
     name: Test with python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11-dev']
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11-dev"]
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      id: setup_python
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        id: setup_python
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Cache venv
-      id: cache-venv
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+      - name: Cache venv
+        id: cache-venv
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
 
-    - uses: Gr1N/setup-poetry@v7
-    - name: Bootstrap test environment
-      run: |
-        make dev EXTRAS=test
-    - name: Test
-      run: |
-        make cov
-    - name: Codecov upload
-      uses: codecov/codecov-action@v2.1.0
+      - name: Setup poetry
+        uses: Gr1N/setup-poetry@v7
+
+      - name: Bootstrap test environment
+        run: |
+          make dev EXTRAS=test
+
+      - name: Test
+        run: |
+          make cov
+
+      - name: Codecov upload
+        uses: codecov/codecov-action@v2.1.0
 
   test-doc:
     name: Test doc build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      id: setup_python
-      with:
-        python-version: "3.10"
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Cache venv
-      id: cache-venv
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-v1-doc-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        id: setup_python
+        with:
+          python-version: "3.10"
 
-    - uses: Gr1N/setup-poetry@v7
-    - name: Bootstrap test environment
-      run: |
-        make dev EXTRAS=doc
-    - name: Test
-      run: |
-        make doc
+      - name: Cache venv
+        id: cache-venv
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-v1-doc-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+
+      - uses: Gr1N/setup-poetry@v7
+      - name: Bootstrap test environment
+        run: |
+          make dev EXTRAS=doc
+      - name: Test
+        run: |
+          make doc
