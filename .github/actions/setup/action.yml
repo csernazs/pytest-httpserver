@@ -1,0 +1,55 @@
+name: "setup poetry and python"
+description: "Setup python, poetry, and development environment"
+inputs:
+  type:
+    description: "Type of the venv to create"
+    required: true
+  python-version:
+    description: "Python version to use"
+    required: true
+  poetry-version:
+    description: "Poetry version to use"
+    required: true
+
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: "composite"
+  steps:
+      - name: Cache venv
+        id: cache-venv
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-v1-${{ inputs.type }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('poetry.lock') }}
+
+      - name: Cache pre-commit
+        id: cache-pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-v1-${{ inputs.type }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Cache setup-poetry
+        id: cache-setup-poetry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.local/share/pypoetry
+            ~/.local/share/virtualenv
+            ~/.local/bin/poetry
+          key: setup-poetry-v1-${{ runner.os }}-${{ inputs.poetry-version }}
+
+      - name: Setup poetry
+        uses: Gr1N/setup-poetry@v7
+        id: setup_poetry
+        if: steps.cache-setup-poetry.outputs.cache-hit != 'true'
+        with:
+          poetry-version: ${{ inputs.poetry-version }}
+
+      - name: Bootstrap environment
+        shell: bash
+        run: |
+          make dev EXTRAS=${{ inputs.type }}
