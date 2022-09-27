@@ -8,6 +8,9 @@ on:
     branches:
       - master
 
+env:
+  POETRY_VERSION: "1.2.1"
+
 jobs:
   cs:
     name: Coding style checks
@@ -36,8 +39,22 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-v1-test-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
+      - name: Cache setup-poetry
+        id: cache-setup-poetry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.local/share/pypoetry
+            ~/.local/share/virtualenv
+            ~/.local/bin/poetry
+          key: setup-poetry-v1-${{ runner.os }}-${{ env.POETRY_VERSION }}
+
       - name: Setup poetry
         uses: Gr1N/setup-poetry@v7
+        id: setup_poetry
+        if: steps.cache-setup-poetry.outputs.cache-hit != 'true'
+        with:
+          poetry-version: ${{ env.POETRY_VERSION }}
 
       - name: Bootstrap environment
         run: |
