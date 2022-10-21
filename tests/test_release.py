@@ -195,8 +195,8 @@ def test_sdist_contents(build: Build, version: str):
         "tests": {
             "assets",
             "conftest.py",
+            "examples",
             "test_blocking_httpserver.py",
-            "test_blocking_httpserver_howto.py",
             "test_handler_errors.py",
             "test_headers.py",
             "test_ip_protocols.py",
@@ -214,6 +214,9 @@ def test_sdist_contents(build: Build, version: str):
             "test_wait.py",
             "test_with_statement.py",
         },
+        # "tests/examples": {
+        #     "test_example_blocking_httpserver.py"
+        # }
     }
 
     for subdir, subdir_content in subdir_contents.items():

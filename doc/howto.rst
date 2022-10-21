@@ -15,17 +15,13 @@ Matching query parameters
 To match query parameters, you must not included them to the URI, as this will
 not work:
 
-.. code-block:: python
-
-    def test_query_params(httpserver):
-        httpserver.expect_request("/foo?user=bar")  # never do this
+.. literalinclude :: ../tests/examples/test_howto_query_params_never_do_this.py
+   :language: python
 
 There's an explicit place where the query string should go:
 
-.. code-block:: python
-
-    def test_query_params(httpserver):
-        httpserver.expect_request("/foo", query_string="user=bar")
+.. literalinclude :: ../tests/examples/test_howto_query_params_proper_use.py
+   :language: python
 
 The ``query_string`` is the parameter which does not contain the leading
 question mark ``?``.
@@ -43,15 +39,9 @@ can specify a dict for the ``query_string`` parameter (the naming may look a bit
 strange but we wanted to keep API compatibility and this dict matching feature
 was added later).
 
-.. code-block:: python
 
-    def test_query_params(httpserver):
-        httpserver.expect_request(
-            "/foo", query_string={"user": "user1", "group": "group1"}
-        ).respond_with_data("OK")
-
-        assert requests.get("/foo?user=user1&group=group1").status_code == 200
-        assert requests.get("/foo?group=group1&user=user1").status_code == 200
+.. literalinclude :: ../tests/examples/test_howto_query_params_dict.py
+   :language: python
 
 In the example above, both requests pass the test as we specified the expected
 query string as a dictionary.
@@ -70,9 +60,8 @@ request will not be handled.
 If this is not desired, you can specify a regexp object (returned by the
 ``re.compile()`` call).
 
-.. code:: python
-
-    httpserver.expect_request(re.compile("^/foo"), method="GET")
+.. literalinclude :: ../tests/examples/test_howto_regexp.py
+   :language: python
 
 The above will match every URI starting with "/foo".
 
@@ -82,18 +71,9 @@ method which will receive the URI. All you need is to subclass from the
 string and should return a boolean value.
 
 
-.. code:: python
+.. literalinclude :: ../tests/examples/test_howto_url_matcher.py
+   :language: python
 
-    class PrefixMatch(URIPattern):
-        def __init__(self, prefix: str):
-            self.prefix = prefix
-
-        def match(self, uri):
-            return uri.startswith(self.prefix)
-
-
-    def test_uripattern_object(httpserver: HTTPServer):
-        httpserver.expect_request(PrefixMatch("/foo")).respond_with_json({"foo": "bar"})
 
 Authentication
 --------------
@@ -121,50 +101,8 @@ parameters in the ``Authorization`` header value is arbitrary.
 By default, pytest-httpserver includes an Authorization header parser so the
 order of the parameters in the ``Authorization`` header does not matter.
 
-.. code:: python
-
-    def test_authorization_headers(httpserver: HTTPServer):
-        headers_with_values_in_direct_order = {
-            "Authorization": (
-                'Digest username="Mufasa",'
-                'realm="testrealm@host.com",'
-                'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
-                'uri="/dir/index.html",'
-                "qop=auth,"
-                "nc=00000001,"
-                'cnonce="0a4f113b",'
-                'response="6629fae49393a05397450978507c4ef1",'
-                'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-            )
-        }
-        httpserver.expect_request(
-            uri="/", headers=headers_with_values_in_direct_order
-        ).respond_with_data("OK")
-        response = requests.get(
-            httpserver.url_for("/"), headers=headers_with_values_in_direct_order
-        )
-        assert response.status_code == 200
-        assert response.text == "OK"
-
-        headers_with_values_in_modified_order = {
-            "Authorization": (
-                "Digest qop=auth,"
-                'username="Mufasa",'
-                'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
-                'uri="/dir/index.html",'
-                "nc=00000001,"
-                'realm="testrealm@host.com",'
-                'response="6629fae49393a05397450978507c4ef1",'
-                'cnonce="0a4f113b",'
-                'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-            )
-        }
-        response = requests.get(
-            httpserver.url_for("/"), headers=headers_with_values_in_modified_order
-        )
-        assert response.status_code == 200
-        assert response.text == "OK"
-
+.. literalinclude :: ../tests/examples/test_howto_authorization_headers.py
+   :language: python
 
 JSON matching
 -------------
@@ -185,16 +123,8 @@ will fail and *pytest-httpserver* will proceed with the next registered matcher.
 
 Example:
 
-.. code:: python
-
-    def test_json_matcher(httpserver: HTTPServer):
-        httpserver.expect_request("/foo", json={"foo": "bar"}).respond_with_data(
-            "Hello world!"
-        )
-        resp = requests.get(httpserver.url_for("/foo"), json={"foo": "bar"})
-        assert resp.status_code == 200
-        assert resp.text == "Hello world!"
-
+.. literalinclude :: ../tests/examples/test_howto_json_matcher.py
+   :language: python
 
 .. note::
     JSON requests usually come with ``Content-Type: application/json`` header.
@@ -222,29 +152,8 @@ value, and will be able to determine the matching.
 
 You need to implement such a function and then use it:
 
-.. code:: python
-
-    def case_insensitive_matcher(header_name: str, actual: str, expected: str) -> bool:
-        if header_name == "X-Foo":
-            return actual.lower() == expected.lower()
-        else:
-            return actual == expected
-
-
-    def test_case_insensitive_matching(httpserver: HTTPServer):
-        httpserver.expect_request(
-            "/", header_value_matcher=case_insensitive_matcher, headers={"X-Foo": "bar"}
-        ).respond_with_data("OK")
-
-        assert (
-            requests.get(httpserver.url_for("/"), headers={"X-Foo": "bar"}).status_code
-            == 200
-        )
-        assert (
-            requests.get(httpserver.url_for("/"), headers={"X-Foo": "BAR"}).status_code
-            == 200
-        )
-
+.. literalinclude :: ../tests/examples/test_howto_case_insensitive_matcher.py
+   :language: python
 
 .. note::
     Header value matcher is the basis of the ``Authorization`` header parsing.
@@ -285,30 +194,8 @@ to the ``HeaderValueMatcher.DEFAULT_MATCHERS`` dict.
 In case you don't want to change the defaults, you can provide the
 ``HeaderValueMatcher`` object itself.
 
-.. code:: python
-
-    from pytest_httpserver import HeaderValueMatcher
-
-
-    def case_insensitive_compare(actual: str, expected: str) -> bool:
-        return actual.lower() == expected.lower()
-
-
-    def test_own_matcher_object(httpserver: HTTPServer):
-        matcher = HeaderValueMatcher({"X-Bar": case_insensitive_compare})
-
-        httpserver.expect_request(
-            "/", headers={"X-Bar": "bar"}, header_value_matcher=matcher
-        ).respond_with_data("OK")
-
-        assert (
-            requests.get(httpserver.url_for("/"), headers={"X-Bar": "bar"}).status_code
-            == 200
-        )
-        assert (
-            requests.get(httpserver.url_for("/"), headers={"X-Bar": "BAR"}).status_code
-            == 200
-        )
+.. literalinclude :: ../tests/examples/test_howto_header_value_matcher.py
+   :language: python
 
 Using custom request handler
 ----------------------------
@@ -316,18 +203,9 @@ In the case the response is not static, for example it depends on the request,
 you can pass a function to the ``respond_with_handler`` function. This function
 will be called with a request object and it should return a Response object.
 
-.. code:: python
 
-    from werkzeug.wrappers import Request, Response
-    from random import randint
-
-
-    def test_expected_request_handler(httpserver: HTTPServer):
-        def handler(request: Request):
-            return Response(str(randint(1, 10)))
-
-        httpserver.expect_request("/foobar").respond_with_handler(handler)
-
+.. literalinclude :: ../tests/examples/test_howto_custom_handler.py
+   :language: python
 
 The above code implements a handler which returns a random number between 1 and
 10. Not particularly useful but shows that the handler can return any computed
@@ -344,57 +222,15 @@ unhandled, you can call the ``check_handler_errors()`` method of the httpserver.
 
 Two notable examples for this:
 
-.. code:: python
-
-    def test_check_assertions_raises_handler_assertions(httpserver: HTTPServer):
-        def handler(_):
-            assert 1 == 2
-
-        httpserver.expect_request("/foobar").respond_with_handler(handler)
-
-        requests.get(httpserver.url_for("/foobar"))
-
-        # if you leave this "with" statement out, check_assertions() will break
-        # the test by re-raising the assertion error caused by the handler
-        # pytest will pick this exception as it was happened in the main thread
-        with pytest.raises(AssertionError):
-            httpserver.check_assertions()
-
-        httpserver.check_handler_errors()
-
-
-    def test_check_handler_errors_raises_handler_error(httpserver: HTTPServer):
-        def handler(_):
-            raise ValueError("should be propagated")
-
-        httpserver.expect_request("/foobar").respond_with_handler(handler)
-
-        requests.get(httpserver.url_for("/foobar"))
-
-        httpserver.check_assertions()
-
-        # if you leave this "with" statement out, check_handler_errors() will
-        # break the test with the original exception
-        with pytest.raises(ValueError):
-            httpserver.check_handler_errors()
-
+.. literalinclude :: ../tests/examples/test_howto_check_handler_errors.py
+   :language: python
 
 If you want to call both methods (``check_handler_errors()`` and
 ``check_assertions()``) you can call the ``check()`` method, which will call
 these.
 
-
-.. code:: python
-
-    def test_check_assertions(httpserver: HTTPServer):
-        def handler(_):
-            assert 1 == 2
-
-        httpserver.expect_request("/foobar").respond_with_handler(handler)
-
-        requests.get(httpserver.url_for("/foobar"))
-
-        httpserver.check()
+.. literalinclude :: ../tests/examples/test_howto_check.py
+   :language: python
 
 .. note::
     The scope of the errors checked by the ``check()`` method may
@@ -478,24 +314,8 @@ Behind the scenes it synchronizes the state of the server with the main thread.
 
 Last, you need to assert on the ``result`` attribute of the context object.
 
-.. code-block:: python
-
-    def test_wait_success(httpserver: HTTPServer):
-        waiting_timeout = 0.1
-
-        with httpserver.wait(stop_on_nohandler=False, timeout=waiting_timeout) as waiting:
-            requests.get(httpserver.url_for("/foobar"))
-            httpserver.expect_oneshot_request("/foobar").respond_with_data("OK foobar")
-            requests.get(httpserver.url_for("/foobar"))
-        assert waiting.result
-
-        httpserver.expect_oneshot_request("/foobar").respond_with_data("OK foobar")
-        httpserver.expect_oneshot_request("/foobaz").respond_with_data("OK foobaz")
-        with httpserver.wait(timeout=waiting_timeout) as waiting:
-            requests.get(httpserver.url_for("/foobar"))
-            requests.get(httpserver.url_for("/foobaz"))
-        assert waiting.result
-
+.. literalinclude :: ../tests/examples/test_howto_wait_success.py
+   :language: python
 
 In the above code, all the request.get() calls could be in a different thread,
 eg. running in parallel, but the exit condition of the context object is to wait
@@ -509,19 +329,10 @@ If by any chance, you want to emulate network errors such as *Connection reset
 by peer* or *Connection refused*, you can simply do it by connecting to a random
 port number where no service is listening:
 
-.. code-block:: python
+.. literalinclude :: ../tests/examples/test_howto_timeout_requests.py
+   :language: python
 
-    import pytest
-    import requests
-
-
-    def test_connection_refused():
-        # assumes that there's no server listening at localhost:1234
-        with pytest.raises(requests.exceptions.ConnectionError):
-            requests.get("http://localhost:1234")
-
-
-However connecting to the port where the httpserver had been started will still
+However, connecting to the port where the httpserver had been started will still
 succeed as the server is running continuously. This is working by design as
 starting/stopping the server is costly.
 
@@ -699,5 +510,5 @@ to this, feel free to open an issue.
 
 Example:
 
-.. literalinclude :: ../tests/test_blocking_httpserver_howto.py
+.. literalinclude :: ../tests/examples/test_example_blocking_httpserver.py
    :language: python
