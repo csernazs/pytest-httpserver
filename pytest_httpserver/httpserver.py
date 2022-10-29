@@ -37,6 +37,8 @@ HEADERS_T = Union[
     Iterable[Tuple[str, Union[str, int]]],
 ]
 
+HVMATCHER_T = Callable[[str, Optional[str], str], bool]
+
 
 class Undefined:
     def __repr__(self):
@@ -289,6 +291,13 @@ class RequestMatcher:
         specified in the request. If multiple values specified for a given key, the first
         value will be used. If multiple values needed to be handled, use ``MultiDict``
         object from werkzeug.
+    :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches
+        values of headers, or a ``Callable[[str, Optional[str], str], bool]``
+        receiving the header key (from `headers`), header value (or `None`) and the expected
+        value (from `headers`) and should return ``True`` if the header matches, ``False`` otherwise.
+    :param json: a python object (eg. a dict) whose value will be compared to the request body after it
+        is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
+        If that's desired, add it to the headers parameter.
     """
 
     def __init__(
@@ -299,7 +308,7 @@ class RequestMatcher:
         data_encoding: str = "utf-8",
         headers: Optional[Mapping[str, str]] = None,
         query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HeaderValueMatcher] = None,
+        header_value_matcher: Optional[HVMATCHER_T] = None,
         json: Any = UNDEFINED,
     ):
 
@@ -322,7 +331,10 @@ class RequestMatcher:
         self.data = data
         self.data_encoding = data_encoding
 
-        self.header_value_matcher = HeaderValueMatcher() if header_value_matcher is None else header_value_matcher
+        self.header_value_matcher: HVMATCHER_T = HeaderValueMatcher()
+
+        if header_value_matcher is not None:
+            self.header_value_matcher = header_value_matcher
 
     def __repr__(self):
         """
@@ -939,7 +951,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data_encoding: str = "utf-8",
         headers: Optional[Mapping[str, str]] = None,
         query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HeaderValueMatcher] = None,
+        header_value_matcher: Optional[HVMATCHER_T] = None,
         handler_type: HandlerType = HandlerType.PERMANENT,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
@@ -973,7 +985,10 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             specified in the request. If multiple values specified for a given key, the first
             value will be used. If multiple values needed to be handled, use ``MultiDict``
             object from werkzeug.
-        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches
+            values of headers, or a ``Callable[[str, Optional[str], str], bool]``
+            receiving the header key (from `headers`), header value (or `None`) and the expected
+            value (from `headers`) and should return ``True`` if the header matches, ``False`` otherwise.
         :param handler_type: type of handler
         :param json: a python object (eg. a dict) whose value will be compared to the request body after it
             is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
@@ -1011,7 +1026,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data_encoding: str = "utf-8",
         headers: Optional[Mapping[str, str]] = None,
         query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HeaderValueMatcher] = None,
+        header_value_matcher: Optional[HVMATCHER_T] = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
         """
@@ -1033,7 +1048,10 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             specified in the request. If multiple values specified for a given key, the first
             value will be used. If multiple values needed to be handled, use ``MultiDict``
             object from werkzeug.
-        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches
+            values of headers, or a ``Callable[[str, Optional[str], str], bool]``
+            receiving the header key (from `headers`), header value (or `None`) and the expected
+            value (from `headers`) and should return ``True`` if the header matches, ``False`` otherwise.
         :param json: a python object (eg. a dict) whose value will be compared to the request body after it
             is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
             If that's desired, add it to the headers parameter.
@@ -1063,7 +1081,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data_encoding: str = "utf-8",
         headers: Optional[Mapping[str, str]] = None,
         query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HeaderValueMatcher] = None,
+        header_value_matcher: Optional[HVMATCHER_T] = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
         """
@@ -1085,7 +1103,10 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             specified in the request. If multiple values specified for a given key, the first
             value will be used. If multiple values needed to be handled, use ``MultiDict``
             object from werkzeug.
-        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches
+            values of headers, or a ``Callable[[str, Optional[str], str], bool]``
+            receiving the header key (from `headers`), header value (or `None`) and the expected
+            value (from `headers`) and should return ``True`` if the header matches, ``False`` otherwise.
         :param json: a python object (eg. a dict) whose value will be compared to the request body after it
             is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
             If that's desired, add it to the headers parameter.

@@ -2,6 +2,22 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.6-12:
+
+1.0.6-12
+========
+
+.. _Release Notes_1.0.6-12_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Type hinting for header_value_matcher has been fixed. From now, specifying a
+  callable as `Callable[[str, Optional[str], str], bool]` will be accepted
+  also. Providing a `HeaderValueMatcher` object will be also accepted as
+  before, as it provides the same callable signature.
+
+
 .. _Release Notes_1.0.6:
 
 1.0.6

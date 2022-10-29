@@ -1,9 +1,14 @@
+from typing import Optional
+
 import requests
 
 from pytest_httpserver import HTTPServer
 
 
-def case_insensitive_matcher(header_name: str, actual: str, expected: str) -> bool:
+def case_insensitive_matcher(header_name: str, actual: Optional[str], expected: str) -> bool:
+    if actual is None:
+        return False
+
     if header_name == "X-Foo":
         return actual.lower() == expected.lower()
     else:
