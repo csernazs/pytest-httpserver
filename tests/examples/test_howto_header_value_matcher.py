@@ -1,10 +1,15 @@
+from typing import Optional
+
 import requests
 
 from pytest_httpserver import HeaderValueMatcher
 from pytest_httpserver import HTTPServer
 
 
-def case_insensitive_compare(actual: str, expected: str) -> bool:
+def case_insensitive_compare(actual: Optional[str], expected: str) -> bool:
+    # actual is `None` if it is not specified
+    if actual is None:
+        return False
     return actual.lower() == expected.lower()
 
 
