@@ -530,6 +530,7 @@ starting/stopping the server is costly.
     import pytest
     import requests
 
+
     # setting a fixed port for httpserver
     @pytest.fixture(scope="session")
     def httpserver_listen_address():
