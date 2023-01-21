@@ -14,6 +14,7 @@ With pytest-httpserver, a test looks like this:
 .. code:: python
 
     import requests
+    from pytest_httpserver import HTTPServer
 
 
     def test_json_client(httpserver: HTTPServer):
@@ -457,6 +458,7 @@ soon as possible.
 .. code:: python
 
     import requests
+    from pytest_httpserver import HTTPServer
 
 
     def test_json_client(httpserver: HTTPServer):
@@ -484,6 +486,7 @@ Adding more call of ``check_assertions()`` will help.
 .. code:: python
 
     import requests
+    from pytest_httpserver import HTTPServer
 
 
     def test_json_client(httpserver: HTTPServer):

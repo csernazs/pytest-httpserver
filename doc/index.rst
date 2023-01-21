@@ -25,6 +25,7 @@ Example
 .. code:: python
 
     import requests
+    from pytest_httpserver import HTTPServer
 
 
     def test_json_client(httpserver: HTTPServer):
