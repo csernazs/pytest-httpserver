@@ -69,7 +69,7 @@ also.
 It is advised to use the ``url_for()`` method to construct an URL as it will
 always contain the correct port number in the URL.
 
-If you need the http port as an integer, you can get is by the ``port``
+If you need the http port as an integer, you can get it by the ``port``
 attribute of the ``httpserver`` object.
 
 
