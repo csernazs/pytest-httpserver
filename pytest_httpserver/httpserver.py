@@ -311,7 +311,6 @@ class RequestMatcher:
         header_value_matcher: Optional[HVMATCHER_T] = None,
         json: Any = UNDEFINED,
     ):
-
         if json is not UNDEFINED and data is not None:
             raise ValueError("data and json parameters are mutually exclusive")
 

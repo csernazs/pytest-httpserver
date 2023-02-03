@@ -59,7 +59,6 @@ def test_behave_workflow(httpserver: BlockingHTTPServer):
     )
 
     with when_a_request_is_being_sent_to_the_server(request) as server_connection:
-
         client_connection = then_the_server_gets_the_request(httpserver, request)
 
         response = {"foo": "bar"}
@@ -76,7 +75,6 @@ def test_raises_assertion_error_when_request_does_not_match(httpserver: Blocking
     )
 
     with when_a_request_is_being_sent_to_the_server(request):
-
         with pytest.raises(AssertionError) as exc:
             httpserver.assert_request(uri="/not/my/path/")
 
@@ -99,7 +97,6 @@ def test_ignores_when_request_is_not_asserted(httpserver: BlockingHTTPServer):
     )
 
     with when_a_request_is_being_sent_to_the_server(request) as server_connection:
-
         assert server_connection.get(timeout=9).text == "No handler found for this request"
 
 
@@ -110,7 +107,6 @@ def test_raises_assertion_error_when_request_was_not_responded(httpserver: Block
     )
 
     with when_a_request_is_being_sent_to_the_server(request):
-
         then_the_server_gets_the_request(httpserver, request)
 
         httpserver.stop()  # waiting for timeout of waiting for the response
