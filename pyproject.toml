@@ -50,6 +50,7 @@ pytest-cov = "^3.0.0"
 coverage = "^6.4.4"
 ipdb = "^0.13.9"
 types-toml = "^0.10.8"
+black = "^23.1.0"
 
 
 [tool.poetry.group.doc]
