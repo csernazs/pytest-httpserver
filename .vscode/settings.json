@@ -8,9 +8,22 @@
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
+    "editor.formatOnSave": true,
     "python.formatting.provider": "black",
-    "python.formatting.blackArgs": ["--line-length", "120", "--safe"],
+    "python.formatting.blackPath": "${workspaceFolder}/.venv/bin/black",
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "120",
+        "--safe"
+    ],
     "python.linting.mypyEnabled": true,
     "python.linting.mypyPath": "${workspaceFolder}/.venv/bin/mypy",
-    "isort.args": ["--force-single-line-imports", "--profile", "black"]
+    "isort.args": [
+        "--force-single-line-imports",
+        "--profile",
+        "black"
+    ],
+    "files.trimTrailingWhitespace": true,
+    "json.format.enable": true,
+    "files.insertFinalNewline": true,
 }
