@@ -1,5 +1,4 @@
 {
-    "python.pythonPath": "${workspaceFolder}/.venv/bin/python3",
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
@@ -13,5 +12,5 @@
     "python.formatting.blackArgs": ["--line-length", "120", "--safe"],
     "python.linting.mypyEnabled": true,
     "python.linting.mypyPath": "${workspaceFolder}/.venv/bin/mypy",
-    "python.sortImports.args": ["--force-single-line-imports", "--profile", "black"]
+    "isort.args": ["--force-single-line-imports", "--profile", "black"]
 }
