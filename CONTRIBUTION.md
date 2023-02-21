@@ -65,3 +65,8 @@ There are a few rules you are kindly asked to accept:
 * nix files are provided on a best-effort basis. `tox.nix` can be used to run
   `tox`, `shell.nix` can be used instead of poetry for development. No tests
   have been written for these (yet!), so they may be out of sync occasionally.
+
+* to release a new version, you can use the `scripts/release.py` script to make
+  the wheels and sdist, generate the changelog, and tag the commit. This tool
+  won't upload the artifacts as they need to be checked manually (by installing
+  the wheel to a new venv, for example).
