@@ -61,3 +61,7 @@ There are a few rules you are kindly asked to accept:
   docstrings, but if the PR changes the code and the way of working
   conceptually, the main documentation (located in the doc directory) needs to
   be updated and extended.
+
+* nix files are provided on a best-effort basis. `tox.nix` can be used to run
+  `tox`, `shell.nix` can be used instead of poetry for development. No tests
+  have been written for these (yet!), so they may be out of sync occasionally.
