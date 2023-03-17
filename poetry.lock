@@ -870,14 +870,14 @@ files = [
 
 [[package]]
 name = "reno"
-version = "3.5.0"
+version = "4.0.0"
 description = "RElease NOtes manager"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "reno-3.5.0-py3-none-any.whl", hash = "sha256:55aae4c84c4849ea9d426c295d281bb5535e6ad54cebdc9f81d8d6511c08786b"},
-    {file = "reno-3.5.0.tar.gz", hash = "sha256:822f433c7b48c5a4bbd248d4af418eae8856043c2dae777d392cb4c974cbb2e2"},
+    {file = "reno-4.0.0-py3-none-any.whl", hash = "sha256:db7038061a5bfcc7bc61bfa3413fbc3202881f51ad011d21a58ae607ed1d5d9f"},
+    {file = "reno-4.0.0.tar.gz", hash = "sha256:0ebcad207133f4dbb7bc176ec3513fcd8e107a5d9e2f04b5621eb61da1147089"},
 ]
 
 [package.dependencies]
@@ -1292,4 +1292,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7,<4.0"
-content-hash = "061b1b9de2bd215ba20b33d04dbf82e92208da0e1699ad4d27acbf33229791b6"
+content-hash = "4fcb6e66d670cad28c5e61566f4b69ded07ec121e310ad327350ff70dac024c0"
