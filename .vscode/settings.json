@@ -26,4 +26,5 @@
     "files.trimTrailingWhitespace": true,
     "json.format.enable": true,
     "files.insertFinalNewline": true,
+    "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
 }
