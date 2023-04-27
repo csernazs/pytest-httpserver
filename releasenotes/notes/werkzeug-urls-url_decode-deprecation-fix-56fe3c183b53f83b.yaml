@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fix Werkzeug deprecation warning about ``werkzeug.urls.url_decode`` call. This
+    call has been changed to ``urllib.parse.parse_qsl`` in the implementation.
+    This fix should not introduce any functional change for the users.

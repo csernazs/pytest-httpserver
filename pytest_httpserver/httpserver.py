@@ -5,6 +5,7 @@ import queue
 import re
 import threading
 import time
+import urllib.parse
 from collections import defaultdict
 from contextlib import contextmanager
 from contextlib import suppress
@@ -22,7 +23,6 @@ from typing import Pattern
 from typing import Tuple
 from typing import Union
 
-import werkzeug.urls
 from werkzeug.datastructures import MultiDict
 from werkzeug.http import parse_authorization_header
 from werkzeug.serving import make_server
@@ -216,7 +216,7 @@ class MappingQueryMatcher(QueryMatcher):
         self.query_dict = query_dict
 
     def get_comparing_values(self, request_query_string: bytes) -> tuple:
-        query = werkzeug.urls.url_decode(request_query_string)
+        query = MultiDict(urllib.parse.parse_qsl(request_query_string.decode("utf-8")))
         if isinstance(self.query_dict, MultiDict):
             return (query, self.query_dict)
         else:
