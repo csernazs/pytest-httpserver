@@ -205,6 +205,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_oneshot.py",
             "test_ordered.py",
             "test_permanent.py",
+            "test_parse_qs.py",
             "test_port_changing.py",
             "test_querymatcher.py",
             "test_querystring.py",
