@@ -23,8 +23,9 @@ from typing import Pattern
 from typing import Tuple
 from typing import Union
 
+import werkzeug.http
+from werkzeug.datastructures import Authorization
 from werkzeug.datastructures import MultiDict
-from werkzeug.http import parse_authorization_header
 from werkzeug.serving import make_server
 from werkzeug.wrappers import Request
 from werkzeug.wrappers import Response
@@ -133,7 +134,10 @@ class HeaderValueMatcher:
 
     @staticmethod
     def authorization_header_value_matcher(actual: Optional[str], expected: str) -> bool:
-        return parse_authorization_header(actual) == parse_authorization_header(expected)
+        callable = getattr(Authorization, "from_header", None)
+        if callable is None:  # Werkzeug < 2.3.0
+            callable = werkzeug.http.parse_authorization_header
+        return callable(actual) == callable(expected)
 
     @staticmethod
     def default_header_value_matcher(actual: Optional[str], expected: str) -> bool:

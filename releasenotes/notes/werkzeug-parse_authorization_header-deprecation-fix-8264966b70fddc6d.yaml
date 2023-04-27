@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fix Werkzeug deprecation warning about ``parse_authorization_header`` call.
+    Replace ``parse_authorization_header`` with ``Authorization.from_header`` as
+    suggested. This fix should not introduce any functional change for the
+    users.
