@@ -1,0 +1,4 @@
+---
+upgrade:
+  - With werkzeug 2.3.x the headers type has been updated to not allow integers
+    as header values. This restriction followed up in pytest-httpserver.

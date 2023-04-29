@@ -34,8 +34,8 @@ URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
 
 HEADERS_T = Union[
-    Mapping[str, Union[str, int, Iterable[Union[str, int]]]],
-    Iterable[Tuple[str, Union[str, int]]],
+    Mapping[str, Union[str, Iterable[str]]],
+    Iterable[Tuple[str, str]],
 ]
 
 HVMATCHER_T = Callable[[str, Optional[str], str], bool]

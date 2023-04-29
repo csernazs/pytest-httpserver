@@ -82,15 +82,14 @@ def test_authorization_headers(httpserver: HTTPServer):
 def test_header_one_key_multiple_values(httpserver: HTTPServer):
     httpserver.expect_request(uri="/t1").respond_with_data(headers=[("X-Foo", "123"), ("X-Foo", "456")])
     httpserver.expect_request(uri="/t2").respond_with_data(headers={"X-Foo": ["123", "456"]})
-    httpserver.expect_request(uri="/t3").respond_with_data(headers={"X-Foo": [123, 456]})
 
     headers = Headers()
     headers.add("X-Foo", "123")
     headers.add("X-Foo", "456")
 
-    httpserver.expect_request(uri="/t4").respond_with_data(headers=headers)
+    httpserver.expect_request(uri="/t3").respond_with_data(headers=headers)
 
-    for uri in ("/t1", "/t2", "/t3", "/t4"):
+    for uri in ("/t1", "/t2", "/t3"):
         conn = http.client.HTTPConnection("localhost:{}".format(httpserver.port))
         conn.request("GET", uri)
         response = conn.getresponse()
