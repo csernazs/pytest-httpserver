@@ -9,7 +9,7 @@
     "python.testing.pytestEnabled": true,
     "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
     "editor.formatOnSave": true,
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.formatting.blackPath": "${workspaceFolder}/.venv/bin/black",
     "python.formatting.blackArgs": [
         "--line-length",
@@ -27,4 +27,7 @@
     "json.format.enable": true,
     "files.insertFinalNewline": true,
     "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
 }
