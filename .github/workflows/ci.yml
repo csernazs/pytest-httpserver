@@ -71,7 +71,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           type: doc
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
           poetry-version: ${{ env.POETRY_VERSION }}
 
       - name: Test
