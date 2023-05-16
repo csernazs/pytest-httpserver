@@ -78,7 +78,7 @@ class Build:
 
 
 @pytest.fixture(scope="session")
-def build(request) -> Iterable[Build]:
+def build() -> Iterable[Build]:
     dist_path = Path("dist").resolve()
     if dist_path.is_dir():
         shutil.rmtree(dist_path)
