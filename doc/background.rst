@@ -167,12 +167,11 @@ the state of the officially supported python versions by PSF.
 The library should be tested periodically on the supported versions.
 
 Dropping support for old python versions is possible if supporting would cause
-an issue or require extensive workaround. Currently, 3.4 is still supported by
-the library, however it is deprecated by PSF. As it causes no problems for
-*pytest-httpserver* (there's an additional requirement for this in the setup.py,
-but that's all), the support for this version will be maintained as long as
-possible. Once a new change is added to the library which require great effort
-to maintain compatibility with 3.4, the support for it will be dropped.
+an issue or require extensive workaround.
+
+Python support for a given version is also dropped if it is near to the end of
+support or when a dependency deprecates it - this is needed to move forward with
+the community in order to support the latest versions of the dependencies.
 
 
 Testing and coverage
