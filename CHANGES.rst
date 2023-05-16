@@ -2,20 +2,48 @@
 Release Notes
 =============
 
-.. _Release Notes_1.0.6-12:
+.. _Release Notes_1.0.7:
 
-1.0.6-12
-========
+1.0.7
+=====
 
-.. _Release Notes_1.0.6-12_Bug Fixes:
+.. _Release Notes_1.0.7_Upgrade Notes:
+
+Upgrade Notes
+-------------
+
+- With werkzeug 2.3.x the headers type has been updated to not allow integers as header values. This restriction followed up in pytest-httpserver.
+
+
+.. _Release Notes_1.0.7_Deprecation Notes:
+
+Deprecation Notes
+-----------------
+
+- Python versions earlier than 3.8 have been deprecated in order to support
+  the latest werkzeug. Users using 3.7 or earlier python may use
+  pytest-httpserver with earlier werkzeug versions but tests are no longer run
+  for these python versions.
+
+
+.. _Release Notes_1.0.7_Bug Fixes:
 
 Bug Fixes
 ---------
 
 - Type hinting for header_value_matcher has been fixed. From now, specifying a
-  callable as `Callable[[str, Optional[str], str], bool]` will be accepted
-  also. Providing a `HeaderValueMatcher` object will be also accepted as
+  callable as ``Callable[[str, Optional[str], str], bool]`` will be accepted
+  also. Providing a ``HeaderValueMatcher`` object will be also accepted as
   before, as it provides the same callable signature.
+
+- Fix Werkzeug deprecation warning about ``parse_authorization_header`` call.
+  Replace ``parse_authorization_header`` with ``Authorization.from_header`` as
+  suggested. This fix should not introduce any functional change for the
+  users.
+
+- Fix Werkzeug deprecation warning about ``werkzeug.urls.url_decode`` call. This
+  call has been changed to ``urllib.parse.parse_qsl`` in the implementation.
+  This fix should not introduce any functional change for the users.
 
 
 .. _Release Notes_1.0.6:
