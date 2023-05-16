@@ -49,7 +49,7 @@ runs:
           python-version:  ${{ inputs.python-version }}
 
       - name: Setup poetry
-        uses: Gr1N/setup-poetry@v7
+        uses: Gr1N/setup-poetry@v8
         id: setup_poetry
         if: steps.cache-setup-poetry.outputs.cache-hit != 'true'
         with:
