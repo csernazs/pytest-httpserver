@@ -11,7 +11,6 @@ in pkgs.mkShell {
     (toxPython python310)
     (toxPython python39)
     (toxPython python38)
-    (toxPython python37)
 
     bashInteractive
   ];
