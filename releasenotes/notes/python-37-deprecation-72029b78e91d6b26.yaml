@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    Python versions earlier than 3.8 have been deprecated in order to support
+    the latest werkzeug. Users using 3.7 or earlier python may use
+    pytest-httpserver with earlier werkzeug versions but tests are no longer run
+    for these python versions.
