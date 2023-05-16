@@ -40,7 +40,7 @@ runs:
             ~/.local/share/pypoetry
             ~/.local/share/virtualenv
             ~/.local/bin/poetry
-          key: setup-poetry-v1-${{ runner.os }}-${{ inputs.poetry-version }}
+          key: setup-poetry-v1-${{ runner.os }}-${{ inputs.python-version }}-${{ inputs.poetry-version }}
 
       - name: Setup poetry
         uses: Gr1N/setup-poetry@v7
