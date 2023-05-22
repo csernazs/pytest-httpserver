@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Version 1.0.7 has been released with incorrect dependencies. This is fixed now.
