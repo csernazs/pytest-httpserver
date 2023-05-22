@@ -2,6 +2,19 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.8:
+
+1.0.8
+=====
+
+.. _Release Notes_1.0.8_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Version 1.0.7 has been released with incorrect dependencies. This is fixed now.
+
+
 .. _Release Notes_1.0.7:
 
 1.0.7
