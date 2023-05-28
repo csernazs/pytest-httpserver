@@ -17,7 +17,6 @@ from ssl import SSLContext
 from typing import Any
 from typing import Callable
 from typing import Iterable
-from typing import List
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
@@ -131,23 +130,23 @@ class HeaderValueMatcher:
         and return whether they are equal as bool.
     """
 
-    DEFAULT_MATCHERS: MutableMapping[str, Callable[[Optional[str], str], bool]] = {}
+    DEFAULT_MATCHERS: MutableMapping[str, Callable[[str | None, str], bool]] = {}
 
-    def __init__(self, matchers: Optional[Mapping[str, Callable[[Optional[str], str], bool]]] = None):
+    def __init__(self, matchers: Mapping[str, Callable[[str | None, str], bool]] | None = None):
         self.matchers = self.DEFAULT_MATCHERS if matchers is None else matchers
 
     @staticmethod
-    def authorization_header_value_matcher(actual: Optional[str], expected: str) -> bool:
+    def authorization_header_value_matcher(actual: str | None, expected: str) -> bool:
         callable = getattr(Authorization, "from_header", None)
         if callable is None:  # Werkzeug < 2.3.0
             callable = werkzeug.http.parse_authorization_header
         return callable(actual) == callable(expected)
 
     @staticmethod
-    def default_header_value_matcher(actual: Optional[str], expected: str) -> bool:
+    def default_header_value_matcher(actual: str | None, expected: str) -> bool:
         return actual == expected
 
-    def __call__(self, header_name: str, actual: Optional[str], expected: str) -> bool:
+    def __call__(self, header_name: str, actual: str | None, expected: str) -> bool:
         try:
             matcher = self.matchers[header_name]
         except KeyError:
@@ -185,7 +184,7 @@ class StringQueryMatcher(QueryMatcher):
     Matches a query for a string or bytes specified
     """
 
-    def __init__(self, query_string: Union[bytes, str]):
+    def __init__(self, query_string: bytes | str):
         """
         :param query_string: the query string will be compared to this string or bytes.
             If string is specified, it will be encoded by the encode() method.
@@ -213,7 +212,7 @@ class MappingQueryMatcher(QueryMatcher):
     Matches a query string to a dictionary or MultiDict specified
     """
 
-    def __init__(self, query_dict: Union[Mapping, MultiDict]):
+    def __init__(self, query_dict: Mapping | MultiDict):
         """
         :param query_dict: if dictionary (Mapping) is specified, it will be used as a
             key-value mapping where both key and value should be string. If there are multiple
@@ -243,14 +242,14 @@ class BooleanQueryMatcher(QueryMatcher):
         """
         self.result = result
 
-    def get_comparing_values(self, request_query_string):
+    def get_comparing_values(self, request_query_string):  # noqa: ARG002
         if self.result:
             return (True, True)
         else:
             return (True, False)
 
 
-def _create_query_matcher(query_string: Union[None, QueryMatcher, str, bytes, Mapping]) -> QueryMatcher:
+def _create_query_matcher(query_string: None | QueryMatcher | str | bytes | Mapping) -> QueryMatcher:
     if isinstance(query_string, QueryMatcher):
         return query_string
 
@@ -310,13 +309,13 @@ class RequestMatcher:
 
     def __init__(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ):
         if json is not UNDEFINED and data is not None:
@@ -413,7 +412,7 @@ class RequestMatcher:
 
         return json_received == self.json
 
-    def difference(self, request: Request) -> List[Tuple]:
+    def difference(self, request: Request) -> list[tuple]:
         """
         Calculates the difference between the matcher and the request.
 
@@ -425,7 +424,7 @@ class RequestMatcher:
         matches the fields set in the matcher object.
         """
 
-        retval: List[Tuple] = []
+        retval: list[tuple] = []
 
         if not self.match_uri(request):
             retval.append(("uri", request.path, self.uri))
@@ -472,7 +471,7 @@ class RequestHandlerBase(abc.ABC):
         self,
         response_json,
         status: int = 200,
-        headers: Optional[Mapping[str, str]] = None,
+        headers: Mapping[str, str] | None = None,
         content_type: str = "application/json",
     ):
         """
@@ -489,11 +488,11 @@ class RequestHandlerBase(abc.ABC):
 
     def respond_with_data(
         self,
-        response_data: Union[str, bytes] = "",
+        response_data: str | bytes = "",
         status: int = 200,
-        headers: Optional[HEADERS_T] = None,
-        mimetype: Optional[str] = None,
-        content_type: Optional[str] = None,
+        headers: HEADERS_T | None = None,
+        mimetype: str | None = None,
+        content_type: str | None = None,
     ):
         """
         Prepares a response with raw data.
@@ -533,7 +532,7 @@ class RequestHandler(RequestHandlerBase):
 
     def __init__(self, matcher: RequestMatcher):
         self.matcher = matcher
-        self.request_handler: Optional[Callable[[Request], Response]] = None
+        self.request_handler: Callable[[Request], Response] | None = None
 
     def respond(self, request: Request) -> Response:
         """
@@ -571,7 +570,7 @@ class RequestHandlerList(list):
 
     """
 
-    def match(self, request: Request) -> Optional[RequestHandler]:
+    def match(self, request: Request) -> RequestHandler | None:
         """
         Returns the first request handler which matches the specified request. Otherwise, it returns `None`.
         """
@@ -614,7 +613,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self,
         host: str,
         port: int,
-        ssl_context: Optional[SSLContext] = None,
+        ssl_context: SSLContext | None = None,
     ):
         """
         Initializes the instance.
@@ -624,9 +623,9 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.port = port
         self.server = None
         self.server_thread = None
-        self.assertions: List[str] = []
-        self.handler_errors: List[Exception] = []
-        self.log: List[Tuple[Request, Response]] = []
+        self.assertions: list[str] = []
+        self.handler_errors: list[Exception] = []
+        self.log: list[tuple[Request, Response]] = []
         self.ssl_context = ssl_context
         self.no_handler_status_code = 500
 
@@ -911,15 +910,15 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         self,
         host=DEFAULT_LISTEN_HOST,
         port=DEFAULT_LISTEN_PORT,
-        ssl_context: Optional[SSLContext] = None,
-        default_waiting_settings: Optional[WaitingSettings] = None,
+        ssl_context: SSLContext | None = None,
+        default_waiting_settings: WaitingSettings | None = None,
     ):
         """
         Initializes the instance.
         """
         super().__init__(host, port, ssl_context)
 
-        self.ordered_handlers: List[RequestHandler] = []
+        self.ordered_handlers: list[RequestHandler] = []
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
         self.permanently_failed = False
@@ -952,13 +951,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def expect_request(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         handler_type: HandlerType = HandlerType.PERMANENT,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
@@ -1027,13 +1026,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def expect_oneshot_request(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
         """
@@ -1082,13 +1081,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def expect_ordered_request(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
         """
@@ -1266,9 +1265,9 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
     @contextmanager
     def wait(
         self,
-        raise_assertions: Optional[bool] = None,
-        stop_on_nohandler: Optional[bool] = None,
-        timeout: Optional[float] = None,
+        raise_assertions: bool | None = None,
+        stop_on_nohandler: bool | None = None,
+        timeout: float | None = None,
     ):
         """Context manager to wait until the first of following event occurs: all ordered and oneshot handlers were
         executed, unexpected request was received (if `stop_on_nohandler` is set to `True`), or time was out
