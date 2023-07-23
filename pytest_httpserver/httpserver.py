@@ -130,7 +130,7 @@ class HeaderValueMatcher:
         and return whether they are equal as bool.
     """
 
-    DEFAULT_MATCHERS: MutableMapping[str, Callable[[str | None, str], bool]] = {}
+    DEFAULT_MATCHERS: MutableMapping[str, Callable[[str | None, str], bool]] = {}  # noqa: RUF012
 
     def __init__(self, matchers: Mapping[str, Callable[[str | None, str], bool]] | None = None):
         self.matchers = self.DEFAULT_MATCHERS if matchers is None else matchers
