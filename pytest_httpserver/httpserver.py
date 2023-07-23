@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from contextlib import suppress
 from copy import copy
 from enum import Enum
-from ssl import SSLContext
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Iterable
@@ -30,6 +30,9 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.serving import make_server
 from werkzeug.wrappers import Request
 from werkzeug.wrappers import Response
+
+if TYPE_CHECKING:
+    from ssl import SSLContext
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -55,15 +58,11 @@ class Error(Exception):
     Base class for all exception defined in this package.
     """
 
-    pass
-
 
 class NoHandlerError(Error):
     """
     Raised when a :py:class:`RequestHandler` has no registered method to serve the request.
     """
-
-    pass
 
 
 class HTTPServerError(Error):
@@ -71,15 +70,11 @@ class HTTPServerError(Error):
     Raised when there's a problem with HTTP server.
     """
 
-    pass
-
 
 class NoMethodFoundForMatchingHeaderValueError(Error):
     """
     Raised when a :py:class:`HeaderValueMatcher` has no registered method to match the header value.
     """
-
-    pass
 
 
 class WaitingSettings:
@@ -275,7 +270,6 @@ class URIPattern(abc.ABC):
             with "/" and does not contain the query part.
         :return: True if there's a match, False otherwise
         """
-        pass
 
 
 class RequestMatcher:
@@ -516,8 +510,6 @@ class RequestHandlerBase(abc.ABC):
 
         :param response: the response object which will be responded
         """
-
-        pass
 
 
 class RequestHandler(RequestHandlerBase):
@@ -827,7 +819,6 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         :param request: the request object from the werkzeug library
         :return: the response object what the handler responded, or a response which contains the error
         """
-        pass
 
     @Request.application  # type: ignore
     def application(self, request: Request):
@@ -1213,8 +1204,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             handler = self.ordered_handlers[0]
             if not handler.matcher.match(request):
                 self.permanently_failed = True
-                response = self.respond_nohandler(request)
-                return response
+                return self.respond_nohandler(request)
 
             self.ordered_handlers.pop(0)
             self._update_waiting_result()
@@ -1317,7 +1307,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             waiting.complete(result=False)
             if self._waiting_settings.raise_assertions:
                 raise AssertionError(
-                    "Wait timeout occurred, but some handlers left:\n" "{}".format(self.format_matchers())
+                    "Wait timeout occurred, but some handlers left:\n{}".format(self.format_matchers())
                 )
         if self._waiting_settings.raise_assertions and not waiting.result:
             self.check_assertions()
