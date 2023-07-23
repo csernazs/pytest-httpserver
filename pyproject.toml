@@ -111,6 +111,9 @@ ignore = [
   "B904",
   "TRY200",
   "RET505",
+  "EM103",
+  "COM812",
+  "RET506",
 ]
 line-length = 120
 target-version = "py37"

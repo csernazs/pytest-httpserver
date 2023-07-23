@@ -91,8 +91,8 @@ class WaitingSettings:
     """
 
     def __init__(
-        self, raise_assertions: bool = True, stop_on_nohandler: bool = True, timeout: float = 5
-    ):  # noqa: FBT001
+        self, raise_assertions: bool = True, stop_on_nohandler: bool = True, timeout: float = 5  # noqa: FBT001
+    ):
         self.raise_assertions = raise_assertions
         self.stop_on_nohandler = stop_on_nohandler
         self.timeout = timeout
@@ -137,10 +137,10 @@ class HeaderValueMatcher:
 
     @staticmethod
     def authorization_header_value_matcher(actual: str | None, expected: str) -> bool:
-        callable = getattr(Authorization, "from_header", None)
-        if callable is None:  # Werkzeug < 2.3.0
-            callable = werkzeug.http.parse_authorization_header
-        return callable(actual) == callable(expected)
+        func = getattr(Authorization, "from_header", None)
+        if func is None:  # Werkzeug < 2.3.0
+            func = werkzeug.http.parse_authorization_header
+        return func(actual) == func(expected)
 
     @staticmethod
     def default_header_value_matcher(actual: str | None, expected: str) -> bool:
@@ -254,7 +254,7 @@ def _create_query_matcher(query_string: None | QueryMatcher | str | bytes | Mapp
         return query_string
 
     if query_string is None:
-        return BooleanQueryMatcher(True)
+        return BooleanQueryMatcher(result=True)
 
     if isinstance(query_string, (str, bytes)):
         return StringQueryMatcher(query_string)
@@ -561,7 +561,7 @@ class RequestHandler(RequestHandlerBase):
         self.request_handler = func
 
     def respond_with_response(self, response: Response):
-        self.request_handler = lambda request: response
+        self.request_handler = lambda request: response  # noqa: ARG005
 
 
 class RequestHandlerList(list):
@@ -1171,7 +1171,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
         """
         if self._waiting_settings.stop_on_nohandler:
-            self._set_waiting_result(False)
+            self._set_waiting_result(value=False)
 
         return super().respond_nohandler(request, self.format_matchers() + extra_message)
 
@@ -1260,7 +1260,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def _update_waiting_result(self) -> None:
         if not self.oneshot_handlers and not self.ordered_handlers:
-            self._set_waiting_result(True)
+            self._set_waiting_result(value=True)
 
     @contextmanager
     def wait(
