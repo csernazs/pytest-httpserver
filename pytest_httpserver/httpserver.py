@@ -136,7 +136,7 @@ class HeaderValueMatcher:
     def authorization_header_value_matcher(actual: Optional[str], expected: str) -> bool:
         callable = getattr(Authorization, "from_header", None)
         if callable is None:  # Werkzeug < 2.3.0
-            callable = werkzeug.http.parse_authorization_header
+            callable = werkzeug.http.parse_authorization_header  # type: ignore[attr-defined]
         return callable(actual) == callable(expected)
 
     @staticmethod
