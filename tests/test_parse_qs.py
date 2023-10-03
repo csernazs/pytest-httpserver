@@ -3,8 +3,6 @@ from typing import List
 from typing import Tuple
 
 import pytest
-import werkzeug.urls
-from werkzeug.datastructures import MultiDict
 
 parse_qsl_semicolon_cases = [
     ("&", []),
@@ -22,9 +20,3 @@ parse_qsl_semicolon_cases = [
 @pytest.mark.parametrize("qs,expected", parse_qsl_semicolon_cases)
 def test_qsl(qs: str, expected: List[Tuple[bytes, bytes]]):
     assert urllib.parse.parse_qsl(qs, keep_blank_values=True) == expected
-
-
-@pytest.mark.skip(reason="skipped to avoid werkzeug warnings")
-@pytest.mark.parametrize("qs,expected", parse_qsl_semicolon_cases)
-def test_qsl_werkzeug(qs: str, expected: List[Tuple[bytes, bytes]]):
-    assert werkzeug.urls.url_decode(qs) == MultiDict(expected)
