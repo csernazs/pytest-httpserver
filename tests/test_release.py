@@ -19,6 +19,7 @@ pytestmark = pytest.mark.release
 
 NAME = "pytest-httpserver"
 NAME_UNDERSCORE = NAME.replace("-", "_")
+PY_MAX_VERSION = (3, 12)
 
 
 @pytest.fixture(scope="session")
@@ -120,20 +121,20 @@ def test_python_version(build: Build, pyproject):
     pyproject_meta = pyproject["tool"]["poetry"]
     wheel_meta = build.wheel.get_meta(version=pyproject_meta["version"])
     python_dependency = pyproject_meta["dependencies"]["python"]
-    m = re.match(r">=(\d+\.\d+),<(\d+\.\d+)", python_dependency)
+    m = re.match(r">=(\d+\.\d+)", python_dependency)
     if m:
-        min_version, max_version = m.groups()
+        min_version, *_ = m.groups()
     else:
         raise ValueError(python_dependency)
 
     min_version_tuple = version_to_tuple(min_version)
-    max_version_tuple = version_to_tuple(max_version)
 
     for classifier in wheel_meta.get_all("Classifier"):
         if classifier.startswith("Programming Language :: Python ::"):
             version_tuple = version_to_tuple(classifier.split("::")[-1].strip())
             if len(version_tuple) > 1:
-                assert version_tuple >= min_version_tuple and version_tuple < max_version_tuple
+                assert version_tuple >= min_version_tuple
+                assert version_tuple < PY_MAX_VERSION
 
 
 def test_wheel_no_extra_contents(build: Build, version: str):
@@ -168,7 +169,6 @@ def test_sdist_contents(build: Build, version: str):
             "pyproject.toml",
             "pytest_httpserver",
             "README.md",
-            "setup.py",
             "tests",
         },
         "doc": {
