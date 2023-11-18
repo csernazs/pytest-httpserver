@@ -16,7 +16,6 @@ def httpserver():
 
     yield server
 
-    server.clear()
     if server.is_running():
         server.stop()
 
