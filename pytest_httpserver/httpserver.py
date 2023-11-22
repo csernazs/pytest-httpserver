@@ -971,7 +971,15 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         If `handler_type` is `HandlerType.ORDERED` an ordered request handler is created. Comparing to oneshot handler,
         ordered handler also determines the order of the requests to be served. For example if there are two ordered
         handlers registered, the first request must hit the first handler, and the second request must hit the second
-        one, and not vice versa. If one or more ordered handler defined, those must be exhausted first.
+        one, and not vice versa. If one or more ordered handler defined, those
+        must be exhausted first.
+
+        .. note::
+
+            Once this method is called, the response should also be specified by
+            calling one of the respond methods of the returned
+            :py:class:`RequestHandler` object, otherwise
+            :py:class:`NoHandlerError` will be raised on an incoming request.
 
 
         :param uri: URI of the request. This must be an absolute path starting with ``/``, a

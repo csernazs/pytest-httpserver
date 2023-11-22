@@ -39,6 +39,12 @@ This tells that when the request arrives to the *http://localhost/foobar* URL,
 it must respond with the provided json. The library accepts here any python
 object which is json serializable. Here, a dict is provided.
 
+.. note::
+
+    It is important to specify what response to be sent back to the client
+    otherwise *pytest-httpserver* will error with ``Matching request handler
+    found but no response defined`` message on an incoming request.
+
 In the next line, an http request is sent with the *requests* library:
 
 .. code:: python
