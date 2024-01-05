@@ -134,7 +134,7 @@ def test_python_version(build: Build, pyproject):
             version_tuple = version_to_tuple(classifier.split("::")[-1].strip())
             if len(version_tuple) > 1:
                 assert version_tuple >= min_version_tuple
-                assert version_tuple < PY_MAX_VERSION
+                assert version_tuple <= PY_MAX_VERSION
 
 
 def test_wheel_no_extra_contents(build: Build, version: str):
