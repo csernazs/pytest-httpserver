@@ -560,6 +560,15 @@ class RequestHandler(RequestHandlerBase):
     def respond_with_response(self, response: Response):
         self.request_handler = lambda request: response
 
+    def __repr__(self) -> str:
+        class_name = self.__class__.__name__
+        retval = (
+            f"<{class_name} uri={self.matcher.uri!r} method={self.matcher.method!r} "
+            f"query_string={self.matcher.query_string!r} headers={self.matcher.headers!r} data={self.matcher.data!r} "
+            f"json={self.matcher.json!r}>"
+        )
+        return retval
+
 
 class RequestHandlerList(list):
     """
