@@ -821,9 +821,9 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         As the result, there's an assertion added (which can be raised by :py:meth:`check_assertions`).
 
         """
-        text = "No handler found for request {!r}.\n".format(request)
+        text = "No handler found for request {!r} with data {!r}.".format(request, request.data)
         self.add_assertion(text + extra_message)
-        return Response("No handler found for this request", self.no_handler_status_code)
+        return Response(text + extra_message, self.no_handler_status_code)
 
     @abc.abstractmethod
     def dispatch(self, request: Request) -> Response:
