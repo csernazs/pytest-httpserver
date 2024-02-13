@@ -66,7 +66,7 @@ author = "Zsolt Cserna"
 # built documents.
 #
 # The short X.Y version.
-version = "1.0.8"
+version = "1.0.9"
 # The full version, including alpha/beta/rc tags.
 release = version
 
