@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.9:
+
+1.0.9
+=====
+
+.. _Release Notes_1.0.9_New Features:
+
+New Features
+------------
+
+- Add ``__repr__`` to ``RequestHandler`` object so when it is compared (eg. with
+  the ``log`` attribute of the server) it will show the matcher parameters.
+
+
 .. _Release Notes_1.0.8:
 
 1.0.8
