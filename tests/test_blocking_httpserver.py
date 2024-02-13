@@ -97,7 +97,10 @@ def test_ignores_when_request_is_not_asserted(httpserver: BlockingHTTPServer):
     )
 
     with when_a_request_is_being_sent_to_the_server(request) as server_connection:
-        assert server_connection.get(timeout=9).text == "No handler found for this request"
+        assert (
+            server_connection.get(timeout=9).text == "No handler found for request "
+            f"<Request 'http://localhost:{httpserver.port}/my/path' [GET]> with data b''."
+        )
 
 
 def test_raises_assertion_error_when_request_was_not_responded(httpserver: BlockingHTTPServer):
