@@ -54,14 +54,14 @@ def make_httpserver(httpserver_listen_address, httpserver_ssl_context):
         server.stop()
 
 
-def pytest_sessionfinish(session, exitstatus):  # pylint: disable=unused-argument
+def pytest_sessionfinish(session, exitstatus):  # noqa: ARG001
     if Plugin.SERVER is not None:
         Plugin.SERVER.clear()
         if Plugin.SERVER.is_running():
             Plugin.SERVER.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def httpserver(make_httpserver):
     server = make_httpserver
     yield server
@@ -78,7 +78,7 @@ def make_httpserver_ipv4(httpserver_ssl_context):
         server.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def httpserver_ipv4(make_httpserver_ipv4):
     server = make_httpserver_ipv4
     yield server
@@ -95,7 +95,7 @@ def make_httpserver_ipv6(httpserver_ssl_context):
         server.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def httpserver_ipv6(make_httpserver_ipv6):
     server = make_httpserver_ipv6
     yield server

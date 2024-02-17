@@ -7,7 +7,7 @@ from pytest_httpserver import HTTPServer
 
 def test_check_assertions_raises_handler_assertions(httpserver: HTTPServer):
     def handler(_):
-        assert 1 == 2
+        assert False  # noqa: PT015
 
     httpserver.expect_request("/foobar").respond_with_handler(handler)
 
@@ -29,7 +29,7 @@ def test_check_handler_errors_raises_handler_error(httpserver: HTTPServer):
 
     httpserver.check_assertions()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         httpserver.check_handler_errors()
 
 
@@ -48,10 +48,10 @@ def test_check_handler_errors_correct_order(httpserver: HTTPServer):
 
     httpserver.check_assertions()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         httpserver.check_handler_errors()
 
-    with pytest.raises(OSError):
+    with pytest.raises(OSError):  # noqa: PT011
         httpserver.check_handler_errors()
 
     httpserver.check_handler_errors()
@@ -69,7 +69,7 @@ def test_missing_matcher_raises_exception(httpserver):
 
 def test_check_raises_errors_in_order(httpserver):
     def handler1(_):
-        assert 1 == 2
+        assert False  # noqa: PT015
 
     def handler2(_):
         pass  # does nothing
@@ -88,5 +88,5 @@ def test_check_raises_errors_in_order(httpserver):
     with pytest.raises(AssertionError):
         httpserver.check()
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         httpserver.check()

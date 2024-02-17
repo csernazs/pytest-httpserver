@@ -9,7 +9,7 @@ PORT_KEY = "PYTEST_HTTPSERVER_PORT"
 HOST_KEY = "PYTEST_HTTPSERVER_HOST"
 
 
-@pytest.fixture
+@pytest.fixture()
 def tmpenv():
     old_vars = {}
     for key in (HOST_KEY, PORT_KEY):
@@ -37,7 +37,7 @@ def test_port_changing_by_environment(httpserver: HTTPServer):
     assert httpserver.port == int(os.environ[PORT_KEY])
 
 
-def test_get_httpserver_listen_address_with_env(tmpenv):
+def test_get_httpserver_listen_address_with_env(tmpenv):  # noqa: ARG001
     address = get_httpserver_listen_address()
     assert address[0] == "5.5.5.5"
     assert address[1] == 12345

@@ -1,5 +1,4 @@
-# TODO: skip if poetry is not available or add mark to test it explicitly
-
+from __future__ import annotations
 
 import email
 import re
@@ -10,10 +9,12 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
-from typing import Tuple
 
 import pytest
 import toml
+
+# TODO: skip if poetry is not available or add mark to test it explicitly
+
 
 pytestmark = pytest.mark.release
 
@@ -45,7 +46,7 @@ class Wheel:
 
     def extract(self):
         with zipfile.ZipFile(self.path) as zf:
-            zf.extractall(self.wheel_out_dir)
+            zf.extractall(self.wheel_out_dir)  # noqa: S202
 
     def get_meta(self, version: str, name: str = NAME_UNDERSCORE) -> email.message.Message:
         metadata_path = self.wheel_out_dir.joinpath(f"{name}-{version}.dist-info", "METADATA")
@@ -65,7 +66,7 @@ class Sdist:
 
     def extract(self):
         with tarfile.open(self.path, mode="r:gz") as tf:
-            tf.extractall(self.sdist_out_dir)
+            tf.extractall(self.sdist_out_dir)  # noqa: S202
 
 
 @dataclass
@@ -104,7 +105,7 @@ def version(pyproject) -> str:
     return pyproject["tool"]["poetry"]["version"]
 
 
-def version_to_tuple(version: str) -> Tuple:
+def version_to_tuple(version: str) -> tuple:
     return tuple([int(x) for x in version.split(".")])
 
 

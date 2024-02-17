@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import ipaddress
 import json
@@ -11,11 +13,11 @@ from contextlib import contextmanager
 from contextlib import suppress
 from copy import copy
 from enum import Enum
-from ssl import SSLContext
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
+from typing import ClassVar
 from typing import Iterable
-from typing import List
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
@@ -29,6 +31,9 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.serving import make_server
 from werkzeug.wrappers import Request
 from werkzeug.wrappers import Response
+
+if TYPE_CHECKING:
+    from ssl import SSLContext
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -54,15 +59,11 @@ class Error(Exception):
     Base class for all exception defined in this package.
     """
 
-    pass
-
 
 class NoHandlerError(Error):
     """
     Raised when a :py:class:`RequestHandler` has no registered method to serve the request.
     """
-
-    pass
 
 
 class HTTPServerError(Error):
@@ -70,15 +71,11 @@ class HTTPServerError(Error):
     Raised when there's a problem with HTTP server.
     """
 
-    pass
-
 
 class NoMethodFoundForMatchingHeaderValueError(Error):
     """
     Raised when a :py:class:`HeaderValueMatcher` has no registered method to match the header value.
     """
-
-    pass
 
 
 class WaitingSettings:
@@ -89,7 +86,12 @@ class WaitingSettings:
     :param timeout: time (in seconds) until time is out
     """
 
-    def __init__(self, raise_assertions: bool = True, stop_on_nohandler: bool = True, timeout: float = 5):
+    def __init__(
+        self,
+        raise_assertions: bool = True,  # noqa: FBT001
+        stop_on_nohandler: bool = True,  # noqa: FBT001
+        timeout: float = 5,
+    ):
         self.raise_assertions = raise_assertions
         self.stop_on_nohandler = stop_on_nohandler
         self.timeout = timeout
@@ -105,7 +107,7 @@ class Waiting:
         self._start = time.monotonic()
         self._stop = None
 
-    def complete(self, result: bool):
+    def complete(self, result: bool):  # noqa: FBT001
         self._result = result
         self._stop = time.monotonic()
 
@@ -127,23 +129,23 @@ class HeaderValueMatcher:
         and return whether they are equal as bool.
     """
 
-    DEFAULT_MATCHERS: MutableMapping[str, Callable[[Optional[str], str], bool]] = {}
+    DEFAULT_MATCHERS: ClassVar[MutableMapping[str, Callable[[str | None, str], bool]]] = {}
 
-    def __init__(self, matchers: Optional[Mapping[str, Callable[[Optional[str], str], bool]]] = None):
+    def __init__(self, matchers: Mapping[str, Callable[[str | None, str], bool]] | None = None):
         self.matchers = self.DEFAULT_MATCHERS if matchers is None else matchers
 
     @staticmethod
-    def authorization_header_value_matcher(actual: Optional[str], expected: str) -> bool:
-        callable = getattr(Authorization, "from_header", None)
-        if callable is None:  # Werkzeug < 2.3.0
-            callable = werkzeug.http.parse_authorization_header  # type: ignore[attr-defined]
-        return callable(actual) == callable(expected)
+    def authorization_header_value_matcher(actual: str | None, expected: str) -> bool:
+        func = getattr(Authorization, "from_header", None)
+        if func is None:  # Werkzeug < 2.3.0
+            func = werkzeug.http.parse_authorization_header  # type: ignore[attr-defined]
+        return func(actual) == func(expected)
 
     @staticmethod
-    def default_header_value_matcher(actual: Optional[str], expected: str) -> bool:
+    def default_header_value_matcher(actual: str | None, expected: str) -> bool:
         return actual == expected
 
-    def __call__(self, header_name: str, actual: Optional[str], expected: str) -> bool:
+    def __call__(self, header_name: str, actual: str | None, expected: str) -> bool:
         try:
             matcher = self.matchers[header_name]
         except KeyError:
@@ -181,7 +183,7 @@ class StringQueryMatcher(QueryMatcher):
     Matches a query for a string or bytes specified
     """
 
-    def __init__(self, query_string: Union[bytes, str]):
+    def __init__(self, query_string: bytes | str):
         """
         :param query_string: the query string will be compared to this string or bytes.
             If string is specified, it will be encoded by the encode() method.
@@ -209,7 +211,7 @@ class MappingQueryMatcher(QueryMatcher):
     Matches a query string to a dictionary or MultiDict specified
     """
 
-    def __init__(self, query_dict: Union[Mapping, MultiDict]):
+    def __init__(self, query_dict: Mapping | MultiDict):
         """
         :param query_dict: if dictionary (Mapping) is specified, it will be used as a
             key-value mapping where both key and value should be string. If there are multiple
@@ -232,26 +234,26 @@ class BooleanQueryMatcher(QueryMatcher):
     Matches the query depending on the boolean value
     """
 
-    def __init__(self, result: bool):
+    def __init__(self, result: bool):  # noqa: FBT001
         """
         :param result: if this parameter is true, the query match will be always
             successful. Otherwise, no query match will be successful.
         """
         self.result = result
 
-    def get_comparing_values(self, request_query_string):
+    def get_comparing_values(self, request_query_string):  # noqa: ARG002
         if self.result:
             return (True, True)
         else:
             return (True, False)
 
 
-def _create_query_matcher(query_string: Union[None, QueryMatcher, str, bytes, Mapping]) -> QueryMatcher:
+def _create_query_matcher(query_string: None | QueryMatcher | str | bytes | Mapping) -> QueryMatcher:
     if isinstance(query_string, QueryMatcher):
         return query_string
 
     if query_string is None:
-        return BooleanQueryMatcher(True)
+        return BooleanQueryMatcher(result=True)
 
     if isinstance(query_string, (str, bytes)):
         return StringQueryMatcher(query_string)
@@ -272,7 +274,6 @@ class URIPattern(abc.ABC):
             with "/" and does not contain the query part.
         :return: True if there's a match, False otherwise
         """
-        pass
 
 
 class RequestMatcher:
@@ -306,13 +307,13 @@ class RequestMatcher:
 
     def __init__(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ):
         if json is not UNDEFINED and data is not None:
@@ -383,7 +384,7 @@ class RequestMatcher:
             #
             # also, python will raise TypeError when self.uri is a conflicting type
 
-            return self.uri == URI_DEFAULT or path == self.uri
+            return self.uri in (URI_DEFAULT, path)
 
     def match_json(self, request: Request) -> bool:
         """
@@ -409,7 +410,7 @@ class RequestMatcher:
 
         return json_received == self.json
 
-    def difference(self, request: Request) -> List[Tuple]:
+    def difference(self, request: Request) -> list[tuple]:
         """
         Calculates the difference between the matcher and the request.
 
@@ -421,12 +422,12 @@ class RequestMatcher:
         matches the fields set in the matcher object.
         """
 
-        retval: List[Tuple] = []
+        retval: list[tuple] = []
 
         if not self.match_uri(request):
             retval.append(("uri", request.path, self.uri))
 
-        if self.method != METHOD_ALL and self.method != request.method:
+        if self.method not in (METHOD_ALL, request.method):
             retval.append(("method", request.method, self.method))
 
         if not self.query_matcher.match(request.query_string):
@@ -468,7 +469,7 @@ class RequestHandlerBase(abc.ABC):
         self,
         response_json,
         status: int = 200,
-        headers: Optional[Mapping[str, str]] = None,
+        headers: Mapping[str, str] | None = None,
         content_type: str = "application/json",
     ):
         """
@@ -485,11 +486,11 @@ class RequestHandlerBase(abc.ABC):
 
     def respond_with_data(
         self,
-        response_data: Union[str, bytes] = "",
+        response_data: str | bytes = "",
         status: int = 200,
-        headers: Optional[HEADERS_T] = None,
-        mimetype: Optional[str] = None,
-        content_type: Optional[str] = None,
+        headers: HEADERS_T | None = None,
+        mimetype: str | None = None,
+        content_type: str | None = None,
     ):
         """
         Prepares a response with raw data.
@@ -514,8 +515,6 @@ class RequestHandlerBase(abc.ABC):
         :param response: the response object which will be responded
         """
 
-        pass
-
 
 class RequestHandler(RequestHandlerBase):
     """
@@ -529,7 +528,7 @@ class RequestHandler(RequestHandlerBase):
 
     def __init__(self, matcher: RequestMatcher):
         self.matcher = matcher
-        self.request_handler: Optional[Callable[[Request], Response]] = None
+        self.request_handler: Callable[[Request], Response] | None = None
 
     def respond(self, request: Request) -> Response:
         """
@@ -576,7 +575,7 @@ class RequestHandlerList(list):
 
     """
 
-    def match(self, request: Request) -> Optional[RequestHandler]:
+    def match(self, request: Request) -> RequestHandler | None:
         """
         Returns the first request handler which matches the specified request. Otherwise, it returns `None`.
         """
@@ -619,7 +618,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self,
         host: str,
         port: int,
-        ssl_context: Optional[SSLContext] = None,
+        ssl_context: SSLContext | None = None,
     ):
         """
         Initializes the instance.
@@ -629,9 +628,9 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.port = port
         self.server = None
         self.server_thread = None
-        self.assertions: List[str] = []
-        self.handler_errors: List[Exception] = []
-        self.log: List[Tuple[Request, Response]] = []
+        self.assertions: list[str] = []
+        self.handler_errors: list[Exception] = []
+        self.log: list[tuple[Request, Response]] = []
         self.ssl_context = ssl_context
         self.no_handler_status_code = 500
 
@@ -833,7 +832,6 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         :param request: the request object from the werkzeug library
         :return: the response object what the handler responded, or a response which contains the error
         """
-        pass
 
     @Request.application  # type: ignore
     def application(self, request: Request):
@@ -916,15 +914,15 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         self,
         host=DEFAULT_LISTEN_HOST,
         port=DEFAULT_LISTEN_PORT,
-        ssl_context: Optional[SSLContext] = None,
-        default_waiting_settings: Optional[WaitingSettings] = None,
+        ssl_context: SSLContext | None = None,
+        default_waiting_settings: WaitingSettings | None = None,
     ):
         """
         Initializes the instance.
         """
         super().__init__(host, port, ssl_context)
 
-        self.ordered_handlers: List[RequestHandler] = []
+        self.ordered_handlers: list[RequestHandler] = []
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
         self.permanently_failed = False
@@ -957,13 +955,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def expect_request(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         handler_type: HandlerType = HandlerType.PERMANENT,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
@@ -1040,13 +1038,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def expect_oneshot_request(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
         """
@@ -1095,13 +1093,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def expect_ordered_request(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HVMATCHER_T] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
         """
@@ -1185,7 +1183,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
         """
         if self._waiting_settings.stop_on_nohandler:
-            self._set_waiting_result(False)
+            self._set_waiting_result(value=False)
 
         return super().respond_nohandler(request, self.format_matchers() + extra_message)
 
@@ -1263,7 +1261,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
         return response
 
-    def _set_waiting_result(self, value: bool) -> None:
+    def _set_waiting_result(self, value: bool) -> None:  # noqa: FBT001
         """Set waiting_result
 
         Setting is implemented as putting value to queue without waiting. If queue is full we simply ignore the
@@ -1274,14 +1272,14 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def _update_waiting_result(self) -> None:
         if not self.oneshot_handlers and not self.ordered_handlers:
-            self._set_waiting_result(True)
+            self._set_waiting_result(value=True)
 
     @contextmanager
     def wait(
         self,
-        raise_assertions: Optional[bool] = None,
-        stop_on_nohandler: Optional[bool] = None,
-        timeout: Optional[float] = None,
+        raise_assertions: bool | None = None,
+        stop_on_nohandler: bool | None = None,
+        timeout: float | None = None,
     ):
         """Context manager to wait until the first of following event occurs: all ordered and oneshot handlers were
         executed, unexpected request was received (if `stop_on_nohandler` is set to `True`), or time was out
@@ -1331,7 +1329,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             waiting.complete(result=False)
             if self._waiting_settings.raise_assertions:
                 raise AssertionError(
-                    "Wait timeout occurred, but some handlers left:\n" "{}".format(self.format_matchers())
+                    "Wait timeout occurred, but some handlers left:\n{}".format(self.format_matchers())
                 )
         if self._waiting_settings.raise_assertions and not waiting.result:
             self.check_assertions()

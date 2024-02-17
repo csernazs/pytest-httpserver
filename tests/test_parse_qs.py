@@ -1,6 +1,6 @@
+from __future__ import annotations
+
 import urllib.parse
-from typing import List
-from typing import Tuple
 
 import pytest
 
@@ -17,6 +17,6 @@ parse_qsl_semicolon_cases = [
 ]
 
 
-@pytest.mark.parametrize("qs,expected", parse_qsl_semicolon_cases)
-def test_qsl(qs: str, expected: List[Tuple[bytes, bytes]]):
+@pytest.mark.parametrize(("qs", "expected"), parse_qsl_semicolon_cases)
+def test_qsl(qs: str, expected: list[tuple[bytes, bytes]]):
     assert urllib.parse.parse_qsl(qs, keep_blank_values=True) == expected
