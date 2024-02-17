@@ -91,7 +91,12 @@ class WaitingSettings:
     :param timeout: time (in seconds) until time is out
     """
 
-    def __init__(self, raise_assertions: bool = True, stop_on_nohandler: bool = True, timeout: float = 5):
+    def __init__(
+        self,
+        raise_assertions: bool = True,  # noqa: FBT001
+        stop_on_nohandler: bool = True,  # noqa: FBT001
+        timeout: float = 5,
+    ):
         self.raise_assertions = raise_assertions
         self.stop_on_nohandler = stop_on_nohandler
         self.timeout = timeout
@@ -107,7 +112,7 @@ class Waiting:
         self._start = time.monotonic()
         self._stop = None
 
-    def complete(self, result: bool):
+    def complete(self, result: bool):  # noqa: FBT001
         self._result = result
         self._stop = time.monotonic()
 
@@ -234,7 +239,7 @@ class BooleanQueryMatcher(QueryMatcher):
     Matches the query depending on the boolean value
     """
 
-    def __init__(self, result: bool):
+    def __init__(self, result: bool):  # noqa: FBT001
         """
         :param result: if this parameter is true, the query match will be always
             successful. Otherwise, no query match will be successful.
@@ -1265,7 +1270,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
         return response
 
-    def _set_waiting_result(self, value: bool) -> None:
+    def _set_waiting_result(self, value: bool) -> None:  # noqa: FBT001
         """Set waiting_result
 
         Setting is implemented as putting value to queue without waiting. If queue is full we simply ignore the
