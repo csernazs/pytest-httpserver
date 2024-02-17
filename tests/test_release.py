@@ -46,7 +46,7 @@ class Wheel:
 
     def extract(self):
         with zipfile.ZipFile(self.path) as zf:
-            zf.extractall(self.wheel_out_dir)
+            zf.extractall(self.wheel_out_dir)  # noqa: S202
 
     def get_meta(self, version: str, name: str = NAME_UNDERSCORE) -> email.message.Message:
         metadata_path = self.wheel_out_dir.joinpath(f"{name}-{version}.dist-info", "METADATA")
@@ -66,7 +66,7 @@ class Sdist:
 
     def extract(self):
         with tarfile.open(self.path, mode="r:gz") as tf:
-            tf.extractall(self.sdist_out_dir)
+            tf.extractall(self.sdist_out_dir)  # noqa: S202
 
 
 @dataclass
