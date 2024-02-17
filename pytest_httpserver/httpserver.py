@@ -253,7 +253,7 @@ def _create_query_matcher(query_string: None | QueryMatcher | str | bytes | Mapp
         return query_string
 
     if query_string is None:
-        return BooleanQueryMatcher(True)
+        return BooleanQueryMatcher(result=True)
 
     if isinstance(query_string, (str, bytes)):
         return StringQueryMatcher(query_string)
@@ -1183,7 +1183,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
         """
         if self._waiting_settings.stop_on_nohandler:
-            self._set_waiting_result(False)
+            self._set_waiting_result(value=False)
 
         return super().respond_nohandler(request, self.format_matchers() + extra_message)
 
@@ -1272,7 +1272,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def _update_waiting_result(self) -> None:
         if not self.oneshot_handlers and not self.ordered_handlers:
-            self._set_waiting_result(True)
+            self._set_waiting_result(value=True)
 
     @contextmanager
     def wait(

@@ -28,7 +28,7 @@ def test_qm_bytes():
 
 
 def test_qm_boolean():
-    qm = BooleanQueryMatcher(True)
+    qm = BooleanQueryMatcher(result=True)
     assert_match(qm, b"k1=v1")
 
 
