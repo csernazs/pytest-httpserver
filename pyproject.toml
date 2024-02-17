@@ -96,8 +96,8 @@ line-length = 120
 safe = true
 
 [tool.ruff]
-select = ["ALL"]
-ignore = [
+lint.select = ["ALL"]
+lint.ignore = [
   "I",
   "D",
 
@@ -136,7 +136,6 @@ ignore = [
   "TD002",
   "TD003",
   "TRY003",
-  "TRY200",
   "UP032",
 ]
 line-length = 120
