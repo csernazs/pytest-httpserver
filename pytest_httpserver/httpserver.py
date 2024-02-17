@@ -384,7 +384,7 @@ class RequestMatcher:
             #
             # also, python will raise TypeError when self.uri is a conflicting type
 
-            return self.uri == URI_DEFAULT or path == self.uri
+            return self.uri in (URI_DEFAULT, path)
 
     def match_json(self, request: Request) -> bool:
         """
@@ -427,7 +427,7 @@ class RequestMatcher:
         if not self.match_uri(request):
             retval.append(("uri", request.path, self.uri))
 
-        if self.method != METHOD_ALL and self.method != request.method:
+        if self.method not in (METHOD_ALL, request.method):
             retval.append(("method", request.method, self.method))
 
         if not self.query_matcher.match(request.query_string):
