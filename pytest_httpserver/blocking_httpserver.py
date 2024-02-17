@@ -129,7 +129,7 @@ class BlockingHTTPServer(HTTPServerBase):
         try:
             request = self.request_queue.get(timeout=timeout)
         except Empty:
-            raise AssertionError(f"Waiting for request {matcher} timed out")
+            raise AssertionError(f"Waiting for request {matcher} timed out")  # noqa: EM102
 
         diff = matcher.difference(request)
 
@@ -139,7 +139,7 @@ class BlockingHTTPServer(HTTPServerBase):
 
         if diff:
             request_handler.respond_with_response(self.respond_nohandler(request))
-            raise AssertionError(f"Request {matcher} does not match: {diff}")
+            raise AssertionError(f"Request {matcher} does not match: {diff}")  # noqa: EM102
 
         return request_handler
 
