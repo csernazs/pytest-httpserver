@@ -36,5 +36,5 @@ def test_json_matcher_with_invalid_json(httpserver: HTTPServer):
 
 
 def test_data_and_json_mutually_exclusive(httpserver: HTTPServer):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         httpserver.expect_request("/foo", json={}, data="foo")
