@@ -88,3 +88,35 @@ markers = [
 [tool.mypy]
 files = ["pytest_httpserver", "scripts", "tests", "doc"]
 implicit_reexport = false
+
+
+[tool.black]
+line-length = 120
+safe = true
+
+[tool.ruff]
+select = ["ALL"]
+ignore = [
+  "I",
+  "D",
+  "ANN",
+  "PLR0913",
+  "UP032",
+  "TRY003",
+  "FBT002",
+  "PLR0912",
+  "C901",
+  "SIM108",
+  "EM101",
+  "B904",
+  "TRY200",
+  "RET505",
+  "EM103",
+  "COM812",
+  "RET506",
+  "PGH003",
+    "S101",
+]
+line-length = 120
+target-version = "py38"
+exclude = ["doc", "example*.py"]

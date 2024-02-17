@@ -1,4 +1,10 @@
 repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.2.1
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
   - repo: https://github.com/psf/black
     rev: 23.1.0
     hooks:
@@ -22,12 +28,6 @@ repos:
       - id: isort
         name: isort (python)
         args: ['--force-single-line-imports', '--profile', 'black']
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        args: [ '--max-line-length', '120', '--max-doc-length', '120' ]
 
   - repo: https://github.com/asottile/blacken-docs
     rev: 1.13.0
