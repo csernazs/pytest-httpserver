@@ -9,7 +9,6 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
-from typing import Tuple
 
 import pytest
 import toml
@@ -106,7 +105,7 @@ def version(pyproject) -> str:
     return pyproject["tool"]["poetry"]["version"]
 
 
-def version_to_tuple(version: str) -> Tuple:
+def version_to_tuple(version: str) -> tuple:
     return tuple([int(x) for x in version.split(".")])
 
 

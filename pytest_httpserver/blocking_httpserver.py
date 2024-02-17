@@ -4,11 +4,8 @@ from queue import Empty
 from queue import Queue
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Dict
 from typing import Mapping
-from typing import Optional
 from typing import Pattern
-from typing import Union
 
 from pytest_httpserver.httpserver import METHOD_ALL
 from pytest_httpserver.httpserver import UNDEFINED
@@ -64,23 +61,23 @@ class BlockingHTTPServer(HTTPServerBase):
         self,
         host=DEFAULT_LISTEN_HOST,
         port=DEFAULT_LISTEN_PORT,
-        ssl_context: Optional[SSLContext] = None,
+        ssl_context: SSLContext | None = None,
         timeout: int = 30,
     ):
         super().__init__(host, port, ssl_context)
         self.timeout = timeout
         self.request_queue: Queue[Request] = Queue()
-        self.request_handlers: Dict[Request, Queue[BlockingRequestHandler]] = {}
+        self.request_handlers: dict[Request, Queue[BlockingRequestHandler]] = {}
 
     def assert_request(
         self,
-        uri: Union[str, URIPattern, Pattern[str]],
+        uri: str | URIPattern | Pattern[str],
         method: str = METHOD_ALL,
-        data: Union[str, bytes, None] = None,
+        data: str | bytes | None = None,
         data_encoding: str = "utf-8",
-        headers: Optional[Mapping[str, str]] = None,
-        query_string: Union[None, QueryMatcher, str, bytes, Mapping] = None,
-        header_value_matcher: Optional[HeaderValueMatcher] = None,
+        headers: Mapping[str, str] | None = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        header_value_matcher: HeaderValueMatcher | None = None,
         json: Any = UNDEFINED,
         timeout: int = 30,
     ) -> BlockingRequestHandler:
