@@ -61,7 +61,7 @@ def pytest_sessionfinish(session, exitstatus):  # noqa: ARG001
             Plugin.SERVER.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def httpserver(make_httpserver):
     server = make_httpserver
     yield server
@@ -78,7 +78,7 @@ def make_httpserver_ipv4(httpserver_ssl_context):
         server.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def httpserver_ipv4(make_httpserver_ipv4):
     server = make_httpserver_ipv4
     yield server
@@ -95,7 +95,7 @@ def make_httpserver_ipv6(httpserver_ssl_context):
         server.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def httpserver_ipv6(make_httpserver_ipv6):
     server = make_httpserver_ipv6
     yield server
