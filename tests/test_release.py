@@ -1,5 +1,4 @@
-# TODO: skip if poetry is not available or add mark to test it explicitly
-
+from __future__ import annotations
 
 import email
 import re
@@ -14,6 +13,9 @@ from typing import Tuple
 
 import pytest
 import toml
+
+# TODO: skip if poetry is not available or add mark to test it explicitly
+
 
 pytestmark = pytest.mark.release
 

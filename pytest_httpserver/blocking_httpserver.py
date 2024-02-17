@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from queue import Empty
 from queue import Queue
 from ssl import SSLContext
