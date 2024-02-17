@@ -1329,7 +1329,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             waiting.complete(result=False)
             if self._waiting_settings.raise_assertions:
                 raise AssertionError(
-                    "Wait timeout occurred, but some handlers left:\n" "{}".format(self.format_matchers())
+                    "Wait timeout occurred, but some handlers left:\n{}".format(self.format_matchers())
                 )
         if self._waiting_settings.raise_assertions and not waiting.result:
             self.check_assertions()
