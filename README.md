@@ -1,7 +1,6 @@
 [![Build Status](https://github.com/csernazs/pytest-httpserver/workflows/build/badge.svg?branch=master)](https://github.com/csernazs/pytest-httpserver/actions?query=workflow%3Abuild+branch%3Amaster)
 [![Documentation Status](https://readthedocs.org/projects/pytest-httpserver/badge/?version=latest)](https://pytest-httpserver.readthedocs.io/en/latest/?badge=latest)
- [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=K6PU3AGBZW4QC&item_name=pytest-httpserver&currency_code=EUR&source=url)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/csernazs/pytest-httpserver/branch/master/graph/badge.svg?token=MX2JXbHqRH)](https://codecov.io/gh/csernazs/pytest-httpserver)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -117,11 +116,15 @@ documentation](https://pytest-httpserver.readthedocs.io/en/latest/api.html#block
 
 ### Donation
 
-If you want to donate to this project, you can find the donate button at the top
-of the README.
+Currently, this project is based heavily on werkzeug and pytest.
 
-Currently, this project is based heavily on werkzeug. Werkzeug does all the heavy lifting
-behind the scenes, parsing HTTP request and defining Request and Response objects, which
-are currently transparent in the API.
+Werkzeug does all the heavy lifting behind the scenes, parsing HTTP request and
+defining Request and Response objects, which are currently transparent in the
+API.
 
-If you wish to donate, please consider donating to them: https://palletsprojects.com/donate
+If you wish to donate to werkzeug: https://palletsprojects.com/donate
+
+
+Pytest is the de-facto test library for python.
+
+If you wish to donate to pytest: https://opencollective.com/pytest
