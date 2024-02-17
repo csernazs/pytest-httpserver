@@ -54,7 +54,7 @@ def make_httpserver(httpserver_listen_address, httpserver_ssl_context):
         server.stop()
 
 
-def pytest_sessionfinish(session, exitstatus):  # pylint: disable=unused-argument
+def pytest_sessionfinish(session, exitstatus):  # noqa: ARG001
     if Plugin.SERVER is not None:
         Plugin.SERVER.clear()
         if Plugin.SERVER.is_running():

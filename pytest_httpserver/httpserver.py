@@ -241,7 +241,7 @@ class BooleanQueryMatcher(QueryMatcher):
         """
         self.result = result
 
-    def get_comparing_values(self, request_query_string):
+    def get_comparing_values(self, request_query_string):  # noqa: ARG002
         if self.result:
             return (True, True)
         else:
