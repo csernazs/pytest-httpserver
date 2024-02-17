@@ -120,4 +120,4 @@ ignore = [
 ]
 line-length = 120
 target-version = "py38"
-exclude = ["doc", "example*.py"]
+exclude = ["doc", "example*.py", "tests/examples/*.py"]
