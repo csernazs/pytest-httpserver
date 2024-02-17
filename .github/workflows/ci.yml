@@ -59,6 +59,8 @@ jobs:
 
       - name: Codecov upload
         uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   test-doc:
     name: Test doc build
