@@ -59,15 +59,11 @@ class Error(Exception):
     Base class for all exception defined in this package.
     """
 
-    pass
-
 
 class NoHandlerError(Error):
     """
     Raised when a :py:class:`RequestHandler` has no registered method to serve the request.
     """
-
-    pass
 
 
 class HTTPServerError(Error):
@@ -75,15 +71,11 @@ class HTTPServerError(Error):
     Raised when there's a problem with HTTP server.
     """
 
-    pass
-
 
 class NoMethodFoundForMatchingHeaderValueError(Error):
     """
     Raised when a :py:class:`HeaderValueMatcher` has no registered method to match the header value.
     """
-
-    pass
 
 
 class WaitingSettings:
@@ -282,7 +274,6 @@ class URIPattern(abc.ABC):
             with "/" and does not contain the query part.
         :return: True if there's a match, False otherwise
         """
-        pass
 
 
 class RequestMatcher:
@@ -523,8 +514,6 @@ class RequestHandlerBase(abc.ABC):
 
         :param response: the response object which will be responded
         """
-
-        pass
 
 
 class RequestHandler(RequestHandlerBase):
@@ -843,7 +832,6 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         :param request: the request object from the werkzeug library
         :return: the response object what the handler responded, or a response which contains the error
         """
-        pass
 
     @Request.application  # type: ignore
     def application(self, request: Request):
