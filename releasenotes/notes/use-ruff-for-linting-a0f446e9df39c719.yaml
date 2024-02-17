@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    Use ruff for linting. It includes some source code changes which should not
+    introduce functional changes, or API changes.
