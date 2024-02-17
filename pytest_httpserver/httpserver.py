@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from contextlib import suppress
 from copy import copy
 from enum import Enum
-from ssl import SSLContext
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Iterable
@@ -31,6 +31,9 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.serving import make_server
 from werkzeug.wrappers import Request
 from werkzeug.wrappers import Response
+
+if TYPE_CHECKING:
+    from ssl import SSLContext
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"

@@ -2,16 +2,13 @@ from __future__ import annotations
 
 from queue import Empty
 from queue import Queue
-from ssl import SSLContext
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Dict
 from typing import Mapping
 from typing import Optional
 from typing import Pattern
 from typing import Union
-
-from werkzeug.wrappers import Request
-from werkzeug.wrappers import Response
 
 from pytest_httpserver.httpserver import METHOD_ALL
 from pytest_httpserver.httpserver import UNDEFINED
@@ -20,6 +17,12 @@ from pytest_httpserver.httpserver import HTTPServerBase
 from pytest_httpserver.httpserver import QueryMatcher
 from pytest_httpserver.httpserver import RequestHandlerBase
 from pytest_httpserver.httpserver import URIPattern
+
+if TYPE_CHECKING:
+    from ssl import SSLContext
+
+    from werkzeug.wrappers import Request
+    from werkzeug.wrappers import Response
 
 
 class BlockingRequestHandler(RequestHandlerBase):
