@@ -136,10 +136,10 @@ class HeaderValueMatcher:
 
     @staticmethod
     def authorization_header_value_matcher(actual: str | None, expected: str) -> bool:
-        callable = getattr(Authorization, "from_header", None)
-        if callable is None:  # Werkzeug < 2.3.0
-            callable = werkzeug.http.parse_authorization_header  # type: ignore[attr-defined]
-        return callable(actual) == callable(expected)
+        func = getattr(Authorization, "from_header", None)
+        if func is None:  # Werkzeug < 2.3.0
+            func = werkzeug.http.parse_authorization_header  # type: ignore[attr-defined]
+        return func(actual) == func(expected)
 
     @staticmethod
     def default_header_value_matcher(actual: str | None, expected: str) -> bool:
