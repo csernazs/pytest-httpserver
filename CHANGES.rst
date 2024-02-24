@@ -2,6 +2,29 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.10:
+
+1.0.10
+======
+
+.. _Release Notes_1.0.10_New Features:
+
+New Features
+------------
+
+- When there's no handler for the request, add more details to the response
+  sent by the server about the request to help debugging.
+
+
+.. _Release Notes_1.0.10_Other Notes:
+
+Other Notes
+-----------
+
+- Use ruff for linting. It includes some source code changes which should not
+  introduce functional changes, or API changes.
+
+
 .. _Release Notes_1.0.9:
 
 1.0.9
