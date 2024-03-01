@@ -50,7 +50,7 @@ pytest-cov = ">=3,<5"
 coverage = ">=6.4.4,<8.0.0"
 types-toml = "^0.10.8"
 toml = "^0.10.2"
-black = "^23.1.0"
+black = ">=23.1,<25.0"
 ruff = "^0.2.1"
 
 
