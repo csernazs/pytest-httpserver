@@ -40,7 +40,7 @@ optional = true
 [tool.poetry.group.develop.dependencies]
 pre-commit = "^2.20.0"
 requests = "^2.28.1"
-Sphinx = "^5.1.1"
+Sphinx = ">=5.1.1,<8.0.0"
 sphinx-rtd-theme = "^1.0.0"
 reno = "^3.5.0"
 mypy = "^0.971"
@@ -58,7 +58,7 @@ ruff = "^0.2.1"
 optional = true
 
 [tool.poetry.group.doc.dependencies]
-Sphinx = "^5.1.1"
+Sphinx = ">=5.1.1,<8.0.0"
 sphinx-rtd-theme = "^1.0.0"
 
 
