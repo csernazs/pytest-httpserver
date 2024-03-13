@@ -2,6 +2,7 @@
 This is package provides the main API for the pytest_httpserver package.
 
 """
+
 __all__ = [
     "HTTPServer",
     "HTTPServerError",
