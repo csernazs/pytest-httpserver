@@ -1333,3 +1333,73 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
                 )
         if self._waiting_settings.raise_assertions and not waiting.result:
             self.check_assertions()
+
+    def iter_matching_requests(self, matcher: RequestMatcher) -> Iterable[tuple[Request, Response]]:
+        """
+        Queries log for matching requests.
+
+
+        :param matcher: the matcher object to match requests
+        :return: an iterator with request-response pair from the log
+        """
+
+        for request, response in self.log:
+            if matcher.match(request):
+                yield (request, response)
+
+    def get_matching_requests_count(self, matcher: RequestMatcher) -> int:
+        """
+        Queries the log for matching requests, returning the number of log
+        entries matching for the specified matcher.
+
+        :param matcher: the matcher object to match requests
+        :return: the number of log entries matching
+        """
+        return len(list(self.iter_matching_requests(matcher)))
+
+    def assert_request_made(self, matcher: RequestMatcher, *, count: int = 1):
+        """
+        Check the amount of log entries matching for the matcher specified. By
+        default it verifies that exactly one request matching for the matcher
+        specified. The expected count can be customized with the count kwarg
+        (including zero, which asserts that no requests made for the given
+        matcher).
+
+        :param matcher: the matcher object to match requests
+        :param count: the expected number of matches in the log
+        :return: ``None`` if the assert succeeded, raises
+            :py:class:`AssertionError` if not.
+        """
+
+        matching_count = self.get_matching_requests_count(matcher)
+        if matching_count != count:
+            similar_requests: list[Request] = []
+            for request, _ in self.log:
+                if request.path == matcher.uri:
+                    similar_requests.append(request)
+
+            assert_msg_lines = [
+                f"Matching request found {matching_count} times but expected {count} times.",
+                f"Expected request: {matcher}",
+            ]
+
+            if similar_requests:
+                assert_msg_lines.append(f"Found {len(similar_requests)} similar request(s):")
+                for request in similar_requests:
+                    assert_msg_lines.extend(
+                        (
+                            "--- Similar Request Start",
+                            f"Path: {request.path}",
+                            f"Method: {request.method}",
+                            f"Body: {request.get_data()!r}",
+                            f"Headers: {request.headers}",
+                            f"Query String: {request.query_string.decode('utf-8')!r}",
+                            "--- Similar Request End",
+                        )
+                    )
+            else:
+                assert_msg_lines.append("No similar requests found.")
+
+            assert_msg = "\n".join(assert_msg_lines) + "\n"
+
+            assert matching_count == count, assert_msg

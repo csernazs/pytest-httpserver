@@ -202,6 +202,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_headers.py",
             "test_ip_protocols.py",
             "test_json_matcher.py",
+            "test_log_querying.py",
             "test_mixed.py",
             "test_oneshot.py",
             "test_ordered.py",
