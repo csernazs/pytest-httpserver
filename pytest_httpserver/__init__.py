@@ -11,6 +11,7 @@ __all__ = [
     "WaitingSettings",
     "HeaderValueMatcher",
     "RequestHandler",
+    "RequestMatcher",
     "URIPattern",
     "URI_DEFAULT",
     "METHOD_ALL",
@@ -28,5 +29,6 @@ from .httpserver import HTTPServer
 from .httpserver import HTTPServerError
 from .httpserver import NoHandlerError
 from .httpserver import RequestHandler
+from .httpserver import RequestMatcher
 from .httpserver import URIPattern
 from .httpserver import WaitingSettings

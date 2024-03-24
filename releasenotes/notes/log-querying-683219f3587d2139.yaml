@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    New methods added to query for matching requests in the log.

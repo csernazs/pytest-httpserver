@@ -1,13 +1,14 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> { } }:
 
 let
   unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
-in pkgs.mkShell {
+in
+pkgs.mkShell {
   buildInputs = with pkgs; [
     virtualenv
 
     python3Packages.tox
-    python3Packages.poetry
+    python3Packages.poetry-core
 
     pre-commit
     python3Packages.requests
