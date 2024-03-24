@@ -544,3 +544,44 @@ Example:
 
 .. literalinclude :: ../tests/examples/test_howto_log_querying.py
    :language: python
+
+
+Adding side effects
+-------------------
+
+Sometimes there's a need to add side effects to the handling of the requests.
+Such side effect could be adding some amount of delay to the serving or adding
+some garbage to response data.
+
+While these can be achieved by using
+:py:meth:`pytest_httpserver.RequestHandler.respond_with_handler` where you can
+implement your own function to serve the request, *pytest-httpserver* provides a
+hooks API where you can add side effects to request handlers such as
+:py:meth:`pytest_httpserver.RequestHandler.respond_with_json` and others.
+This allows to use the existing API of registering handlers.
+
+Example:
+
+.. literalinclude :: ../tests/examples/test_howto_hooks.py
+    :language: python
+
+:py:mod:`pytest_httpserver.hooks` module provides some pre-defined hooks to
+use.
+
+You can implement your own hook as well. The requirement is to have a callable
+object (a function) ``Callable[[Request, Response], Response]``. In details:
+
+* Parameter :py:class:`werkzeug.wrappers.Request` which represents the request
+  sent by the client.
+
+* Parameter :py:class:`werkzeug.wrappers.Response` which represents the response
+  made by the handler.
+
+* Returns a :py:class:`werkzeug.wrappers.Response` object which represents the
+  response will be returned to the client.
+
+
+Example:
+
+.. literalinclude :: ../tests/examples/test_howto_custom_hooks.py
+    :language: python
