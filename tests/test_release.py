@@ -155,6 +155,7 @@ def test_wheel_no_extra_contents(build: Build, version: str):
     assert package_contents == {
         "__init__.py",
         "blocking_httpserver.py",
+        "hooks.py",
         "httpserver.py",
         "py.typed",
         "pytest_plugin.py",
@@ -196,6 +197,7 @@ def test_sdist_contents(build: Build, version: str):
         "pytest_httpserver": {
             "__init__.py",
             "blocking_httpserver.py",
+            "hooks.py",
             "httpserver.py",
             "py.typed",
             "pytest_plugin.py",
@@ -207,6 +209,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_blocking_httpserver.py",
             "test_handler_errors.py",
             "test_headers.py",
+            "test_hooks.py",
             "test_ip_protocols.py",
             "test_json_matcher.py",
             "test_log_querying.py",
