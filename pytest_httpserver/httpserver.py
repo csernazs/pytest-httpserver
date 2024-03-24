@@ -529,6 +529,12 @@ class RequestHandler(RequestHandlerBase):
     def __init__(self, matcher: RequestMatcher):
         self.matcher = matcher
         self.request_handler: Callable[[Request], Response] | None = None
+        self._hook: Callable[[Request, Response], Response] | None = None
+
+    def with_hook(self, hook: Callable[[Request, Response], Response]):
+        assert self._hook is None, "Hook should not be set already"
+        self._hook = hook
+        return self
 
     def respond(self, request: Request) -> Response:
         """
@@ -546,7 +552,10 @@ class RequestHandler(RequestHandlerBase):
                 "Matching request handler found but no response defined: {} {}".format(request.method, request.path)
             )
         else:
-            return self.request_handler(request)
+            response = self.request_handler(request)
+            if self._hook is not None:
+                response = self._hook(request, response)
+            return response
 
     def respond_with_handler(self, func: Callable[[Request], Response]):
         """
