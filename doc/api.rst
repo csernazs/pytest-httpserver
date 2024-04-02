@@ -24,6 +24,13 @@ RequestHandler
         :inherited-members:
 
 
+RequestMatcher
+~~~~~~~~~~~~~~
+
+    .. autoclass:: RequestMatcher
+        :members:
+
+
 BlockingHTTPServer
 ~~~~~~~~~~~~~~~~~~
 
