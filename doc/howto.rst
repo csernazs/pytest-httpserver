@@ -512,3 +512,35 @@ Example:
 
 .. literalinclude :: ../tests/examples/test_example_blocking_httpserver.py
    :language: python
+
+
+Querying the log
+----------------
+
+*pytest-httpserver* keeps a log of request-response pairs in a python list. This
+log can be accessed by the ``log`` attibute of the httpserver instance, but
+there are methods made specifically to query the log.
+
+Each of the log querying methods accepts a
+:py:class:`pytest_httpserver.RequestMatcher` object which uses the same matching
+logic which is used by the server itself. Its parameters are the same to the
+parameters specified for the server's `except_request` (and the similar) methods.
+
+The methods for querying:
+
+* :py:meth:`pytest_httpserver.HTTPServer.get_matching_requests_count` returns
+  how many requests are matching in the log as an int
+
+* :py:meth:`pytest_httpserver.HTTPServer.assert_request_made` asserts the given
+  amount of requests are matching in the log. By default it checks for one (1)
+  request but other value can be specified. For example, 0 can be specified to
+  check for requests not made.
+
+* :py:meth:`pytest_httpserver.HTTPServer.iter_matching_requests` is a generator
+  yielding Request-Response tuples of the matching entries in the log. This
+  offers greater flexibility (compared to the other methods)
+
+Example:
+
+.. literalinclude :: ../tests/examples/test_howto_log_querying.py
+   :language: python
