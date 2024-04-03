@@ -55,6 +55,10 @@ doc: dev
 doc-clean:
 	rm -rf doc/_build
 
+.PHONY: doc-clean
+doc-preview:
+	xdg-open doc/_build/html/index.html
+
 .PHONY: changes
 changes: dev
 	.venv/bin/reno report --output CHANGES.rst --no-show-source
