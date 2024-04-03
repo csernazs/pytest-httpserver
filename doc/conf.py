@@ -24,6 +24,7 @@ from typing import Dict
 
 sys.path.insert(0, os.path.abspath(".."))
 
+import doc.patch
 
 # -- General configuration ------------------------------------------------
 
