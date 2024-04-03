@@ -112,10 +112,13 @@ def version_to_tuple(version: str) -> tuple:
 def test_no_duplicate_classifiers(build: Build, pyproject):
     pyproject_meta = pyproject["tool"]["poetry"]
     wheel_meta = build.wheel.get_meta(version=pyproject_meta["version"])
-    classifiers = sorted(wheel_meta.get_all("Classifier"))
-    unique_classifiers = sorted(set(wheel_meta.get_all("Classifier")))
+    classifiers = wheel_meta.get_all("Classifier")
+    assert classifiers is not None
 
-    assert classifiers == unique_classifiers
+    sorted_classifiers = sorted(classifiers)
+    unique_classifiers = sorted(set(classifiers))
+
+    assert sorted_classifiers == unique_classifiers
 
 
 def test_python_version(build: Build, pyproject):
@@ -130,7 +133,10 @@ def test_python_version(build: Build, pyproject):
 
     min_version_tuple = version_to_tuple(min_version)
 
-    for classifier in wheel_meta.get_all("Classifier"):
+    classifiers = wheel_meta.get_all("Classifier")
+    assert classifiers is not None
+
+    for classifier in classifiers:
         if classifier.startswith("Programming Language :: Python ::"):
             version_tuple = version_to_tuple(classifier.split("::")[-1].strip())
             if len(version_tuple) > 1:
