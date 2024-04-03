@@ -52,7 +52,7 @@ def check_environment():
             raise UsageError("No such binary: {}".format(binary))
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version", help="Version to release")
 
