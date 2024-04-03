@@ -183,6 +183,7 @@ def test_sdist_contents(build: Build, version: str):
             "howto.rst",
             "index.rst",
             "Makefile",
+            "patch.py",
             "tutorial.rst",
             "upgrade.rst",
         },

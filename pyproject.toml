@@ -87,7 +87,7 @@ markers = [
 ]
 
 [tool.mypy]
-files = ["pytest_httpserver", "scripts", "tests", "doc"]
+files = ["pytest_httpserver", "scripts", "tests"]
 implicit_reexport = false
 
 
