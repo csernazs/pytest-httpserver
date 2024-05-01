@@ -6,8 +6,16 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
 
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
+      deps:
+        patterns:
+          - "*"
