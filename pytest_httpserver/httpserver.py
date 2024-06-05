@@ -598,6 +598,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
     :param host: the host or IP where the server will listen
     :param port: the TCP port where the server will listen
     :param ssl_context: the ssl context object to use for https connections
+    :param threaded: whether to handle concurrent requests in separate threads
 
     .. py:attribute:: log
 
@@ -619,6 +620,8 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         host: str,
         port: int,
         ssl_context: SSLContext | None = None,
+        *,
+        threaded: bool = False,
     ):
         """
         Initializes the instance.
@@ -632,6 +635,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.handler_errors: list[Exception] = []
         self.log: list[tuple[Request, Response]] = []
         self.ssl_context = ssl_context
+        self.threaded = threaded
         self.no_handler_status_code = 500
 
     def __repr__(self):
@@ -730,11 +734,11 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         This method returns immediately (e.g. does not block), and it's the caller's
         responsibility to stop the server (by calling :py:meth:`stop`) when it is no longer needed).
 
-        If the sever is not stopped by the caller and execution reaches the end, the
+        If the server is not stopped by the caller and execution reaches the end, the
         program needs to be terminated by Ctrl+C or by signal as it will not terminate until
         the thread is stopped.
 
-        If the sever is already running :py:class:`HTTPServerError` will be raised. If you are
+        If the server is already running :py:class:`HTTPServerError` will be raised. If you are
         unsure, call :py:meth:`is_running` first.
 
         There's a context interface of this class which stops the server when the context block ends.
@@ -742,7 +746,9 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         if self.is_running():
             raise HTTPServerError("Server is already running")
 
-        self.server = make_server(self.host, self.port, self.application, ssl_context=self.ssl_context)
+        self.server = make_server(
+            self.host, self.port, self.application, ssl_context=self.ssl_context, threaded=self.threaded
+        )
         self.port = self.server.port  # Update port (needed if `port` was set to 0)
         self.server_thread = threading.Thread(target=self.thread_target)
         self.server_thread.start()
@@ -900,6 +906,8 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
     :param default_waiting_settings: the waiting settings object to use as default settings for :py:meth:`wait` context
         manager
 
+    :param threaded: whether to handle concurrent requests in separate threads
+
     .. py:attribute:: no_handler_status_code
 
         Attribute containing the http status code (int) which will be the response
@@ -916,11 +924,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         port=DEFAULT_LISTEN_PORT,
         ssl_context: SSLContext | None = None,
         default_waiting_settings: WaitingSettings | None = None,
+        *,
+        threaded: bool = False,
     ):
         """
         Initializes the instance.
         """
-        super().__init__(host, port, ssl_context)
+        super().__init__(host, port, ssl_context, threaded=threaded)
 
         self.ordered_handlers: list[RequestHandler] = []
         self.oneshot_handlers = RequestHandlerList()
