@@ -38,6 +38,7 @@ def test_hook(httpserver: HTTPServer):
     assert requests.get(httpserver.url_for("/foo")).text == "OK-SUFFIX"
 
 
+@pytest.mark.xfail()
 def test_hook_no_overwrite(httpserver: HTTPServer):
     with pytest.raises(AssertionError, match="Hook should not be set already"):
         httpserver.expect_request("/foo").with_hook(my_hook).with_hook(my_hook).respond_with_data("OK")
@@ -82,5 +83,12 @@ def test_garbage_hook(httpserver: HTTPServer):
 def test_chain(httpserver: HTTPServer):
     delay = MyDelay(10)
     httpserver.expect_request("/foo").with_hook(Chain(delay, Garbage(128))).respond_with_data("OK")
+    assert len(requests.get(httpserver.url_for("/foo")).content) == 130
+    assert delay.evidence == 10
+
+
+def test_multiple_hooks(httpserver: HTTPServer):
+    delay = MyDelay(10)
+    httpserver.expect_request("/foo").with_hook(delay).with_hook(Garbage(128)).respond_with_data("OK")
     assert len(requests.get(httpserver.url_for("/foo")).content) == 130
     assert delay.evidence == 10
