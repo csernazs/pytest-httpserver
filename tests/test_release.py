@@ -220,6 +220,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_querystring.py",
             "test_release.py",
             "test_ssl.py",
+            "test_threaded.py",
             "test_urimatch.py",
             "test_wait.py",
             "test_with_statement.py",
