@@ -100,3 +100,19 @@ by the user.
 
     .. autoclass:: pytest_httpserver.httpserver.RequestHandlerList
         :members:
+
+
+pytest_httpserver.hooks
+-----------------------
+
+.. automodule:: pytest_httpserver.hooks
+
+
+    .. autoclass:: pytest_httpserver.hooks.Chain
+        :members:
+
+    .. autoclass:: pytest_httpserver.hooks.Delay
+        :members:
+
+    .. autoclass:: pytest_httpserver.hooks.Garbage
+        :members:
