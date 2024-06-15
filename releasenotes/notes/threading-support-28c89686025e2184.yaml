@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Threading support to serve requests in parallel
