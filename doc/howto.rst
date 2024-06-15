@@ -544,3 +544,64 @@ Example:
 
 .. literalinclude :: ../tests/examples/test_howto_log_querying.py
    :language: python
+
+
+Serving requests in parallel
+----------------------------
+
+*pytest-httpserver*  serves the request in a single-threaded, blocking way. That
+means that if multiple requests are made to it, those will be served one by one.
+
+There can be cases where parallel processing is required, for those cases
+*pytest-httpserver* allows running a server which start one thread per request
+handler, so the requests are served in parallel way (depending on Global
+Interpreter Lock this is not truly parallel, but from the I/O point of view it
+is).
+
+To set this up, you have two possibilities.
+
+
+Overriding httpserver fixture
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One is to customize how the HTTPServer object is created. This is possible by
+defining the following fixture:
+
+.. code:: python
+
+    @pytest.fixture(scope="session")
+    def make_httpserver() -> Iterable[HTTPServer]:
+        server = HTTPServer(threaded=True)  # set threaded=True to enable thread support
+        server.start()
+        yield server
+        server.clear()
+        if server.is_running():
+            server.stop()
+
+
+This will override the ``httpserver`` fixture in your tests.
+
+Creating a different httpserver fixture
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This way, you can create a different httpserver fixture and you can use it
+besides the main one.
+
+.. code:: python
+
+    @pytest.fixture()
+    def threaded() -> Iterable[HTTPServer]:
+        server = HTTPServer(threaded=True)
+        server.start()
+        yield server
+        server.clear()
+        if server.is_running():
+            server.stop()
+
+
+    def test_threaded(threaded: HTTPServer): ...
+
+
+This will start and stop the server for each tests, which causes about 0.5
+seconds waiting when the server is stopped. It won't override the ``httpserver``
+fixture so you can keep the original single-threaded behavior.
