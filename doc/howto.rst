@@ -605,3 +605,10 @@ besides the main one.
 This will start and stop the server for each tests, which causes about 0.5
 seconds waiting when the server is stopped. It won't override the ``httpserver``
 fixture so you can keep the original single-threaded behavior.
+
+.. warning::
+    Handler threads which are still running when the test is finished, will be
+    left behind and won't be join()ed between the tests. If you want to ensure
+    that all threads are properly cleaned up and you want to wait for them,
+    consider using the second option (:ref:`Creating a different httpserver fixture`)
+    described above.
