@@ -38,6 +38,7 @@ import doc.patch
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.autosectionlabel",
 ]
 
 intersphinx_mapping = {
