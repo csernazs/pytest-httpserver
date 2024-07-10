@@ -26,11 +26,11 @@ from typing import Tuple
 from typing import Union
 
 import werkzeug.http
+from werkzeug import Request
+from werkzeug import Response
 from werkzeug.datastructures import Authorization
 from werkzeug.datastructures import MultiDict
 from werkzeug.serving import make_server
-from werkzeug.wrappers import Request
-from werkzeug.wrappers import Response
 
 if TYPE_CHECKING:
     from ssl import SSLContext
@@ -495,7 +495,7 @@ class RequestHandlerBase(abc.ABC):
         """
         Prepares a response with raw data.
 
-        For detailed description please see the :py:class:`werkzeug.wrappers.Response` object as the
+        For detailed description please see the :py:class:`werkzeug.Response` object as the
         parameters are analogue.
 
         :param response_data: a string or bytes object representing the body of the response
@@ -612,7 +612,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
     .. py:attribute:: log
 
         Attribute containing the list of two-element tuples. Each tuple contains
-        :py:class:`werkzeug.wrappers.Request` and :py:class:`werkzeug.wrappers.Response` object which represents the
+        :py:class:`werkzeug.Request` and :py:class:`werkzeug.Response` object which represents the
         incoming request and the outgoing response which happened during the lifetime
         of the server.
 

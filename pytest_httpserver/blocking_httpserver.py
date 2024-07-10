@@ -18,8 +18,8 @@ from pytest_httpserver.httpserver import URIPattern
 if TYPE_CHECKING:
     from ssl import SSLContext
 
-    from werkzeug.wrappers import Request
-    from werkzeug.wrappers import Response
+    from werkzeug import Request
+    from werkzeug import Response
 
 
 class BlockingRequestHandler(RequestHandlerBase):

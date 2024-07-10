@@ -3,8 +3,8 @@
 
 from ssl import SSLContext
 
-from werkzeug.wrappers import Request
-from werkzeug.wrappers import Response
+from werkzeug import Request
+from werkzeug import Response
 
 import pytest_httpserver.blocking_httpserver
 import pytest_httpserver.httpserver

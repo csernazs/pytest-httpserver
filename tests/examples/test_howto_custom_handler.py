@@ -1,7 +1,7 @@
 from random import randint
 
-from werkzeug.wrappers import Request
-from werkzeug.wrappers import Response
+from werkzeug import Request
+from werkzeug import Response
 
 from pytest_httpserver import HTTPServer
 

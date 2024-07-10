@@ -639,13 +639,13 @@ use.
 You can implement your own hook as well. The requirement is to have a callable
 object (a function) ``Callable[[Request, Response], Response]``. In details:
 
-* Parameter :py:class:`werkzeug.wrappers.Request` which represents the request
+* Parameter :py:class:`werkzeug.Request` which represents the request
   sent by the client.
 
-* Parameter :py:class:`werkzeug.wrappers.Response` which represents the response
+* Parameter :py:class:`werkzeug.Response` which represents the response
   made by the handler.
 
-* Returns a :py:class:`werkzeug.wrappers.Response` object which represents the
+* Returns a :py:class:`werkzeug.Response` object which represents the
   response will be returned to the client.
 
 
