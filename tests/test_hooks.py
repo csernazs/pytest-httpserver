@@ -26,13 +26,16 @@ class MyDelay(Delay):
         self.evidence = self._seconds
 
 
-def my_hook(_request: Request, response: Response) -> Response:
-    response.set_data(response.get_data() + b"-SUFFIX")
-    return response
+def suffix_hook_factory(suffix: bytes):
+    def hook(_request: Request, response: Response) -> Response:
+        response.set_data(response.get_data() + suffix)
+        return response
+
+    return hook
 
 
 def test_hook(httpserver: HTTPServer):
-
+    my_hook = suffix_hook_factory(b"-SUFFIX")
     httpserver.expect_request("/foo").with_hook(my_hook).respond_with_data("OK")
 
     assert requests.get(httpserver.url_for("/foo")).text == "OK-SUFFIX"
@@ -86,3 +89,12 @@ def test_multiple_hooks(httpserver: HTTPServer):
     httpserver.expect_request("/foo").with_hook(delay).with_hook(Garbage(128)).respond_with_data("OK")
     assert len(requests.get(httpserver.url_for("/foo")).content) == 130
     assert delay.evidence == 10
+
+
+def test_multiple_hooks_correct_order(httpserver: HTTPServer):
+    hook1 = suffix_hook_factory(b"-S1")
+    hook2 = suffix_hook_factory(b"-S2")
+
+    httpserver.expect_request("/foo").with_hook(hook1).with_hook(hook2).respond_with_data("OK")
+
+    assert requests.get(httpserver.url_for("/foo")).text == "OK-S1-S2"
