@@ -1,6 +1,6 @@
 import pytest
 import requests
-from werkzeug.wrappers import Response
+from werkzeug import Response
 
 from pytest_httpserver import HTTPServer
 

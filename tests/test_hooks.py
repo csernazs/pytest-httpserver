@@ -10,8 +10,8 @@ from pytest_httpserver.hooks import Delay
 from pytest_httpserver.hooks import Garbage
 
 if TYPE_CHECKING:
-    from werkzeug.wrappers import Request
-    from werkzeug.wrappers import Response
+    from werkzeug import Request
+    from werkzeug import Response
 
     from pytest_httpserver import HTTPServer
 
