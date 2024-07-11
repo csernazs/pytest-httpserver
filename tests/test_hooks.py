@@ -36,23 +36,25 @@ def suffix_hook_factory(suffix: bytes):
 
 def test_hook(httpserver: HTTPServer):
     my_hook = suffix_hook_factory(b"-SUFFIX")
-    httpserver.expect_request("/foo").with_hook(my_hook).respond_with_data("OK")
+    httpserver.expect_request("/foo").with_post_hook(my_hook).respond_with_data("OK")
 
     assert requests.get(httpserver.url_for("/foo")).text == "OK-SUFFIX"
 
 
 def test_delay_hook(httpserver: HTTPServer):
     delay = MyDelay(10)
-    httpserver.expect_request("/foo").with_hook(delay).respond_with_data("OK")
+    httpserver.expect_request("/foo").with_post_hook(delay).respond_with_data("OK")
     assert requests.get(httpserver.url_for("/foo")).text == "OK"
     assert delay.evidence == 10
 
 
 def test_garbage_hook(httpserver: HTTPServer):
-    httpserver.expect_request("/prefix").with_hook(Garbage(prefix_size=128)).respond_with_data("OK")
-    httpserver.expect_request("/suffix").with_hook(Garbage(suffix_size=128)).respond_with_data("OK")
-    httpserver.expect_request("/both").with_hook(Garbage(prefix_size=128, suffix_size=128)).respond_with_data("OK")
-    httpserver.expect_request("/large_prefix").with_hook(Garbage(prefix_size=10 * 1024 * 1024)).respond_with_data("OK")
+    httpserver.expect_request("/prefix").with_post_hook(Garbage(prefix_size=128)).respond_with_data("OK")
+    httpserver.expect_request("/suffix").with_post_hook(Garbage(suffix_size=128)).respond_with_data("OK")
+    httpserver.expect_request("/both").with_post_hook(Garbage(prefix_size=128, suffix_size=128)).respond_with_data("OK")
+    httpserver.expect_request("/large_prefix").with_post_hook(Garbage(prefix_size=10 * 1024 * 1024)).respond_with_data(
+        "OK"
+    )
 
     resp_content = requests.get(httpserver.url_for("/prefix")).content
     assert len(resp_content) == 130
@@ -79,14 +81,14 @@ def test_garbage_hook(httpserver: HTTPServer):
 
 def test_chain(httpserver: HTTPServer):
     delay = MyDelay(10)
-    httpserver.expect_request("/foo").with_hook(Chain(delay, Garbage(128))).respond_with_data("OK")
+    httpserver.expect_request("/foo").with_post_hook(Chain(delay, Garbage(128))).respond_with_data("OK")
     assert len(requests.get(httpserver.url_for("/foo")).content) == 130
     assert delay.evidence == 10
 
 
 def test_multiple_hooks(httpserver: HTTPServer):
     delay = MyDelay(10)
-    httpserver.expect_request("/foo").with_hook(delay).with_hook(Garbage(128)).respond_with_data("OK")
+    httpserver.expect_request("/foo").with_post_hook(delay).with_post_hook(Garbage(128)).respond_with_data("OK")
     assert len(requests.get(httpserver.url_for("/foo")).content) == 130
     assert delay.evidence == 10
 
@@ -95,6 +97,6 @@ def test_multiple_hooks_correct_order(httpserver: HTTPServer):
     hook1 = suffix_hook_factory(b"-S1")
     hook2 = suffix_hook_factory(b"-S2")
 
-    httpserver.expect_request("/foo").with_hook(hook1).with_hook(hook2).respond_with_data("OK")
+    httpserver.expect_request("/foo").with_post_hook(hook1).with_post_hook(hook2).respond_with_data("OK")
 
     assert requests.get(httpserver.url_for("/foo")).text == "OK-S1-S2"
