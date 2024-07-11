@@ -531,7 +531,7 @@ class RequestHandler(RequestHandlerBase):
         self.request_handler: Callable[[Request], Response] | None = None
         self._hooks: list[Callable[[Request, Response], Response]] = []
 
-    def with_hook(self, hook: Callable[[Request, Response], Response]):
+    def with_post_hook(self, hook: Callable[[Request, Response], Response]):
         self._hooks.append(hook)
         return self
 

@@ -654,7 +654,7 @@ Example:
 .. literalinclude :: ../tests/examples/test_howto_custom_hooks.py
     :language: python
 
-``with_hook`` can be called multiple times, in this case *pytest-httpserver*
+``with_post_hook`` can be called multiple times, in this case *pytest-httpserver*
 will register the hooks, and hooks will be called sequentially, one by one. Each
 hook will receive the response what the previous hook returned, and the last
 hook called will return the final response which will be sent back to the client.
