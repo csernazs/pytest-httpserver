@@ -14,19 +14,25 @@ inputs:
 runs:
   using: "composite"
   steps:
+      - name: Setup python
+        id: setup_python
+        uses: actions/setup-python@v5
+        with:
+          python-version:  ${{ inputs.python-version }}
+
       - name: Cache venv
         id: cache-venv
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-v2-${{ inputs.type }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: venv-v4-${{ inputs.type }}-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
 
       - name: Cache pre-commit
         id: cache-pre-commit
         uses: actions/cache@v4
         with:
           path: ~/.cache/pre-commit
-          key: pre-commit-v2-${{ inputs.type }}-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          key: pre-commit-v4-${{ inputs.type }}-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Cache setup-poetry
         id: cache-setup-poetry
@@ -36,13 +42,8 @@ runs:
             ~/.local/share/pypoetry
             ~/.local/share/virtualenv
             ~/.local/bin/poetry
-          key: setup-poetry-v2-${{ runner.os }}-${{ inputs.python-version }}-${{ inputs.poetry-version }}
+          key: setup-poetry-v4-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ inputs.poetry-version }}
 
-      - name: Setup python
-        id: setup_python
-        uses: actions/setup-python@v5
-        with:
-          python-version:  ${{ inputs.python-version }}
 
       - name: Setup poetry
         uses: Gr1N/setup-poetry@v8
