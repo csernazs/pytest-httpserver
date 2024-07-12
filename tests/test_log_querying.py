@@ -47,7 +47,7 @@ def test_verify_assert_msg(httpserver: HTTPServer):
         "Path: /foo",
         "Method: GET",
         "Body: b''",
-        f"Headers: Host: localhost:{httpserver.port}",
+        f"Headers: Host: {httpserver.host}:{httpserver.port}",
         "User-Agent: requests",
         "Accept-Encoding: gzip, deflate",
         "Accept: */*",

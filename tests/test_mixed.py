@@ -85,4 +85,4 @@ def test_all_ordered_missing(httpserver: HTTPServer):
 
 
 def test_repr(httpserver: HTTPServer):
-    assert repr(httpserver) == f"<HTTPServer host=localhost port={httpserver.port}>"
+    assert repr(httpserver) == f"<HTTPServer host={httpserver.host} port={httpserver.port}>"
