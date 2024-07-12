@@ -122,4 +122,4 @@ def test_raises_assertion_error_when_request_was_not_responded(httpserver: Block
 
 
 def test_repr(httpserver: BlockingHTTPServer):
-    assert repr(httpserver) == f"<BlockingHTTPServer host=localhost port={httpserver.port}>"
+    assert repr(httpserver) == f"<BlockingHTTPServer host={httpserver.host} port={httpserver.port}>"

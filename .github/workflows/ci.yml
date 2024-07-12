@@ -35,11 +35,18 @@ jobs:
           make mypy
 
   test:
-    name: Test with python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    name: Test with python ${{ matrix.python-version }} / ${{ matrix.os-version }}
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev"]
+        os-version: ["ubuntu-latest", "windows-latest"]
+        exclude:
+          - os-version: windows-latest
+        include:
+          - os-version: windows-latest
+            python-version: 3.12
+
+    runs-on: ${{ matrix.os-version }}
 
     steps:
 
@@ -54,11 +61,24 @@ jobs:
           poetry-version: ${{ env.POETRY_VERSION }}
 
       - name: Test
+        if: runner.os == 'Linux'
         run: |
           make cov
 
+      - name: Test
+        if: runner.os == 'Windows'
+        shell: bash
+        env:
+          PYTEST_HTTPSERVER_HOST: '127.0.0.1'
+        run: |
+          set -e
+          poetry run pytest tests -s -vv --release
+          poetry run pytest tests -s -vv --ssl
+
+
       - name: Codecov upload
         uses: codecov/codecov-action@v4
+        if: runner.os == 'Linux'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
