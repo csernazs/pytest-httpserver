@@ -66,15 +66,15 @@ sphinx-rtd-theme = ">=1,<3"
 optional = true
 
 [tool.poetry.group.test.dependencies]
-pytest = ">=7.1.3,<9.0.0"
-pytest-cov = ">=3,<6"
-coverage = ">=6.4.4,<8.0.0"
-requests = "^2.28.1"
-types-requests = "^2.28.9"
-pre-commit = ">=2.20,<4.0"
-types-toml = "^0.10.8"
-toml = "^0.10.2"
-mypy = "^1.9.0"
+pytest = "*"
+pytest-cov = "*"
+coverage = "*"
+requests = "*"
+types-requests = "*"
+pre-commit = "*"
+types-toml = "*"
+toml = "*"
+mypy = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
