@@ -2,6 +2,23 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.11:
+
+1.0.11
+======
+
+.. _Release Notes_1.0.11_New Features:
+
+New Features
+------------
+
+- Hooks API
+
+- New methods added to query for matching requests in the log.
+
+- Threading support to serve requests in parallel
+
+
 .. _Release Notes_1.0.10:
 
 1.0.10
