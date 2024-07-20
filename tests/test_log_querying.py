@@ -35,7 +35,8 @@ def test_verify(httpserver: HTTPServer):
 def test_verify_assert_msg(httpserver: HTTPServer):
     httpserver.no_handler_status_code = 404
     httpserver.expect_request("/foo", json={"foo": "bar"}, method="POST").respond_with_data("OK")
-    assert requests.get(httpserver.url_for("/foo"), headers={"User-Agent": "requests"}).status_code == 404
+    headers = {"User-Agent": "requests", "Accept-Encoding": "gzip, deflate"}
+    assert requests.get(httpserver.url_for("/foo"), headers=headers).status_code == 404
 
     with pytest.raises(AssertionError) as err:
         httpserver.assert_request_made(RequestMatcher("/foo", json={"foo": "bar"}, method="POST"))
