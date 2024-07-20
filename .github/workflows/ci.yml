@@ -35,11 +35,12 @@ jobs:
           make mypy
 
   test:
-    name: Test with python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    name: Test with python ${{ matrix.python-version }} / ${{ matrix.os-version }}
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev"]
+        os-version: ["ubuntu-latest", "windows-latest"]
+    runs-on: ${{ matrix.os-version }}
 
     steps:
 
