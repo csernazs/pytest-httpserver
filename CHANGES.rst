@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_1.0.12:
+
+1.0.12
+======
+
+.. _Release Notes_1.0.12_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Fix pytest-httpserver's own tests related to log querying. No functional
+  changes in pytest-httpserver code itself. `#345 <https://github.com/csernazs/pytest-httpserver/issues/345>`_
+
+
 .. _Release Notes_1.0.11:
 
 1.0.11
