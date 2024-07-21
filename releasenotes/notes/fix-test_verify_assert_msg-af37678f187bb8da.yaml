@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fix pytest-httpserver's own tests related to log querying. No functional
+    changes in pytest-httpserver code itself. `#345 <https://github.com/csernazs/pytest-httpserver/issues/345>`_

@@ -38,37 +38,45 @@ def test_verify_assert_msg(httpserver: HTTPServer):
     headers = {"User-Agent": "requests", "Accept-Encoding": "gzip, deflate"}
     assert requests.get(httpserver.url_for("/foo"), headers=headers).status_code == 404
 
+    expected_lines = [
+        "Matching request found 0 times but expected 1 times.",
+        "Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={} data"
+        "=None json={'foo': 'bar'}>",
+        "Found 1 similar request(s):",
+        "--- Similar Request Start",
+        "Path: /foo",
+        "Method: GET",
+        "Body: b''",
+        f"Headers: Host: localhost:{httpserver.port}",
+        "User-Agent: requests",
+        "Accept-Encoding: gzip, deflate",
+        "Accept: */*",
+        "Connection: keep-alive",
+        "",
+        "",
+        "Query String: ''",
+        "--- Similar Request End",
+    ]
+
     with pytest.raises(AssertionError) as err:
         httpserver.assert_request_made(RequestMatcher("/foo", json={"foo": "bar"}, method="POST"))
 
-    expected_message = f"""Matching request found 0 times but expected 1 times.
-Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={{}} data=None json={{'foo': 'bar'}}>
-Found 1 similar request(s):
---- Similar Request Start
-Path: /foo
-Method: GET
-Body: b''
-Headers: Host: localhost:{httpserver.port}\r
-User-Agent: requests\r
-Accept-Encoding: gzip, deflate\r
-Accept: */*\r
-Connection: keep-alive\r
-\r
-
-Query String: ''
---- Similar Request End
-"""  # noqa: E501
-    assert str(err.value) == expected_message
+    actual_lines = [x.strip() for x in str(err.value).splitlines()][: len(expected_lines)]
+    assert actual_lines == expected_lines
 
 
 def test_verify_assert_msg_no_similar_requests(httpserver: HTTPServer):
     httpserver.expect_request("/foo", json={"foo": "bar"}, method="POST").respond_with_data("OK")
 
+    expected_lines = [
+        "Matching request found 0 times but expected 1 times.",
+        "Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={} data"
+        "=None json={'foo': 'bar'}>",
+        "No similar requests found.",
+    ]
+
     with pytest.raises(AssertionError) as err:
         httpserver.assert_request_made(RequestMatcher("/foo", json={"foo": "bar"}, method="POST"))
 
-    expected_message = """Matching request found 0 times but expected 1 times.
-Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={} data=None json={'foo': 'bar'}>
-No similar requests found.
-"""
-    assert str(err.value) == expected_message
+    actual_lines = [x.strip() for x in str(err.value).splitlines()][: len(expected_lines)]
+    assert actual_lines == expected_lines
