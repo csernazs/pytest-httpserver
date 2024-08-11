@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixed an issue related to the leak of httpserver state between the tests
+    when httpserver is destructed before the other fixtures. `#352 <https://github.com/csernazs/pytest-httpserver/issues/352>`_
