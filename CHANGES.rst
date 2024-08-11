@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_1.1.0:
+
+1.1.0
+=====
+
+.. _Release Notes_1.1.0_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Fixed an issue related to the leak of httpserver state between the tests
+  when httpserver is destructed before the other fixtures. `#352 <https://github.com/csernazs/pytest-httpserver/issues/352>`_
+
+
 .. _Release Notes_1.0.12:
 
 1.0.12
