@@ -13,7 +13,7 @@ class Client:
             requests.get(self.url)
 
 
-@pytest.fixture()
+@pytest.fixture
 def my_fixture():
     client = Client()
     yield client
