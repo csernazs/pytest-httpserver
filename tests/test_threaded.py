@@ -10,7 +10,7 @@ from werkzeug import Response
 from pytest_httpserver import HTTPServer
 
 
-@pytest.fixture()
+@pytest.fixture
 def threaded() -> Iterable[HTTPServer]:
     server = HTTPServer(threaded=True)
     server.start()

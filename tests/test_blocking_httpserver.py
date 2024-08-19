@@ -40,7 +40,7 @@ def then_the_response_is_got_from(server_connection, response):
     assert server_connection.get(timeout=9).json() == response
 
 
-@pytest.fixture()
+@pytest.fixture
 def httpserver():
     server = BlockingHTTPServer(timeout=1)
     server.start()

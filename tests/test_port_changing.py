@@ -9,7 +9,7 @@ PORT_KEY = "PYTEST_HTTPSERVER_PORT"
 HOST_KEY = "PYTEST_HTTPSERVER_HOST"
 
 
-@pytest.fixture()
+@pytest.fixture
 def tmpenv():
     old_vars = {}
     for key in (HOST_KEY, PORT_KEY):
