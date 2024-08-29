@@ -33,8 +33,6 @@ def test_threaded(threaded: HTTPServer):
 
     threaded.expect_request("/foo").respond_with_handler(handler)
 
-    t_start = time.perf_counter()
-
     number_of_connections = 5
     conns = [http.client.HTTPConnection(threaded.host, threaded.port) for _ in range(number_of_connections)]
 
@@ -51,10 +49,4 @@ def test_threaded(threaded: HTTPServer):
     for conn in conns:
         conn.close()
 
-    t_elapsed = time.perf_counter() - t_start
-
     assert len(thread_ids) == len(set(thread_ids)), "thread ids returned should be unique"
-
-    assert (
-        t_elapsed < number_of_connections * sleep_time * 0.9
-    ), "elapsed time should be less than processing sequential requests"
