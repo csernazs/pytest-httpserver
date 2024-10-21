@@ -50,6 +50,37 @@ Behind the scenes an additional step is done by the library: it parses up the
 query_string into the dict and then compares it with the dict provided.
 
 
+Query parameter quoting
+~~~~~~~~~~~~~~~~~~~~~~~
+
+*pytest-httpserver* does the quoting of query parameters in the following way.
+
+Specifying the query parameter as a string expects a quoted version of the query
+parameters:
+
+.. code-block:: python
+
+    httpserver.expect_request("/test", query_string="foo=bar%20baz")
+
+While if you specify a dict or a multidict to it, it must not be URL encoded:
+
+.. code-block:: python
+
+    httpserver.expect_request("/test", query_string={"foo": "bar baz"})
+
+
+The reasoning behind this is the following:
+
+* if it is specified as a string or bytes, *pytest-httpserver* compares this
+  value as-is with the incoming query parameter in the http protocol. For
+  strings, an implicit ``encode()`` method is called on it to convert to bytes.
+  If you want 100% correctness you can specify a bytes object.
+
+* if it is specified as a dict or other higher-level object, this is treated as
+  a higher-level specification so *pytest-httpserver* does the encoding for
+  convenience.
+
+
 URI matching
 ------------
 

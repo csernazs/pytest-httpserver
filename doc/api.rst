@@ -57,6 +57,12 @@ HeaderValueMatcher
     .. autoclass:: HeaderValueMatcher
         :members:
 
+MappingQueryMatcher
+~~~~~~~~~~~~~~~~~~
+
+    .. autoclass:: MappingQueryMatcher
+        :members:
+
 URIPattern
 ~~~~~~~~~~
 

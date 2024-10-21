@@ -188,7 +188,8 @@ class StringQueryMatcher(QueryMatcher):
         :param query_string: the query string will be compared to this string or bytes.
             If string is specified, it will be encoded by the encode() method.
             The query must not start with '?' but will be exactly (byte-by-byte) equal
-            the actual query string of the incoming request.
+            the actual query string of the incoming request. This means that it
+            should be URL-quoted as well.
         """
         if not isinstance(query_string, (str, bytes)):
             raise TypeError("query_string must be a string, or a bytes-like object")
@@ -217,7 +218,7 @@ class MappingQueryMatcher(QueryMatcher):
             key-value mapping where both key and value should be string. If there are multiple
             values specified for the same key in the request, the first element will be used.
             If you want to match multiple values, use a MultiDict object from werkzeug, which
-            represents multiple values for one key.
+            represents multiple values for one key. Keys and values must be URL-unquoted.
         """
         self.query_dict = query_dict
 
