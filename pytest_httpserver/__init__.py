@@ -17,6 +17,7 @@ __all__ = [
     "METHOD_ALL",
     "BlockingHTTPServer",
     "BlockingRequestHandler",
+    "MappingQueryMatcher",
 ]
 
 from .blocking_httpserver import BlockingHTTPServer
@@ -27,6 +28,7 @@ from .httpserver import Error
 from .httpserver import HeaderValueMatcher
 from .httpserver import HTTPServer
 from .httpserver import HTTPServerError
+from .httpserver import MappingQueryMatcher
 from .httpserver import NoHandlerError
 from .httpserver import RequestHandler
 from .httpserver import RequestMatcher
