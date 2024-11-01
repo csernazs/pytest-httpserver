@@ -41,7 +41,7 @@ optional = true
 pre-commit = ">=2.20,<4.0"
 requests = "*"
 Sphinx = ">=5.1.1,<8.0.0"
-sphinx-rtd-theme = ">=1,<3"
+sphinx-rtd-theme = ">=1,<4"
 reno = "*"
 types-requests = "*"
 pytest = ">=7.1.3,<9.0.0"
@@ -59,7 +59,7 @@ optional = true
 
 [tool.poetry.group.doc.dependencies]
 Sphinx = ">=5.1.1,<8.0.0"
-sphinx-rtd-theme = ">=1,<3"
+sphinx-rtd-theme = ">=1,<4"
 
 
 [tool.poetry.group.test]
