@@ -11,7 +11,13 @@ from pathlib import Path
 from typing import Iterable
 
 import pytest
-import toml
+
+try:
+    import tomllib
+except ImportError:
+    # Unfortunately mypy cannot handle this try/expect pattern, and "type: ignore"
+    # is the simplest work-around. See: https://github.com/python/mypy/issues/1153
+    import tomli as tomllib  # type: ignore
 
 # TODO: skip if poetry is not available or add mark to test it explicitly
 
@@ -31,8 +37,8 @@ def pyproject_path() -> Path:
 @pytest.fixture(scope="session")
 def pyproject(pyproject_path: Path):
     assert pyproject_path.is_file()
-    with pyproject_path.open() as infile:
-        pyproject = toml.load(infile)
+    with pyproject_path.open("rb") as infile:
+        pyproject = tomllib.load(infile)
     return pyproject
 
 
