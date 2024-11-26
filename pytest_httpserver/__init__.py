@@ -4,19 +4,19 @@ This is package provides the main API for the pytest_httpserver package.
 """
 
 __all__ = [
+    "METHOD_ALL",
+    "URI_DEFAULT",
+    "BlockingHTTPServer",
+    "BlockingRequestHandler",
+    "Error",
     "HTTPServer",
     "HTTPServerError",
-    "Error",
-    "NoHandlerError",
-    "WaitingSettings",
     "HeaderValueMatcher",
+    "NoHandlerError",
     "RequestHandler",
     "RequestMatcher",
     "URIPattern",
-    "URI_DEFAULT",
-    "METHOD_ALL",
-    "BlockingHTTPServer",
-    "BlockingRequestHandler",
+    "WaitingSettings",
 ]
 
 from .blocking_httpserver import BlockingHTTPServer
