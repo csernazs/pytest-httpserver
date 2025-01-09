@@ -18,6 +18,7 @@ from typing import Any
 from typing import Callable
 from typing import ClassVar
 from typing import Iterable
+from typing import List
 from typing import Mapping
 from typing import MutableMapping
 from typing import Optional
@@ -34,6 +35,9 @@ from werkzeug.serving import make_server
 
 if TYPE_CHECKING:
     from ssl import SSLContext
+    from types import TracebackType
+
+    from werkzeug.serving import BaseWSGIServer
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -113,11 +117,13 @@ class Waiting:
 
     @property
     def result(self) -> bool:
-        return self._result
+        return bool(self._result)
 
     @property
     def elapsed_time(self) -> float:
         """Elapsed time in seconds"""
+        if self._stop is None:
+            raise TypeError("unsupported operand type(s) for -: 'NoneType' and 'float'")
         return self._stop - self._start
 
 
@@ -139,7 +145,7 @@ class HeaderValueMatcher:
         func = getattr(Authorization, "from_header", None)
         if func is None:  # Werkzeug < 2.3.0
             func = werkzeug.http.parse_authorization_header  # type: ignore[attr-defined]
-        return func(actual) == func(expected)
+        return func(actual) == func(expected)  # type: ignore
 
     @staticmethod
     def default_header_value_matcher(actual: str | None, expected: str) -> bool:
@@ -174,7 +180,7 @@ class QueryMatcher(abc.ABC):
         return values[0] == values[1]
 
     @abc.abstractmethod
-    def get_comparing_values(self, request_query_string: bytes) -> tuple:
+    def get_comparing_values(self, request_query_string: bytes) -> tuple[Any, Any]:
         pass
 
 
@@ -195,10 +201,10 @@ class StringQueryMatcher(QueryMatcher):
 
         self.query_string = query_string
 
-    def get_comparing_values(self, request_query_string: bytes) -> tuple:
+    def get_comparing_values(self, request_query_string: bytes) -> tuple[bytes, bytes]:
         if isinstance(self.query_string, str):
             query_string = self.query_string.encode()
-        elif isinstance(self.query_string, bytes):
+        elif isinstance(self.query_string, bytes):  # type: ignore
             query_string = self.query_string
         else:
             raise TypeError("query_string must be a string, or a bytes-like object")
@@ -211,7 +217,7 @@ class MappingQueryMatcher(QueryMatcher):
     Matches a query string to a dictionary or MultiDict specified
     """
 
-    def __init__(self, query_dict: Mapping | MultiDict):
+    def __init__(self, query_dict: Mapping[str, str] | MultiDict[str, str]):
         """
         :param query_dict: if dictionary (Mapping) is specified, it will be used as a
             key-value mapping where both key and value should be string. If there are multiple
@@ -221,7 +227,7 @@ class MappingQueryMatcher(QueryMatcher):
         """
         self.query_dict = query_dict
 
-    def get_comparing_values(self, request_query_string: bytes) -> tuple:
+    def get_comparing_values(self, request_query_string: bytes) -> tuple[Mapping[str, str], Mapping[str, str]]:
         query = MultiDict(urllib.parse.parse_qsl(request_query_string.decode("utf-8")))
         if isinstance(self.query_dict, MultiDict):
             return (query, self.query_dict)
@@ -241,14 +247,14 @@ class BooleanQueryMatcher(QueryMatcher):
         """
         self.result = result
 
-    def get_comparing_values(self, request_query_string):  # noqa: ARG002
+    def get_comparing_values(self, request_query_string: bytes):  # noqa: ARG002
         if self.result:
             return (True, True)
         else:
             return (True, False)
 
 
-def _create_query_matcher(query_string: None | QueryMatcher | str | bytes | Mapping) -> QueryMatcher:
+def _create_query_matcher(query_string: None | QueryMatcher | str | bytes | Mapping[str, str]) -> QueryMatcher:
     if isinstance(query_string, QueryMatcher):
         return query_string
 
@@ -312,7 +318,7 @@ class RequestMatcher:
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ):
@@ -410,7 +416,7 @@ class RequestMatcher:
 
         return json_received == self.json
 
-    def difference(self, request: Request) -> list[tuple]:
+    def difference(self, request: Request) -> list[tuple[str, str, str | URIPattern]]:
         """
         Calculates the difference between the matcher and the request.
 
@@ -422,7 +428,7 @@ class RequestMatcher:
         matches the fields set in the matcher object.
         """
 
-        retval: list[tuple] = []
+        retval: list[tuple[str, Any, Any]] = []
 
         if not self.match_uri(request):
             retval.append(("uri", request.path, self.uri))
@@ -433,8 +439,8 @@ class RequestMatcher:
         if not self.query_matcher.match(request.query_string):
             retval.append(("query_string", request.query_string, self.query_string))
 
-        request_headers = {}
-        expected_headers = {}
+        request_headers: dict[str, str | None] = {}
+        expected_headers: dict[str, str] = {}
         for key, value in self.headers.items():
             if not self.header_value_matcher(key, request.headers.get(key), value):
                 request_headers[key] = request.headers.get(key)
@@ -467,7 +473,7 @@ class RequestHandlerBase(abc.ABC):
 
     def respond_with_json(
         self,
-        response_json,
+        response_json: Any,
         status: int = 200,
         headers: Mapping[str, str] | None = None,
         content_type: str = "application/json",
@@ -578,7 +584,7 @@ class RequestHandler(RequestHandlerBase):
         return retval
 
 
-class RequestHandlerList(list):
+class RequestHandlerList(List[RequestHandler]):
     """
     Represents a list of :py:class:`RequestHandler` objects.
 
@@ -638,9 +644,9 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         """
         self.host = host
         self.port = port
-        self.server = None
-        self.server_thread = None
-        self.assertions: list[str] = []
+        self.server: BaseWSGIServer | None = None
+        self.server_thread: threading.Thread | None = None
+        self.assertions: list[str | AssertionError] = []
         self.handler_errors: list[Exception] = []
         self.log: list[tuple[Request, Response]] = []
         self.ssl_context = ssl_context
@@ -727,7 +733,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         This should not be called directly, but can be overridden to tailor it to your needs.
         """
-
+        assert self.server is not None
         self.server.serve_forever()
 
     def is_running(self) -> bool:
@@ -736,7 +742,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         """
         return bool(self.server)
 
-    def start(self):
+    def start(self) -> None:
         """
         Start the server in a thread.
 
@@ -755,9 +761,16 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         if self.is_running():
             raise HTTPServerError("Server is already running")
 
+        app = Request.application(self.application)
+
         self.server = make_server(
-            self.host, self.port, self.application, ssl_context=self.ssl_context, threaded=self.threaded
+            self.host,
+            self.port,
+            app,
+            ssl_context=self.ssl_context,
+            threaded=self.threaded,
         )
+
         self.port = self.server.port  # Update port (needed if `port` was set to 0)
         self.server_thread = threading.Thread(target=self.thread_target)
         self.server_thread.start()
@@ -772,6 +785,8 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         Only a running server can be stopped. If the sever is not running, :py:class`HTTPServerError`
         will be raised.
         """
+        assert self.server is not None
+        assert self.server_thread is not None
         if not self.is_running():
             raise HTTPServerError("Server is not running")
         self.server.shutdown()
@@ -779,7 +794,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.server = None
         self.server_thread = None
 
-    def add_assertion(self, obj):
+    def add_assertion(self, obj: str | AssertionError):
         """
         Add a new assertion
 
@@ -848,8 +863,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         :return: the response object what the handler responded, or a response which contains the error
         """
 
-    @Request.application  # type: ignore
-    def application(self, request: Request):
+    def application(self, request: Request) -> Response:
         """
         Entry point of werkzeug.
 
@@ -875,7 +889,12 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
             self.start()
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ):
         """
         Provide the context API
 
@@ -886,7 +905,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
             self.stop()
 
     @staticmethod
-    def format_host(host):
+    def format_host(host: str):
         """
         Formats a hostname so it can be used in a URL.
         Notably, this adds brackets around IPV6 addresses when
@@ -929,8 +948,8 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     def __init__(
         self,
-        host=DEFAULT_LISTEN_HOST,
-        port=DEFAULT_LISTEN_PORT,
+        host: str = DEFAULT_LISTEN_HOST,
+        port: int = DEFAULT_LISTEN_PORT,
         ssl_context: SSLContext | None = None,
         default_waiting_settings: WaitingSettings | None = None,
         *,
@@ -995,7 +1014,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
         header_value_matcher: HVMATCHER_T | None = None,
         handler_type: HandlerType = HandlerType.PERMANENT,
         json: Any = UNDEFINED,
@@ -1078,7 +1097,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
@@ -1133,7 +1152,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
@@ -1191,13 +1210,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         This method is primarily used when reporting errors.
         """
 
-        def format_handlers(handlers):
+        def format_handlers(handlers: list[RequestHandler]):
             if handlers:
                 return ["    {!r}".format(handler.matcher) for handler in handlers]
             else:
                 return ["    none"]
 
-        lines = []
+        lines: list[str] = []
         lines.append("Ordered matchers:")
         lines.extend(format_handlers(self.ordered_handlers))
         lines.append("")
