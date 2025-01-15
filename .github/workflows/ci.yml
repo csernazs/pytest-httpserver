@@ -38,13 +38,13 @@ jobs:
     name: Test with python ${{ matrix.python-version }} / ${{ matrix.os-version }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         os-version: ["ubuntu-latest", "windows-latest"]
         exclude:
           - os-version: windows-latest
         include:
           - os-version: windows-latest
-            python-version: 3.12
+            python-version: 3.13
 
     runs-on: ${{ matrix.os-version }}
 
@@ -93,7 +93,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           type: doc
-          python-version: "3.12"
+          python-version: "3.13"
           poetry-version: ${{ env.POETRY_VERSION }}
 
       - name: Test
