@@ -9,21 +9,19 @@ import threading
 import time
 import urllib.parse
 from collections import defaultdict
+from collections.abc import Iterable
+from collections.abc import Mapping
+from collections.abc import MutableMapping
 from contextlib import contextmanager
 from contextlib import suppress
 from copy import copy
 from enum import Enum
+from re import Pattern
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import ClassVar
-from typing import Iterable
-from typing import List
-from typing import Mapping
-from typing import MutableMapping
 from typing import Optional
-from typing import Pattern
-from typing import Tuple
 from typing import Union
 
 import werkzeug.http
@@ -44,7 +42,7 @@ METHOD_ALL = "__ALL"
 
 HEADERS_T = Union[
     Mapping[str, Union[str, Iterable[str]]],
-    Iterable[Tuple[str, str]],
+    Iterable[tuple[str, str]],
 ]
 
 HVMATCHER_T = Callable[[str, Optional[str], str], bool]
@@ -584,7 +582,7 @@ class RequestHandler(RequestHandlerBase):
         return retval
 
 
-class RequestHandlerList(List[RequestHandler]):
+class RequestHandlerList(list[RequestHandler]):
     """
     Represents a list of :py:class:`RequestHandler` objects.
 
