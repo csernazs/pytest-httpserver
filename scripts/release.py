@@ -3,9 +3,9 @@
 import argparse
 import subprocess
 import sys
+from collections.abc import Iterable
 from pathlib import Path
 from shutil import which
-from typing import Iterable
 
 
 class UsageError(Exception):
