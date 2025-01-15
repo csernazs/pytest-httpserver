@@ -24,7 +24,7 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9"
 Werkzeug = ">= 2.0.0"
 
 
@@ -137,5 +137,5 @@ lint.ignore = [
   "UP032",
 ]
 line-length = 120
-target-version = "py38"
+target-version = "py39"
 exclude = ["doc", "example*.py", "tests/examples/*.py"]
