@@ -972,6 +972,22 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         self.oneshot_handlers = RequestHandlerList()
         self.handlers = RequestHandlerList()
 
+    def expect(self, matcher: RequestMatcher, handler_type: HandlerType = HandlerType.PERMANENT) -> RequestHandler:
+        """
+        Create and register a request handler.
+
+        :param matcher: :py:class:`RequestMatcher` used to match requests.
+        :param handler_type: type of handler
+        """
+        request_handler = RequestHandler(matcher)
+        if handler_type == HandlerType.PERMANENT:
+            self.handlers.append(request_handler)
+        elif handler_type == HandlerType.ONESHOT:
+            self.oneshot_handlers.append(request_handler)
+        elif handler_type == HandlerType.ORDERED:
+            self.ordered_handlers.append(request_handler)
+        return request_handler
+
     def expect_request(
         self,
         uri: str | URIPattern | Pattern[str],
