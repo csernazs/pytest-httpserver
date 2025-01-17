@@ -234,6 +234,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_urimatch.py",
             "test_wait.py",
             "test_with_statement.py",
+            "test_matcher.py",
         },
     }
 
