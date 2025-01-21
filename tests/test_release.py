@@ -26,7 +26,7 @@ pytestmark = pytest.mark.release
 
 NAME = "pytest-httpserver"
 NAME_UNDERSCORE = NAME.replace("-", "_")
-PY_MAX_VERSION = (3, 12)
+PY_MAX_VERSION = (3, 13)
 
 
 @pytest.fixture(scope="session")
