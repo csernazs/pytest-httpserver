@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_1.1.1:
+
+1.1.1
+=====
+
+.. _Release Notes_1.1.1_New Features:
+
+New Features
+------------
+
+- Add a new ``expect`` method to the ``HTTPServer`` object which allows
+  developers to provide their own request matcher object.
+
+
 .. _Release Notes_1.1.0:
 
 1.1.0
