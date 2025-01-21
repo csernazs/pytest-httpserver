@@ -238,6 +238,17 @@ these.
     the server.
 
 
+Using custom request matcher
+----------------------------
+In the case when you want to extend or modify the request matcher in
+*pytest-httpserrver*, then you can use your own request matcher.
+
+Example:
+
+.. literalinclude :: ../tests/examples/test_howto_custom_request_matcher.py
+   :language: python
+
+
 Customizing host and port
 -------------------------
 
