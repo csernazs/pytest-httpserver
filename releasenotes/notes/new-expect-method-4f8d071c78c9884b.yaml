@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add a new ``expect`` method to the ``HTTPServer`` object which allows
+    developers to provide their own request matcher object.
