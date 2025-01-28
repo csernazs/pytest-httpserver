@@ -4,8 +4,6 @@ from queue import Empty
 from queue import Queue
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Mapping
-from typing import Pattern
 
 from pytest_httpserver.httpserver import METHOD_ALL
 from pytest_httpserver.httpserver import UNDEFINED
@@ -16,6 +14,8 @@ from pytest_httpserver.httpserver import RequestHandlerBase
 from pytest_httpserver.httpserver import URIPattern
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from re import Pattern
     from ssl import SSLContext
 
     from werkzeug import Request
