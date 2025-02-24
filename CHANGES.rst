@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_1.1.2:
+
+1.1.2
+=====
+
+.. _Release Notes_1.1.2_Deprecation Notes:
+
+Deprecation Notes
+-----------------
+
+- Python versions earlier than 3.9 have been deprecated in order to make the
+  code more type safe. Python 3.8 has reached EOL on 2024-10-07.
+
+
 .. _Release Notes_1.1.1:
 
 1.1.1
