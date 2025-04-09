@@ -770,7 +770,8 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         )
 
         self.port = self.server.port  # Update port (needed if `port` was set to 0)
-        self.server_thread = threading.Thread(target=self.thread_target)
+        # Explicitly make the new thread daemonic to avoid shutdown issues
+        self.server_thread = threading.Thread(target=self.thread_target, daemon=True)
         self.server_thread.start()
 
     def stop(self):
