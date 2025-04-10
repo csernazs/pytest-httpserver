@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Run server threads with daemon flag, preventing shutdown issues.
+    `#411 <https://github.com/csernazs/pytest-httpserver/pull/411>`_
