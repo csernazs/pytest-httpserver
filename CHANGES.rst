@@ -2,6 +2,20 @@
 Release Notes
 =============
 
+.. _Release Notes_1.1.3:
+
+1.1.3
+=====
+
+.. _Release Notes_1.1.3_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Run server threads with daemon flag, preventing shutdown issues.
+  `#411 <https://github.com/csernazs/pytest-httpserver/pull/411>`_
+
+
 .. _Release Notes_1.1.2:
 
 1.1.2
