@@ -75,7 +75,7 @@ jobs:
           which poetry
           poetry --help
 
-          poetry --verbose run pytest tests -s -vv --release
+          poetry -vvv run pytest tests -s -vv --release
           # poetry run pytest tests -s -vv --ssl
 
 
