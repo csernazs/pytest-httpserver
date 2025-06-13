@@ -71,6 +71,8 @@ jobs:
         env:
           PYTEST_HTTPSERVER_HOST: '127.0.0.1'
         run: |
+          echo FOO
+          which poetry
           poetry run pytest tests -s -vv --release
           # poetry run pytest tests -s -vv --ssl
 
