@@ -71,9 +71,12 @@ jobs:
         env:
           PYTEST_HTTPSERVER_HOST: '127.0.0.1'
         run: |
-          set -e
-          poetry run pytest tests -s -vv --release
-          poetry run pytest tests -s -vv --ssl
+          echo FOO
+          which poetry
+          poetry --help
+
+          poetry -vvv run pytest tests -s -vv --release
+          # poetry run pytest tests -s -vv --ssl
 
 
       - name: Codecov upload
