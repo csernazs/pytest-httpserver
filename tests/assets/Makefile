@@ -7,7 +7,7 @@ rootCA.key:
 	openssl genrsa -out rootCA.key 2048
 
 rootCA.crt: rootCA.key rootCA.cnf
-	openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 11083 -out rootCA.crt -config rootCA.cnf
+	openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 11083 -out rootCA.crt -config rootCA.cnf -extensions ext
 
 server.csr server.key: server.cnf
 	openssl req -new -sha256 -nodes -out server.csr -newkey rsa:2048 -keyout server.key -config server.cnf
