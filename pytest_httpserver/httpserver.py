@@ -1330,8 +1330,8 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
     @contextmanager
     def wait(
         self,
-        raise_assertions: bool | None = None,
-        stop_on_nohandler: bool | None = None,
+        raise_assertions: bool | None = None,  # noqa: FBT001
+        stop_on_nohandler: bool | None = None,  # noqa: FBT001
         timeout: float | None = None,
     ):
         """Context manager to wait until the first of following event occurs: all ordered and oneshot handlers were
