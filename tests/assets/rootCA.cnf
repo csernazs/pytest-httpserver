@@ -4,6 +4,10 @@ prompt = no
 default_md = sha256
 distinguished_name = dn
 
+[ ext ]
+basicConstraints=critical, CA:TRUE
+keyUsage=critical,digitalSignature,keyCertSign
+
 [dn]
 C=US
 ST=SomeState
