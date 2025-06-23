@@ -9,7 +9,7 @@ on:
       - master
 
 env:
-  POETRY_VERSION: "1.8.4"
+  POETRY_VERSION: "2.1.1"
 
 jobs:
   cs:
