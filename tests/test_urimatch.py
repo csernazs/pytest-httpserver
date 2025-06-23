@@ -14,7 +14,7 @@ class PrefixMatch(URIPattern):
         return uri.startswith(self.prefix)
 
 
-class PrefixMatchEq:
+class PrefixMatchEq:  # noqa: PLW1641
     def __init__(self, prefix: str):
         self.prefix = prefix
 
