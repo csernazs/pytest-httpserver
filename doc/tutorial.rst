@@ -436,6 +436,69 @@ your test will properly fail:
 
         httpserver.check_assertions()  # this will raise AssertionError and make the test failing
 
+This will also produce a (hopefully) helpful description about what went wrong::
+
+    >           raise AssertionError(assertion)
+    E           AssertionError: No handler found for request <Request 'http://localhost:41085/foobaz' [GET]> with data b''.Ordered matchers:
+    E               <RequestMatcher uri='/foobar' method='__ALL' query_string=None headers={} data=None json=<UNDEFINED>>
+    E               <RequestMatcher uri='/foobaz' method='__ALL' query_string=None headers={} data=None json=<UNDEFINED>>
+    E
+    E           Oneshot matchers:
+    E               none
+    E
+    E           Persistent matchers:
+    E               none
+
+
+Calling ``check_assertions()`` for all tests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes you want to see the informative message made by ``check_assertions()`` if
+your test failed.
+
+In such case you can implement a new fixture or override the behavior:
+
+
+.. code:: python
+
+  from collections.abc import Iterable
+  from pytest_httpserver import HTTPServer
+  import requests
+
+  import pytest
+
+
+  @pytest.fixture
+  def httpserver(httpserver: HTTPServer) -> Iterable[HTTPServer]:
+      yield httpserver
+      httpserver.check_assertions()  # this will raise AssertionError and make the test failing
+
+
+  def test_client(httpserver: HTTPServer):
+      httpserver.expect_request("/foo").respond_with_data("foo")
+      httpserver.expect_request("/bar").respond_with_data("bar")
+
+      resp = requests.get(httpserver.url_for("/foobar"))  # gets 500
+      resp.raise_for_status()  # raises error
+
+
+When the tests are run with ``-vv`` then it will show both errors::
+
+  FAILED example2.py::test_client - requests.exceptions.HTTPError: 500 Server Error: INTERNAL SERVER ERROR for url: http://localhost:37425/foobar
+  ERROR example2.py::test_client - AssertionError: No handler found for request <Request 'http://localhost:37425/foobar' [GET]> with data b''.
+  Ordered matchers:
+      none
+
+  Oneshot matchers:
+      none
+
+  Persistent matchers:
+      <RequestMatcher uri='/foo' method='__ALL' query_string=None headers={} data=None json=<UNDEFINED>>
+      <RequestMatcher uri='/bar' method='__ALL' query_string=None headers={} data=None json=<UNDEFINED>>
+
+
+Logs
+~~~~
 
 The server writes a log about the requests and responses which were
 processed. This can be accessed in the `log` attribute of the http server.
