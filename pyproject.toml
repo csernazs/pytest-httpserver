@@ -45,7 +45,7 @@ sphinx-rtd-theme = ">=1,<4"
 reno = "*"
 types-requests = "*"
 pytest = ">=7.1.3,<9.0.0"
-pytest-cov = ">=3,<7"
+pytest-cov = ">=3,<8"
 coverage = ">=6.4.4,<8.0.0"
 tomli = { version = "*", markers = "python_version < '3.11'"}
 black = "*"
