@@ -7,10 +7,12 @@ let
 
 in pkgs.mkShell {
   buildInputs = with pkgs; [
-    (basePython python311)
+    (basePython python312)
+    (toxPython python314)
+    (toxPython python313)
+    (toxPython python311)
     (toxPython python310)
     (toxPython python39)
-    (toxPython python38)
 
     bashInteractive
   ];
