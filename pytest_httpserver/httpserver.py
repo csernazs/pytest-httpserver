@@ -653,6 +653,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.ssl_context = ssl_context
         self.threaded = threaded
         self.no_handler_status_code = 500
+        self._server_ready_event: threading.Event = threading.Event()
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} host={self.host} port={self.port}>"
@@ -733,8 +734,12 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         This method serves as a thread target when the server is started.
 
         This should not be called directly, but can be overridden to tailor it to your needs.
+
+        If overriding, you must call ``self._server_ready_event.set()`` before starting
+        to serve requests, otherwise :py:meth:`start` will raise an error after timeout.
         """
         assert self.server is not None
+        self._server_ready_event.set()
         self.server.serve_forever()
 
     def is_running(self) -> bool:
@@ -774,8 +779,22 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         self.port = self.server.port  # Update port (needed if `port` was set to 0)
         # Explicitly make the new thread daemonic to avoid shutdown issues
+        self._server_ready_event.clear()
         self.server_thread = threading.Thread(target=self.thread_target, daemon=True)
         self.server_thread.start()
+        if not self._server_ready_event.wait(timeout=10):
+            # Clean up the server before raising.
+            # Use server_close() instead of shutdown() to avoid deadlock
+            # if serve_forever() was never called.
+            self.server.server_close()
+            self.server_thread.join(timeout=5)
+            self.server = None
+            self.server_thread = None
+            raise HTTPServerError(
+                "Server did not start within timeout. "
+                "If you override thread_target(), ensure it calls "
+                "self._server_ready_event.set() before serving."
+            )
 
     def stop(self) -> None:
         """
