@@ -8,6 +8,7 @@ import re
 import threading
 import time
 import urllib.parse
+import warnings
 from collections import defaultdict
 from collections.abc import Callable
 from collections.abc import Generator
@@ -615,6 +616,8 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
     :param port: the TCP port where the server will listen
     :param ssl_context: the ssl context object to use for https connections
     :param threaded: whether to handle concurrent requests in separate threads
+    :param startup_timeout: maximum time in seconds to wait for server readiness.
+        Set to ``None`` to disable readiness waiting.
 
     .. py:attribute:: log
 
@@ -638,6 +641,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         ssl_context: SSLContext | None = None,
         *,
         threaded: bool = False,
+        startup_timeout: float | None = 10.0,
     ) -> None:
         """
         Initializes the instance.
@@ -652,6 +656,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.log: list[tuple[Request, Response]] = []
         self.ssl_context = ssl_context
         self.threaded = threaded
+        self.startup_timeout = startup_timeout
         self.no_handler_status_code = 500
         self._server_ready_event: threading.Event = threading.Event()
 
@@ -735,8 +740,10 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         This should not be called directly, but can be overridden to tailor it to your needs.
 
-        If overriding, you must call ``self._server_ready_event.set()`` before starting
-        to serve requests, otherwise :py:meth:`start` will raise an error after timeout.
+        If overriding, you should call ``self._server_ready_event.set()`` before starting
+        to serve requests. If the event is not set within the timeout, :py:meth:`start`
+        will emit a warning if the thread is still alive; if the thread dies during
+        startup, :py:meth:`start` raises an error.
         """
         assert self.server is not None
         self._server_ready_event.set()
@@ -779,22 +786,33 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         self.port = self.server.port  # Update port (needed if `port` was set to 0)
         # Explicitly make the new thread daemonic to avoid shutdown issues
-        self._server_ready_event.clear()
+        # Create a new event for each startup to prevent stale threads from
+        # signaling readiness for a subsequent start() attempt.
+        self._server_ready_event = threading.Event()
         self.server_thread = threading.Thread(target=self.thread_target, daemon=True)
         self.server_thread.start()
-        if not self._server_ready_event.wait(timeout=10):
-            # Clean up the server before raising.
-            # Use server_close() instead of shutdown() to avoid deadlock
-            # if serve_forever() was never called.
-            self.server.server_close()
-            self.server_thread.join(timeout=5)
-            self.server = None
-            self.server_thread = None
-            raise HTTPServerError(
-                "Server did not start within timeout. "
-                "If you override thread_target(), ensure it calls "
-                "self._server_ready_event.set() before serving."
-            )
+        if self.startup_timeout is not None and not self._server_ready_event.wait(timeout=self.startup_timeout):
+            # Event was not set within timeout.
+            # Check if thread is still alive (custom thread_target may not set the event)
+            if self.server_thread.is_alive():
+                # Server thread is running, assume it's working (backward compatibility)
+                warnings.warn(
+                    "Server thread is running but ready event was not set. "
+                    "If you override thread_target(), call self._server_ready_event.set() "
+                    "before serving to ensure reliable startup.",
+                    stacklevel=2,
+                )
+            else:
+                # Thread died, clean up and raise
+                self.server.server_close()
+                self.server_thread.join(timeout=5)
+                self.server = None
+                self.server_thread = None
+                raise HTTPServerError(
+                    "Server thread died during startup. "
+                    "If you override thread_target(), ensure it calls "
+                    "self._server_ready_event.set() before serving."
+                )
 
     def stop(self) -> None:
         """
@@ -956,6 +974,8 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         manager
 
     :param threaded: whether to handle concurrent requests in separate threads
+    :param startup_timeout: maximum time in seconds to wait for server readiness.
+        Set to ``None`` to disable readiness waiting.
 
     .. py:attribute:: no_handler_status_code
 
@@ -975,11 +995,18 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         default_waiting_settings: WaitingSettings | None = None,
         *,
         threaded: bool = False,
+        startup_timeout: float | None = 10.0,
     ) -> None:
         """
         Initializes the instance.
         """
-        super().__init__(host, port, ssl_context, threaded=threaded)
+        super().__init__(
+            host,
+            port,
+            ssl_context,
+            threaded=threaded,
+            startup_timeout=startup_timeout,
+        )
 
         self.ordered_handlers: list[RequestHandler] = []
         self.oneshot_handlers = RequestHandlerList()

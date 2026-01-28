@@ -232,6 +232,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_querymatcher.py",
             "test_querystring.py",
             "test_release.py",
+            "test_server_startup.py",
             "test_ssl.py",
             "test_thread_type.py",
             "test_threaded.py",
