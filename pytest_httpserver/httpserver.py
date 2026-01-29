@@ -33,10 +33,16 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.serving import make_server
 
 if TYPE_CHECKING:
+    import sys
     from ssl import SSLContext
     from types import TracebackType
 
     from werkzeug.serving import BaseWSGIServer
+
+    if sys.version_info >= (3, 11):
+        from typing import Self
+    else:
+        from typing_extensions import Self
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -879,7 +885,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.log.append((request, response))
         return response
 
-    def __enter__(self) -> HTTPServerBase:  # noqa: PYI034
+    def __enter__(self) -> Self:
         """
         Provide the context API
 
