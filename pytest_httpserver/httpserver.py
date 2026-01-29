@@ -201,6 +201,9 @@ class StringQueryMatcher(QueryMatcher):
         self.query_string = query_string
 
     def get_comparing_values(self, request_query_string: bytes) -> tuple[bytes, bytes]:
+        if not isinstance(self.query_string, (str, bytes)):
+            raise TypeError("query_string must be a string, or a bytes-like object")
+
         if isinstance(self.query_string, str):
             query_string = self.query_string.encode()
         else:
