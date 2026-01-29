@@ -26,10 +26,10 @@ def test_verify(httpserver: HTTPServer):
     httpserver.assert_request_made(httpserver.create_matcher("/no_match"), count=0)
 
     with pytest.raises(AssertionError):
-        assert httpserver.assert_request_made(httpserver.create_matcher("/no_match"))
+        httpserver.assert_request_made(httpserver.create_matcher("/no_match"))
 
     with pytest.raises(AssertionError):
-        assert httpserver.assert_request_made(httpserver.create_matcher("/foo"), count=2)
+        httpserver.assert_request_made(httpserver.create_matcher("/foo"), count=2)
 
 
 def test_verify_assert_msg(httpserver: HTTPServer):

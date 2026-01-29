@@ -29,10 +29,10 @@ class BlockingRequestHandler(RequestHandlerBase):
     This class should only be instantiated inside the implementation of the :py:class:`BlockingHTTPServer`.
     """
 
-    def __init__(self):
-        self.response_queue = Queue()
+    def __init__(self) -> None:
+        self.response_queue: Queue[Response] = Queue()
 
-    def respond_with_response(self, response: Response):
+    def respond_with_response(self, response: Response) -> None:
         self.response_queue.put_nowait(response)
 
 
@@ -59,11 +59,11 @@ class BlockingHTTPServer(HTTPServerBase):
 
     def __init__(
         self,
-        host=DEFAULT_LISTEN_HOST,
-        port=DEFAULT_LISTEN_PORT,
+        host: str = DEFAULT_LISTEN_HOST,
+        port: int = DEFAULT_LISTEN_PORT,
         ssl_context: SSLContext | None = None,
         timeout: int = 30,
-    ):
+    ) -> None:
         super().__init__(host, port, ssl_context)
         self.timeout = timeout
         self.request_queue: Queue[Request] = Queue()
@@ -76,7 +76,7 @@ class BlockingHTTPServer(HTTPServerBase):
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping = None,
+        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
         header_value_matcher: HeaderValueMatcher | None = None,
         json: Any = UNDEFINED,
         timeout: int = 30,

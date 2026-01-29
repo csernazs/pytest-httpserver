@@ -17,11 +17,11 @@ if TYPE_CHECKING:
 
 
 class MyDelay(Delay):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.evidence: int | None = None
+    def __init__(self, seconds: float) -> None:
+        super().__init__(seconds)
+        self.evidence: float | None = None
 
-    def _sleep(self):
+    def _sleep(self) -> None:
         assert self.evidence is None, "_sleep should be called only once"
         self.evidence = self._seconds
 
