@@ -40,6 +40,7 @@ optional = true
 [tool.poetry.group.develop.dependencies]
 pre-commit = ">=2.20,<5.0"
 requests = "*"
+typing_extensions = { version = ">=4.0", markers = "python_version < '3.11'" }
 Sphinx = ">=5.1.1,<8.0.0"
 sphinx-rtd-theme = ">=1,<4"
 reno = "*"
