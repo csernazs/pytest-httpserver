@@ -9,6 +9,7 @@ import threading
 import time
 import urllib.parse
 from collections import defaultdict
+from collections.abc import Callable
 from collections.abc import Generator
 from collections.abc import Iterable
 from collections.abc import Mapping
@@ -20,10 +21,7 @@ from enum import Enum
 from re import Pattern
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import Callable
 from typing import ClassVar
-from typing import Optional
-from typing import Union
 
 import werkzeug.http
 from werkzeug import Request
@@ -47,12 +45,9 @@ if TYPE_CHECKING:
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
 
-HEADERS_T = Union[
-    Mapping[str, Union[str, Iterable[str]]],
-    Iterable[tuple[str, str]],
-]
+HEADERS_T = Mapping[str, str | Iterable[str]] | Iterable[tuple[str, str]]
 
-HVMATCHER_T = Callable[[str, Optional[str], str], bool]
+HVMATCHER_T = Callable[[str, str | None, str], bool]
 
 
 class Undefined:

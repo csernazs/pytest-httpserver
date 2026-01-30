@@ -4,7 +4,7 @@ Hooks for pytest-httpserver
 
 import os
 import time
-from typing import Callable
+from collections.abc import Callable
 
 from werkzeug import Request
 from werkzeug import Response
