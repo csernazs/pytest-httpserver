@@ -111,7 +111,7 @@ def build() -> Iterable[Build]:
 
 @pytest.fixture(scope="session")
 def version(pyproject) -> str:
-    return pyproject["tool"]["poetry"]["version"]
+    return pyproject["project"]["version"]
 
 
 def version_to_tuple(version: str) -> tuple:
@@ -119,7 +119,7 @@ def version_to_tuple(version: str) -> tuple:
 
 
 def test_no_duplicate_classifiers(build: Build, pyproject):
-    pyproject_meta = pyproject["tool"]["poetry"]
+    pyproject_meta = pyproject["project"]
     wheel_meta = build.wheel.get_meta(version=pyproject_meta["version"])
     classifiers = wheel_meta.get_all("Classifier")
     assert classifiers is not None
@@ -131,14 +131,14 @@ def test_no_duplicate_classifiers(build: Build, pyproject):
 
 
 def test_python_version(build: Build, pyproject):
-    pyproject_meta = pyproject["tool"]["poetry"]
+    pyproject_meta = pyproject["project"]
     wheel_meta = build.wheel.get_meta(version=pyproject_meta["version"])
-    python_dependency = pyproject_meta["dependencies"]["python"]
-    m = re.match(r">=(\d+\.\d+)", python_dependency)
+    python_requires = pyproject_meta["requires-python"]
+    m = re.match(r">=(\d+\.\d+)", python_requires)
     if m:
         min_version, *_ = m.groups()
     else:
-        raise ValueError(python_dependency)
+        raise ValueError(python_requires)
 
     min_version_tuple = version_to_tuple(min_version)
 
