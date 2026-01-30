@@ -46,6 +46,8 @@ class BlockingHTTPServer(HTTPServerBase):
 
     :param timeout: waiting time in seconds for matching and responding to an incoming request.
         manager
+    :param startup_timeout: maximum time in seconds to wait for server readiness.
+        Set to ``None`` to disable readiness waiting.
 
     .. py:attribute:: no_handler_status_code
 
@@ -63,8 +65,10 @@ class BlockingHTTPServer(HTTPServerBase):
         port: int = DEFAULT_LISTEN_PORT,
         ssl_context: SSLContext | None = None,
         timeout: int = 30,
+        *,
+        startup_timeout: float | None = 10.0,
     ) -> None:
-        super().__init__(host, port, ssl_context)
+        super().__init__(host, port, ssl_context, startup_timeout=startup_timeout)
         self.timeout = timeout
         self.request_queue: Queue[Request] = Queue()
         self.request_handlers: dict[Request, Queue[BlockingRequestHandler]] = {}
