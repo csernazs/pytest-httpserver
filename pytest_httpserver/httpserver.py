@@ -477,7 +477,7 @@ class RequestHandlerBase(abc.ABC):
     def respond_with_json(
         self,
         response_json: Any,
-        status: int = 200,
+        status: int = HTTPStatus.OK.value,
         headers: Mapping[str, str] | None = None,
         content_type: str = "application/json",
     ) -> None:
@@ -496,7 +496,7 @@ class RequestHandlerBase(abc.ABC):
     def respond_with_data(
         self,
         response_data: str | bytes = "",
-        status: int = 200,
+        status: int = HTTPStatus.OK.value,
         headers: HEADERS_T | None = None,
         mimetype: str | None = None,
         content_type: str | None = None,
