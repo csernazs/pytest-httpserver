@@ -216,6 +216,7 @@ def test_sdist_contents(build: Build, version: str):
             "conftest.py",
             "examples",
             "test_blocking_httpserver.py",
+            "test_extra_options.py",
             "test_handler_errors.py",
             "test_headers.py",
             "test_hooks.py",
