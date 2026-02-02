@@ -231,6 +231,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_port_changing.py",
             "test_querymatcher.py",
             "test_querystring.py",
+            "test_readiness.py",
             "test_release.py",
             "test_ssl.py",
             "test_thread_type.py",
