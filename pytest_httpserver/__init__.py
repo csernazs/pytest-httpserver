@@ -10,6 +10,7 @@ __all__ = [
     "BlockingHTTPServer",
     "BlockingRequestHandler",
     "Error",
+    "ExtraOptions",
     "HTTPServer",
     "HTTPServerError",
     "HeaderValueMatcher",
@@ -27,6 +28,7 @@ from .blocking_httpserver import BlockingRequestHandler
 from .httpserver import METHOD_ALL
 from .httpserver import URI_DEFAULT
 from .httpserver import Error
+from .httpserver import ExtraOptions
 from .httpserver import HeaderValueMatcher
 from .httpserver import HTTPServer
 from .httpserver import HTTPServerError

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from .httpserver import ExtraOptions
 from .httpserver import HTTPServer
 
 if TYPE_CHECKING:
@@ -45,9 +46,15 @@ def httpserver_ssl_context() -> None:
 
 
 @pytest.fixture(scope="session")
+def httpserver_extra_options() -> ExtraOptions:
+    return ExtraOptions()
+
+
+@pytest.fixture(scope="session")
 def make_httpserver(
     httpserver_listen_address: tuple[str | None, int | None],
     httpserver_ssl_context: SSLContext | None,
+    httpserver_extra_options: ExtraOptions,
 ) -> Generator[HTTPServer, None, None]:
     host, port = httpserver_listen_address
     if not host:
@@ -55,7 +62,12 @@ def make_httpserver(
     if not port:
         port = HTTPServer.DEFAULT_LISTEN_PORT
 
-    server = HTTPServer(host=host, port=port, ssl_context=httpserver_ssl_context)
+    server = HTTPServer.with_extra_options(
+        host=host,
+        port=port,
+        ssl_context=httpserver_ssl_context,
+        extra_options=httpserver_extra_options,
+    )
     server.start()
     yield server
     server.clear()
@@ -80,8 +92,14 @@ def httpserver(make_httpserver: HTTPServer) -> HTTPServer:
 @pytest.fixture(scope="session")
 def make_httpserver_ipv4(
     httpserver_ssl_context: SSLContext | None,
+    httpserver_extra_options: ExtraOptions,
 ) -> Generator[HTTPServer, None, None]:
-    server = HTTPServer(host="127.0.0.1", port=0, ssl_context=httpserver_ssl_context)
+    server = HTTPServer.with_extra_options(
+        host="127.0.0.1",
+        port=0,
+        ssl_context=httpserver_ssl_context,
+        extra_options=httpserver_extra_options,
+    )
     server.start()
     yield server
     server.clear()
@@ -99,8 +117,14 @@ def httpserver_ipv4(make_httpserver_ipv4: HTTPServer) -> HTTPServer:
 @pytest.fixture(scope="session")
 def make_httpserver_ipv6(
     httpserver_ssl_context: SSLContext | None,
+    httpserver_extra_options: ExtraOptions,
 ) -> Generator[HTTPServer, None, None]:
-    server = HTTPServer(host="::1", port=0, ssl_context=httpserver_ssl_context)
+    server = HTTPServer.with_extra_options(
+        host="::1",
+        port=0,
+        ssl_context=httpserver_ssl_context,
+        extra_options=httpserver_extra_options,
+    )
     server.start()
     yield server
     server.clear()
