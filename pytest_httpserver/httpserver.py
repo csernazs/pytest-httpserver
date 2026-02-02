@@ -8,6 +8,7 @@ import re
 import threading
 import time
 import urllib.parse
+import urllib.request
 from collections import defaultdict
 from collections.abc import Callable
 from collections.abc import Generator
@@ -18,6 +19,7 @@ from contextlib import contextmanager
 from contextlib import suppress
 from copy import copy
 from enum import Enum
+from http import HTTPStatus
 from re import Pattern
 from typing import TYPE_CHECKING
 from typing import Any
@@ -938,6 +940,9 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
 
     :param threaded: whether to handle concurrent requests in separate threads
 
+    :param startup_timeout: maximum time in seconds to wait for server readiness.
+        By default, no readiness check is performed.
+
     .. py:attribute:: no_handler_status_code
 
         Attribute containing the http status code (int) which will be the response
@@ -956,6 +961,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         default_waiting_settings: WaitingSettings | None = None,
         *,
         threaded: bool = False,
+        startup_timeout: float | None = None,
     ) -> None:
         """
         Initializes the instance.
@@ -972,6 +978,32 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             self.default_waiting_settings = WaitingSettings()
         self._waiting_settings = copy(self.default_waiting_settings)
         self._waiting_result: queue.LifoQueue[bool] = queue.LifoQueue(maxsize=1)
+        self.startup_timeout = startup_timeout
+        self._readiness_check_pending = False
+
+    def start(self) -> None:
+        if self.startup_timeout is None:
+            self._readiness_check_pending = False
+        else:
+            self._readiness_check_pending = True
+
+        super().start()
+        self.wait_for_server_ready()
+
+    def wait_for_server_ready(self) -> None:
+        """
+        Waits until the server is ready to serve requests.
+        """
+        if not self._readiness_check_pending:
+            return
+
+        url = self.url_for("/")
+        if not url.startswith(("http://", "https://")):
+            raise ValueError(f"Invalid URL generated for readiness check : {url}")  # noqa: EM102
+
+        with urllib.request.urlopen(url, timeout=self.startup_timeout) as resp:  # noqa: S310
+            if resp.status != HTTPStatus.OK.value or resp.read() != b"OK":
+                raise HTTPServerError("Readiness check failed with status code: {}".format(resp.status))
 
     def clear(self) -> None:
         """
@@ -1272,6 +1304,10 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         :param request: the request object from the werkzeug library
         :return: the response object what the handler responded, or a response which contains the error
         """
+        if self._readiness_check_pending:
+            self._readiness_check_pending = False
+
+            return Response(HTTPStatus.OK.phrase, status=HTTPStatus.OK.value)
 
         if self.permanently_failed:
             return self.respond_permanent_failure()
