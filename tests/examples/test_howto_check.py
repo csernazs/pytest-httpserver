@@ -5,7 +5,7 @@ from pytest_httpserver import HTTPServer
 
 
 @pytest.mark.xfail
-def test_check_assertions(httpserver: HTTPServer):
+def test_check(httpserver: HTTPServer):
     def handler(_):
         assert 1 == 2
 

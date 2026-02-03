@@ -22,7 +22,7 @@ def httpserver():
     # this is to check if the client has made any request where no
     # `assert_request` was called on it from the test
 
-    server.check_assertions()
+    server.check()
     server.clear()
 
 
