@@ -419,7 +419,7 @@ unhandled and in the end the test will be failed.
 
 In some cases, however, you want to make sure that everything is ok so far,
 and raise AssertionError when something is not good. Call the
-``check_assertions()`` method of the httpserver object, and this will look at
+``check()`` method of the httpserver object, and this will look at
 the server's internal state (which is running in the other thread) and if
 there's something not right (such as the order of the requests not matching,
 or there was a non-matching request), it will raise an AssertionError and
@@ -434,7 +434,7 @@ your test will properly fail:
         requests.get(httpserver.url_for("/foobaz"))
         requests.get(httpserver.url_for("/foobar"))  # gets 500
 
-        httpserver.check_assertions()  # this will raise AssertionError and make the test failing
+        httpserver.check()  # this will raise AssertionError and make the test failing
 
 This will also produce a (hopefully) helpful description about what went wrong::
 
@@ -450,10 +450,10 @@ This will also produce a (hopefully) helpful description about what went wrong::
     E               none
 
 
-Calling ``check_assertions()`` for all tests
+Calling ``check()`` for all tests
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Sometimes you want to see the informative message made by ``check_assertions()`` if
+Sometimes you want to see the informative message made by ``check()`` if
 your test failed.
 
 In such case you can implement a new fixture or override the behavior:
@@ -471,7 +471,7 @@ In such case you can implement a new fixture or override the behavior:
   @pytest.fixture
   def httpserver(httpserver: HTTPServer) -> Iterable[HTTPServer]:
       yield httpserver
-      httpserver.check_assertions()  # this will raise AssertionError and make the test failing
+      httpserver.check()  # this will raise AssertionError and make the test failing
 
 
   def test_client(httpserver: HTTPServer):
@@ -520,7 +520,7 @@ Debugging
 ~~~~~~~~~
 
 If you having multiple requests for the server, adding the call to
-``check_assertions()`` may to debug as it will make the test failed as
+``check()`` may help to debug as it will make the test failed as
 soon as possible.
 
 .. code:: python
@@ -534,20 +534,20 @@ soon as possible.
         requests.get(httpserver.url_for("/bar"))
         requests.get(httpserver.url_for("/foobar"))
 
-        httpserver.check_assertions()
+        httpserver.check()
 
 In the above code, the first request (to **/foo**) is not successful (it gets
 http status 500), but as the response status is not checked (or any of the
-response), and there's no call to ``check_assertions()``, the test continues the
+response), and there's no call to ``check()``, the test continues the
 running. It gets through the **/bar** request, which is also not successful
 (and gets http status 500 also like the first one), then goes the last request
 which is successful (as there's a handler defined for it)
 
-In the end, when checking the check_assertions() raise the error for the first
+In the end, when checking the check() raise the error for the first
 request, but it is a bit late: figuring out the request which caused the problem
 could be troublesome. Also, it will report the problem for the first request only.
 
-Adding more call of ``check_assertions()`` will help.
+Adding more call of ``check()`` will help.
 
 
 .. code:: python
@@ -558,13 +558,13 @@ Adding more call of ``check_assertions()`` will help.
     def test_json_client(httpserver: HTTPServer):
         httpserver.expect_request("/foobar").respond_with_json({"foo": "bar"})
         requests.get(httpserver.url_for("/foo"))
-        httpserver.check_assertions()
+        httpserver.check()
 
         requests.get(httpserver.url_for("/bar"))
-        httpserver.check_assertions()
+        httpserver.check()
 
         requests.get(httpserver.url_for("/foobar"))
-        httpserver.check_assertions()
+        httpserver.check()
 
 
 In the above code, the test will fail after the first request.
