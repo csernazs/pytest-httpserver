@@ -982,10 +982,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         self._readiness_check_pending = False
 
     def start(self) -> None:
-        self._readiness_check_pending = self.startup_timeout is not None
-
         super().start()
-        self.wait_for_server_ready()
+        self._readiness_check_pending = self.startup_timeout is not None
+        try:
+            self.wait_for_server_ready()
+        except Exception:
+            self.stop()
+            raise
 
     def wait_for_server_ready(self) -> None:
         """
