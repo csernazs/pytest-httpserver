@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    More robust server startup by checking server readiness (disabled by
+    default).
+    `#462 <https://github.com/csernazs/pytest-httpserver/pull/462>`_

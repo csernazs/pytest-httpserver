@@ -299,6 +299,40 @@ the ``httpserver`` fixture).
         return ("127.0.0.1", 8000)
 
 
+Waiting for server to be ready
+------------------------------
+
+By default, when the httpserver fixture is available for your tests, the server
+is already bound to the given address and listening for incoming requests. It is
+ensured that the connect() will succeed to that port. This is usually sufficient
+for the most cases but if you want more guarantees, you can wait until the
+server is fully ready to serve http requests. This is especially useful when
+your client is running with a small timeout or the http server is starting up
+slowly for some reason.
+
+You can request that *pytest-httpserver* should make a http request (a probe) to
+the server before your test start, in order to ensure that the server is capable
+to serve requests. You can also tune the timeout for this request.
+
+
+.. warning::
+    This check does not work in SSL mode as the probe is not configured to
+    accept the self-signed certificate used by the server. If you want to have
+    this check in SSL mode, you can override the ``wait_for_server_ready()``
+    method and implement your own logic.
+
+In order to enable this, you have to set the ``startup_timeout`` keyword
+argument to `HTTPServer`. In other words, this is the maximum time you willing
+to wait for the server to be able to server http requests.
+
+
+.. literalinclude :: ../tests/examples/test_howto_readiness.py
+   :language: python
+
+
+In the case the server times out, the test will fail.
+
+
 Multi-threading support
 -----------------------
 
