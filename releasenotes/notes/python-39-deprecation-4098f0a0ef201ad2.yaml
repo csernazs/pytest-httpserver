@@ -1,0 +1,5 @@
+---
+deprecations:
+  - |
+    Python 3.9 has been deprecated as it reached EOL 2025-10-31. While the code
+    may work on this version, there will be no CI tests running on it.
