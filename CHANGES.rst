@@ -2,6 +2,30 @@
 Release Notes
 =============
 
+.. _Release Notes_1.1.4:
+
+1.1.4
+=====
+
+.. _Release Notes_1.1.4_New Features:
+
+New Features
+------------
+
+- More robust server startup by checking server readiness (disabled by
+  default).
+  `#462 <https://github.com/csernazs/pytest-httpserver/pull/462>`_
+
+
+.. _Release Notes_1.1.4_Deprecation Notes:
+
+Deprecation Notes
+-----------------
+
+- Python 3.9 has been deprecated as it reached EOL 2025-10-31. While the code
+  may work on this version, there will be no CI tests running on it.
+
+
 .. _Release Notes_1.1.3:
 
 1.1.3
