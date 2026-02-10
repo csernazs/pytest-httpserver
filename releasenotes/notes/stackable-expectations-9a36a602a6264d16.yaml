@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Add ``bake()`` method to ``HTTPServer`` for creating pre-configured
+    request expectation proxies (``BakedHTTPServer``). This allows sharing
+    common keyword arguments (e.g. ``method``, ``headers``) across multiple
+    ``expect_request()`` calls with last-wins merging semantics.
+    `#470 <https://github.com/csernazs/pytest-httpserver/pull/470>`_
+    Contributed by `@HayaoSuzuki <https://github.com/HayaoSuzuki>`_

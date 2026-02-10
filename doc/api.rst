@@ -24,12 +24,24 @@ RequestHandler
         :inherited-members:
 
 
+RequestMatcherKwargs
+~~~~~~~~~~~~~~~~~~~~
+
+    .. autoclass:: RequestMatcherKwargs
+        :members:
+
 RequestMatcher
 ~~~~~~~~~~~~~~
 
     .. autoclass:: RequestMatcher
         :members:
 
+
+BakedHTTPServer
+~~~~~~~~~~~~~~~~
+
+    .. autoclass:: BakedHTTPServer
+        :members:
 
 BlockingHTTPServer
 ~~~~~~~~~~~~~~~~~~
