@@ -24,6 +24,7 @@ from re import Pattern
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import ClassVar
+from typing import TypedDict
 
 import werkzeug.http
 from werkzeug import Request
@@ -31,6 +32,8 @@ from werkzeug import Response
 from werkzeug.datastructures import Authorization
 from werkzeug.datastructures import MultiDict
 from werkzeug.serving import make_server
+
+from .bake import BakedHTTPServer
 
 if TYPE_CHECKING:
     import sys
@@ -43,6 +46,11 @@ if TYPE_CHECKING:
         from typing import Self
     else:
         from typing_extensions import Self
+
+    if sys.version_info >= (3, 12):
+        from typing import Unpack
+    else:
+        from typing_extensions import Unpack
 
 URI_DEFAULT = ""
 METHOD_ALL = "__ALL"
@@ -283,6 +291,18 @@ class URIPattern(abc.ABC):
             with "/" and does not contain the query part.
         :return: True if there's a match, False otherwise
         """
+
+
+class RequestMatcherKwargs(TypedDict, total=False):
+    """Keyword arguments common to ``expect_request()`` and related methods."""
+
+    method: str
+    data: str | bytes | None
+    data_encoding: str
+    headers: Mapping[str, str] | None
+    query_string: None | QueryMatcher | str | bytes | Mapping[str, str]
+    header_value_matcher: HVMATCHER_T | None
+    json: Any
 
 
 class RequestMatcher:
@@ -1495,3 +1515,25 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             assert_msg = "\n".join(assert_msg_lines) + "\n"
 
             assert matching_count == count, assert_msg
+
+    def bake(self, **kwargs: Unpack[RequestMatcherKwargs]) -> BakedHTTPServer:
+        """
+        Create a proxy with pre-configured defaults for ``expect_request()``.
+
+        Keyword arguments passed here become defaults for ``expect_request()``
+        and related methods. When the same keyword is provided both at bake
+        time and at call time, the call-time value wins (last-wins merging).
+
+        Accepts the same keyword arguments as ``expect_request()`` (see
+        :py:class:`RequestMatcherKwargs`).
+
+        :return: a :py:class:`BakedHTTPServer` proxy object.
+
+        Example:
+
+        .. code-block:: python
+
+            json_server = httpserver.bake(headers={"content-type": "application/json"})
+            json_server.expect_request("/foo").respond_with_json({"result": "ok"})
+        """
+        return BakedHTTPServer(self, **kwargs)

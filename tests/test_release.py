@@ -163,6 +163,7 @@ def test_wheel_no_extra_contents(build: Build, version: str):
     package_contents = {path.name for path in wheel_dir.joinpath(NAME_UNDERSCORE).iterdir()}
     assert package_contents == {
         "__init__.py",
+        "bake.py",
         "blocking_httpserver.py",
         "hooks.py",
         "httpserver.py",
@@ -205,6 +206,7 @@ def test_sdist_contents(build: Build, version: str):
         },
         "pytest_httpserver": {
             "__init__.py",
+            "bake.py",
             "blocking_httpserver.py",
             "hooks.py",
             "httpserver.py",
@@ -215,6 +217,7 @@ def test_sdist_contents(build: Build, version: str):
             "assets",
             "conftest.py",
             "examples",
+            "test_bake.py",
             "test_blocking_httpserver.py",
             "test_handler_errors.py",
             "test_headers.py",

@@ -704,3 +704,29 @@ Example:
 will register the hooks, and hooks will be called sequentially, one by one. Each
 hook will receive the response what the previous hook returned, and the last
 hook called will return the final response which will be sent back to the client.
+
+
+Reducing repetition with bake
+-----------------------------
+
+When multiple expectations share common parameters (such as headers or method),
+the ``bake()`` method creates a proxy with pre-configured defaults. Keyword
+arguments passed to ``bake()`` become defaults that are merged with arguments
+provided at call time using last-wins semantics: if the same keyword appears in
+both, the call-time value is used.
+
+.. literalinclude :: ../tests/examples/test_howto_bake.py
+   :language: python
+
+The ``bake()`` method can be chained to layer additional defaults:
+
+.. code-block:: python
+
+    json_post = httpserver.bake(method="POST").bake(
+        headers={"Content-Type": "application/json"}
+    )
+
+All ``expect_request``, ``expect_oneshot_request``, and
+``expect_ordered_request`` methods are available on the baked object. Other
+attributes such as ``url_for()`` and ``check_assertions()`` are delegated to
+the underlying server transparently.
