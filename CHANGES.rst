@@ -2,6 +2,24 @@
 Release Notes
 =============
 
+.. _Release Notes_1.1.5:
+
+1.1.5
+=====
+
+.. _Release Notes_1.1.5_New Features:
+
+New Features
+------------
+
+- Add ``bake()`` method to ``HTTPServer`` for creating pre-configured
+  request expectation proxies (``BakedHTTPServer``). This allows sharing
+  common keyword arguments (e.g. ``method``, ``headers``) across multiple
+  ``expect_request()`` calls with last-wins merging semantics.
+  `#470 <https://github.com/csernazs/pytest-httpserver/pull/470>`_
+  Contributed by `@HayaoSuzuki <https://github.com/HayaoSuzuki>`_
+
+
 .. _Release Notes_1.1.4:
 
 1.1.4
