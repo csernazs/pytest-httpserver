@@ -1,6 +1,0 @@
----
-fixes:
-  - |
-    Source distribution (sdist) of 1.1.4 has been fixed as the original tarball
-    included the documentation as well by mistake, resulting a significantly
-    larger file.
