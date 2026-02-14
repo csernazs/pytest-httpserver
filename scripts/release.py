@@ -52,6 +52,37 @@ def check_environment():
             raise UsageError("No such binary: {}".format(binary))
 
 
+def run_test_release():
+    return subprocess.check_call(["pytest", "tests/test_release.py", "--release"])
+
+
+def check_git_repository_dirty():
+    result = subprocess.run(
+        [
+            "git",
+            "status",
+            "--porcelain",
+            "--ignored=matching",
+        ],
+        capture_output=True,
+        encoding="utf-8",
+        check=False,
+    )
+    if result.returncode != 0:
+        raise UsageError("Failed to check git repository status")
+
+    accepted = [
+        "!! .venv/",
+    ]
+
+    for line in result.stdout.splitlines():
+        if line not in accepted:
+            raise UsageError(
+                "Git repository is dirty. Please commit or stash changes before releasing, "
+                "or run git clean -fdx to remove ignored files."
+            )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("new_version", help="Version to release")
@@ -69,6 +100,8 @@ def main() -> None:
         raise UsageError("Current version is the same as new version")
 
     check_changelog()
+    check_git_repository_dirty()
+    run_test_release()
 
     bump_version(Path("doc/conf.py"), ["version"], current_version, new_version)
     subprocess.check_call(["poetry", "version", new_version])
