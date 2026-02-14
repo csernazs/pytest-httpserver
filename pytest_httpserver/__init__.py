@@ -10,7 +10,6 @@ __all__ = [
     "BlockingHTTPServer",
     "BlockingRequestHandler",
     "Error",
-    "ExtraOptions",
     "HTTPServer",
     "HTTPServerError",
     "HeaderValueMatcher",
@@ -18,6 +17,7 @@ __all__ = [
     "RequestHandler",
     "RequestMatcher",
     "RequestMatcherKwargs",
+    "ServerOptions",
     "URIPattern",
     "WaitingSettings",
 ]
@@ -28,7 +28,6 @@ from .blocking_httpserver import BlockingRequestHandler
 from .httpserver import METHOD_ALL
 from .httpserver import URI_DEFAULT
 from .httpserver import Error
-from .httpserver import ExtraOptions
 from .httpserver import HeaderValueMatcher
 from .httpserver import HTTPServer
 from .httpserver import HTTPServerError
@@ -36,5 +35,6 @@ from .httpserver import NoHandlerError
 from .httpserver import RequestHandler
 from .httpserver import RequestMatcher
 from .httpserver import RequestMatcherKwargs
+from .httpserver import ServerOptions
 from .httpserver import URIPattern
 from .httpserver import WaitingSettings

@@ -949,7 +949,7 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class ExtraOptions:
+class ServerOptions:
     default_waiting_settings: WaitingSettings | None = None
     threaded: bool = False
     startup_timeout: float | None = None
@@ -1010,16 +1010,14 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         self._readiness_check_pending = False
 
     @classmethod
-    def with_extra_options(
-        cls, host: str, port: int, ssl_context: SSLContext | None, extra_options: ExtraOptions
-    ) -> Self:
+    def with_options(cls, host: str, port: int, ssl_context: SSLContext | None, options: ServerOptions) -> Self:
         return cls(
             host,
             port,
             ssl_context,
-            default_waiting_settings=extra_options.default_waiting_settings,
-            threaded=extra_options.threaded,
-            startup_timeout=extra_options.startup_timeout,
+            default_waiting_settings=options.default_waiting_settings,
+            threaded=options.threaded,
+            startup_timeout=options.startup_timeout,
         )
 
     def start(self) -> None:

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from .httpserver import ExtraOptions
 from .httpserver import HTTPServer
+from .httpserver import ServerOptions
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -46,15 +46,15 @@ def httpserver_ssl_context() -> None:
 
 
 @pytest.fixture(scope="session")
-def httpserver_extra_options() -> ExtraOptions:
-    return ExtraOptions()
+def httpserver_options() -> ServerOptions:
+    return ServerOptions()
 
 
 @pytest.fixture(scope="session")
 def make_httpserver(
     httpserver_listen_address: tuple[str | None, int | None],
     httpserver_ssl_context: SSLContext | None,
-    httpserver_extra_options: ExtraOptions,
+    httpserver_options: ServerOptions,
 ) -> Generator[HTTPServer, None, None]:
     host, port = httpserver_listen_address
     if not host:
@@ -62,11 +62,11 @@ def make_httpserver(
     if not port:
         port = HTTPServer.DEFAULT_LISTEN_PORT
 
-    server = HTTPServer.with_extra_options(
+    server = HTTPServer.with_options(
         host=host,
         port=port,
         ssl_context=httpserver_ssl_context,
-        extra_options=httpserver_extra_options,
+        options=httpserver_options,
     )
     server.start()
     yield server
@@ -92,13 +92,13 @@ def httpserver(make_httpserver: HTTPServer) -> HTTPServer:
 @pytest.fixture(scope="session")
 def make_httpserver_ipv4(
     httpserver_ssl_context: SSLContext | None,
-    httpserver_extra_options: ExtraOptions,
+    httpserver_options: ServerOptions,
 ) -> Generator[HTTPServer, None, None]:
-    server = HTTPServer.with_extra_options(
+    server = HTTPServer.with_options(
         host="127.0.0.1",
         port=0,
         ssl_context=httpserver_ssl_context,
-        extra_options=httpserver_extra_options,
+        options=httpserver_options,
     )
     server.start()
     yield server
@@ -117,13 +117,13 @@ def httpserver_ipv4(make_httpserver_ipv4: HTTPServer) -> HTTPServer:
 @pytest.fixture(scope="session")
 def make_httpserver_ipv6(
     httpserver_ssl_context: SSLContext | None,
-    httpserver_extra_options: ExtraOptions,
+    httpserver_options: ServerOptions,
 ) -> Generator[HTTPServer, None, None]:
-    server = HTTPServer.with_extra_options(
+    server = HTTPServer.with_options(
         host="::1",
         port=0,
         ssl_context=httpserver_ssl_context,
-        extra_options=httpserver_extra_options,
+        options=httpserver_options,
     )
     server.start()
     yield server
