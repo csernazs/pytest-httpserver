@@ -99,8 +99,8 @@ def main() -> None:
     if current_version == new_version:
         raise UsageError("Current version is the same as new version")
 
-    check_changelog()
     check_git_repository_dirty()
+    check_changelog()
     run_test_release()
 
     bump_version(Path("doc/conf.py"), ["version"], current_version, new_version)
