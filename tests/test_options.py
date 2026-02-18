@@ -5,7 +5,7 @@ from pytest_httpserver import ServerOptions
 from pytest_httpserver import WaitingSettings
 
 
-def test_httpserver_options():
+def test_httpserver_options() -> None:
     options = ServerOptions(
         startup_timeout=60,
         threaded=True,
