@@ -24,7 +24,7 @@ def test_httpserver_options():
     assert server.default_waiting_settings.timeout == 5
 
 
-def test_constructor_signature_matches_with_extra_options():
+def test_constructor_signature_matches_with_server_options() -> None:
     # compares that ServerOptions default values matches with HTTPServer
     # constructor defaults
 
