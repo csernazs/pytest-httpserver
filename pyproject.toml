@@ -22,7 +22,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "Werkzeug >= 2.0.0",
+    "Werkzeug >= 3.1.8",
 ]
 
 [project.urls]
@@ -55,8 +55,8 @@ sphinx-rtd-theme = ">=1,<4"
 reno = "*"
 types-requests = "*"
 pytest = ">=9.0.3,<10.0.0"
-pytest-cov = ">=3,<8"
-coverage = ">=6.4.4,<8.0.0"
+pytest-cov = ">=7.1.0,<8"
+coverage = ">=7.13.5,<8.0.0"
 tomli = { version = "*", markers = "python_version < '3.11'"}
 black = "*"
 ruff = "*"
