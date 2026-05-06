@@ -77,7 +77,7 @@ jobs:
 
 
       - name: Codecov upload
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         if: runner.os == 'Linux'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
