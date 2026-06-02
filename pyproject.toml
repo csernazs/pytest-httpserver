@@ -56,7 +56,7 @@ reno = "*"
 types-requests = "*"
 pytest = ">=9.0.3,<10.0.0"
 pytest-cov = ">=7.1.0,<8"
-coverage = ">=7.13.5,<8.0.0"
+coverage = ">=7.14.1,<8.0.0"
 tomli = { version = "*", markers = "python_version < '3.11'"}
 black = "*"
 ruff = "*"
