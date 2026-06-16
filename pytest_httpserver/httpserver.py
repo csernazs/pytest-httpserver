@@ -18,6 +18,7 @@ from collections.abc import MutableMapping
 from contextlib import contextmanager
 from contextlib import suppress
 from copy import copy
+from dataclasses import dataclass
 from enum import Enum
 from http import HTTPStatus
 from re import Pattern
@@ -947,6 +948,13 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         return host
 
 
+@dataclass
+class ServerOptions:
+    default_waiting_settings: WaitingSettings | None = None
+    threaded: bool = False
+    startup_timeout: float | None = None
+
+
 class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attributes
     """
     Server instance which manages handlers to serve pre-defined requests.
@@ -1000,6 +1008,17 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         self._waiting_result: queue.LifoQueue[bool] = queue.LifoQueue(maxsize=1)
         self.startup_timeout = startup_timeout
         self._readiness_check_pending = False
+
+    @classmethod
+    def with_options(cls, host: str, port: int, ssl_context: SSLContext | None, options: ServerOptions) -> Self:
+        return cls(
+            host,
+            port,
+            ssl_context,
+            default_waiting_settings=options.default_waiting_settings,
+            threaded=options.threaded,
+            startup_timeout=options.startup_timeout,
+        )
 
     def start(self) -> None:
         super().start()
