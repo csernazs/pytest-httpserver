@@ -17,6 +17,7 @@ __all__ = [
     "RequestHandler",
     "RequestMatcher",
     "RequestMatcherKwargs",
+    "ServerOptions",
     "URIPattern",
     "WaitingSettings",
 ]
@@ -34,5 +35,6 @@ from .httpserver import NoHandlerError
 from .httpserver import RequestHandler
 from .httpserver import RequestMatcher
 from .httpserver import RequestMatcherKwargs
+from .httpserver import ServerOptions
 from .httpserver import URIPattern
 from .httpserver import WaitingSettings
