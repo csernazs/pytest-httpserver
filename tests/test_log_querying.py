@@ -40,8 +40,10 @@ def test_verify_assert_msg(httpserver: HTTPServer):
 
     expected_lines = [
         "Matching request found 0 times but expected 1 times.",
-        "Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={} data"
-        "=None json={'foo': 'bar'}>",
+        (
+            "Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={} data"
+            "=None json={'foo': 'bar'}>"
+        ),
         "Found 1 similar request(s):",
         "--- Similar Request Start",
         "Path: /foo",
@@ -70,8 +72,10 @@ def test_verify_assert_msg_no_similar_requests(httpserver: HTTPServer):
 
     expected_lines = [
         "Matching request found 0 times but expected 1 times.",
-        "Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={} data"
-        "=None json={'foo': 'bar'}>",
+        (
+            "Expected request: <RequestMatcher uri='/foo' method='POST' query_string=None headers={} data"
+            "=None json={'foo': 'bar'}>"
+        ),
         "No similar requests found.",
     ]
 

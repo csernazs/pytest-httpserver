@@ -265,7 +265,7 @@ class BooleanQueryMatcher(QueryMatcher):
             return (True, False)
 
 
-def _create_query_matcher(query_string: None | QueryMatcher | str | bytes | Mapping[str, str]) -> QueryMatcher:
+def _create_query_matcher(query_string: QueryMatcher | str | bytes | Mapping[str, str] | None) -> QueryMatcher:
     if isinstance(query_string, QueryMatcher):
         return query_string
 
@@ -300,7 +300,7 @@ class RequestMatcherKwargs(TypedDict, total=False):
     data: str | bytes | None
     data_encoding: str
     headers: Mapping[str, str] | None
-    query_string: None | QueryMatcher | str | bytes | Mapping[str, str]
+    query_string: QueryMatcher | str | bytes | Mapping[str, str] | None
     header_value_matcher: HVMATCHER_T | None
     json: Any
 
@@ -341,7 +341,7 @@ class RequestMatcher:
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
+        query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> None:
@@ -1068,7 +1068,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
+        query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HVMATCHER_T | None = None,
         handler_type: HandlerType = HandlerType.PERMANENT,
         json: Any = UNDEFINED,
@@ -1151,7 +1151,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
+        query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:
@@ -1206,7 +1206,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
+        query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
     ) -> RequestHandler:

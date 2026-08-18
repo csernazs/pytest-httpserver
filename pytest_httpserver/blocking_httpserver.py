@@ -76,7 +76,7 @@ class BlockingHTTPServer(HTTPServerBase):
         data: str | bytes | None = None,
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
-        query_string: None | QueryMatcher | str | bytes | Mapping[str, str] = None,
+        query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HeaderValueMatcher | None = None,
         json: Any = UNDEFINED,
         timeout: int = 30,

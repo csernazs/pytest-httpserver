@@ -116,6 +116,7 @@ lint.ignore = [
   "C408",
   "C901",
   "COM812",
+  "CPY001",
   "EM101",
   "EM103",
   "FBT002",
@@ -148,3 +149,6 @@ lint.ignore = [
 line-length = 120
 target-version = "py310"
 exclude = ["doc", "example*.py", "tests/examples/*.py"]
+
+[tool.ruff.lint.pylint]
+max-positional-args = 10
