@@ -16,6 +16,10 @@ dev: .venv/.st-venv-completed
 precommit: dev
 	poetry run pre-commit run -a
 
+.PHONY: prek
+prek: dev
+	poetry run prek run -a
+
 .PHONY: mypy
 mypy: dev
 	.venv/bin/mypy
