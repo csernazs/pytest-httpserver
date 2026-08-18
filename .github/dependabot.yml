@@ -12,6 +12,7 @@ updates:
           - "*"
 
   - package-ecosystem: "pip"
+    versioning-strategy: increase-if-necessary
     directory: "/"
     schedule:
       interval: "monthly"
