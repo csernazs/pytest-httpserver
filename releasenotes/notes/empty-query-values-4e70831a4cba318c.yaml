@@ -1,0 +1,6 @@
+fixes:
+  - |
+    Preserve empty query values when matching dictionaries and MultiDict objects.
+    Both ``flag=`` and ``flag`` match ``{"flag": ""}`` and no longer match ``{}``.
+    For repeated parameters, dictionary matching uses the first value even when it
+    is empty. MultiDict matching includes every empty value.

@@ -48,6 +48,11 @@ query string as a dictionary.
 
 Behind the scenes an additional step is done by the library: it parses up the
 query_string into the dict and then compares it with the dict provided.
+Empty values are preserved. For example, ``query_string={"flag": ""}`` matches
+both ``?flag=`` and ``?flag``. Neither matches an empty dictionary.
+If a parameter appears more than once, a dictionary matches its first value,
+including an empty value. A ``werkzeug.datastructures.MultiDict`` matches all
+values, including empty ones.
 
 
 URI matching
