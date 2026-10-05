@@ -2,6 +2,32 @@
 Release Notes
 =============
 
+.. _Release Notes_1.2.0:
+
+1.2.0
+=====
+
+.. _Release Notes_1.2.0_Upgrade Notes:
+
+Upgrade Notes
+-------------
+
+- Dictionary expectations must include parameters with empty values.
+  A request for ``flag=&foo=123`` previously matched ``{"foo": "123"}``.
+  It now requires ``{"flag": "", "foo": "123"}``.
+
+
+.. _Release Notes_1.2.0_Bug Fixes:
+
+Bug Fixes
+---------
+
+- Preserve empty query values when matching dictionaries and MultiDict objects.
+  Both ``flag=`` and ``flag`` match ``{"flag": ""}`` and no longer match ``{}``.
+  For repeated parameters, dictionary matching uses the first value even when it
+  is empty. MultiDict matching includes every empty value.
+
+
 .. _Release Notes_1.1.5:
 
 1.1.5
