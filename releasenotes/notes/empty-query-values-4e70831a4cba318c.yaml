@@ -4,3 +4,8 @@ fixes:
     Both ``flag=`` and ``flag`` match ``{"flag": ""}`` and no longer match ``{}``.
     For repeated parameters, dictionary matching uses the first value even when it
     is empty. MultiDict matching includes every empty value.
+upgrade:
+  - |
+    Dictionary expectations must include parameters with empty values.
+    A request for ``flag=&foo=123`` previously matched ``{"foo": "123"}``.
+    It now requires ``{"flag": "", "foo": "123"}``.

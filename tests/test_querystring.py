@@ -54,3 +54,16 @@ def test_querystring_empty_value_does_not_match_missing(httpserver: HTTPServer):
     assert response.status_code == 500
     with pytest.raises(AssertionError, match="No handler found"):
         httpserver.check_assertions()
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Blank query values must be included in the expected dictionary",
+)
+def test_querystring_dict_ignores_empty_value(httpserver: HTTPServer):
+    httpserver.expect_request("/foobar", query_string={"foo": "123"}).respond_with_data("example_response")
+    response = requests.get(httpserver.url_for("/foobar?flag=&foo=123"))
+    httpserver.check_assertions()
+    assert response.status_code == 200
+    assert response.text == "example_response"
