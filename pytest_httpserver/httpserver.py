@@ -839,6 +839,20 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
         self.check_assertions()
         self.check_handler_errors()
 
+    @contextmanager
+    def with_check(self) -> Generator[Self, None, None]:
+        """
+        Check server-side assertions and handler errors when the block exits normally.
+
+        Calls :py:meth:`check` after the body completes. Exceptions raised in the body
+        propagate without running the checks, so a server-side error cannot replace them.
+        This context manager does not wait for requests or stop the server.
+
+        :return: the server instance
+        """
+        yield self
+        self.check()
+
     def check_assertions(self) -> None:
         """
         Raise AssertionError when at least one assertion added
