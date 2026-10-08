@@ -1,0 +1,7 @@
+features:
+  - |
+    Add ``HTTPServer.with_check()``, a context manager that checks server-side
+    assertions and handler errors when its body completes normally. It detects
+    unexpected requests received after the expected ordered requests without
+    changing ``wait()`` semantics. Exceptions raised in the body propagate
+    unchanged.

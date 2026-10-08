@@ -90,3 +90,47 @@ def test_check_raises_errors_in_order(httpserver):
 
     with pytest.raises(ValueError):  # noqa: PT011
         httpserver.check()
+
+
+def test_with_check_success(httpserver: HTTPServer):
+    httpserver.expect_ordered_request("/first").respond_with_data(status=204)
+    httpserver.expect_ordered_request("/second").respond_with_data(status=204)
+
+    with httpserver.with_check() as server:
+        assert server is httpserver
+        assert requests.get(server.url_for("/first")).status_code == 204
+        assert requests.get(server.url_for("/second")).status_code == 204
+
+
+def test_with_check_unexpected_request_after_expected_requests(httpserver: HTTPServer):
+    httpserver.expect_ordered_request("/first").respond_with_data(status=204)
+    httpserver.expect_ordered_request("/second").respond_with_data(status=204)
+
+    with pytest.raises(AssertionError, match="No handler found for request"), httpserver.with_check():
+        assert requests.get(httpserver.url_for("/first")).status_code == 204
+        assert requests.get(httpserver.url_for("/second")).status_code == 204
+        assert requests.get(httpserver.url_for("/unexpected")).status_code == 500
+
+
+def test_with_check_propagates_handler_error(httpserver: HTTPServer):
+    handler_error = ValueError("handler failed")
+
+    def handler(_) -> werkzeug.Response:
+        raise handler_error
+
+    httpserver.expect_request("/error").respond_with_handler(handler)
+
+    with pytest.raises(ValueError, match="handler failed") as error, httpserver.with_check():
+        assert requests.get(httpserver.url_for("/error")).status_code == 500
+
+    assert error.value is handler_error
+
+
+def test_with_check_preserves_body_exception(httpserver: HTTPServer):
+    body_error = RuntimeError("client failed")
+
+    with pytest.raises(RuntimeError, match="client failed") as error, httpserver.with_check():
+        assert requests.get(httpserver.url_for("/unexpected")).status_code == 500
+        raise body_error
+
+    assert error.value is body_error

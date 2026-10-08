@@ -237,6 +237,24 @@ these.
 .. literalinclude :: ../tests/examples/test_howto_check.py
    :language: python
 
+To check automatically when a block finishes, use
+:py:meth:`pytest_httpserver.HTTPServer.with_check`:
+
+.. code-block:: python
+
+    httpserver.expect_ordered_request("/first").respond_with_data(status=204)
+    httpserver.expect_ordered_request("/second").respond_with_data(status=204)
+    with httpserver.with_check():
+        requests.get(httpserver.url_for("/first"))
+        requests.get(httpserver.url_for("/second"))
+
+This checks unexpected requests even after all ordered handlers have been used.
+It also propagates errors raised by response handlers. Checks run only when the
+block exits normally; an exception raised in the block propagates unchanged.
+The context manager does not wait for background clients, so complete their
+work before leaving the block. Use ``wait()`` when you need to wait for handler
+completion.
+
 .. note::
     The scope of the errors checked by the ``check()`` method may
     change in the future - it is added to check all possible errors happened in
