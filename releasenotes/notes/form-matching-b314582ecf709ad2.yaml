@@ -1,0 +1,8 @@
+features:
+  - |
+    Add the ``data_form`` keyword argument to request expectations and
+    ``BlockingHTTPServer.assert_request()`` for matching parsed form fields.
+    A mapping matches each field's first value, while a Werkzeug ``MultiDict``
+    matches all repeated values. Form expectations are mutually exclusive with
+    ``data`` and ``json`` expectations, and preserve the raw request body for
+    response handlers.

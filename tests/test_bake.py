@@ -20,6 +20,17 @@ def test_bake_with_headers(httpserver: HTTPServer) -> None:
     assert response.json() == {"result": "ok"}
 
 
+def test_bake_with_form(httpserver: HTTPServer) -> None:
+    server = httpserver.bake(method="POST", data_form={"foo": "bar"})
+    server.expect_request("/form").respond_with_data("ok")
+
+    response = requests.post(server.url_for("/form"), data={"foo": "bar"})
+
+    assert response.status_code == 200
+    assert response.text == "ok"
+    httpserver.check()
+
+
 @pytest.mark.parametrize(
     ("bake_chain", "expect_kwargs", "request_method"),
     [
