@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    Support for Werkzeug versions older than 3.0.0 has been removed as
+    pytest-httpserver now requires ``Werkzeug >= 3.0.0``. The fallback for
+    the deprecated ``werkzeug.http.parse_authorization_header`` has been
+    dropped from ``HeaderValueMatcher`` and the documentation has been
+    updated accordingly.

@@ -26,7 +26,6 @@ from typing import Any
 from typing import ClassVar
 from typing import TypedDict
 
-import werkzeug.http
 from werkzeug import Request
 from werkzeug import Response
 from werkzeug.datastructures import Authorization
@@ -152,10 +151,7 @@ class HeaderValueMatcher:
 
     @staticmethod
     def authorization_header_value_matcher(actual: str | None, expected: str) -> bool:
-        func = getattr(Authorization, "from_header", None)
-        if func is None:  # Werkzeug < 2.3.0
-            func = werkzeug.http.parse_authorization_header  # type: ignore[attr-defined]
-        return func(actual) == func(expected)  # type: ignore
+        return Authorization.from_header(actual) == Authorization.from_header(expected)
 
     @staticmethod
     def default_header_value_matcher(actual: str | None, expected: str) -> bool:
