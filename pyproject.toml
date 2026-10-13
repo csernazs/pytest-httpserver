@@ -101,7 +101,6 @@ implicit_reexport = false
 
 [tool.black]
 line-length = 120
-safe = true
 
 [tool.ruff]
 lint.select = ["ALL"]
