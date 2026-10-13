@@ -162,8 +162,15 @@ class HeaderValueMatcher:
         return actual == expected
 
     def __call__(self, header_name: str, actual: str | None, expected: str) -> bool:
+        for name, matcher in self.matchers.items():
+            if name.lower() == header_name.lower():
+                return matcher(actual, expected)
+
         try:
-            matcher = self.matchers[header_name]
+            if isinstance(self.matchers, defaultdict) and self.matchers.default_factory is not None:
+                matcher = self.matchers.default_factory()
+            else:
+                matcher = self.matchers[header_name]
         except KeyError:
             raise NoMethodFoundForMatchingHeaderValueError(
                 "No method found for matching header value: {}".format(header_name)

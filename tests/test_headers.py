@@ -1,15 +1,40 @@
 import http.client
+from collections import defaultdict
 
+import pytest
 import requests
 from werkzeug.datastructures import Headers
 from werkzeug.http import parse_dict_header
 
 from pytest_httpserver import HTTPServer
 from pytest_httpserver.httpserver import HeaderValueMatcher
+from pytest_httpserver.httpserver import NoMethodFoundForMatchingHeaderValueError
 
 
-def test_custom_headers(httpserver: HTTPServer):
-    headers_with_values_in_direct_order = {"Custom": 'Scheme key0="value0", key1="value1"'}
+def test_header_matcher_fallback_does_not_cache_header_names():
+    matchers = defaultdict(lambda: HeaderValueMatcher.default_header_value_matcher)
+    matcher = HeaderValueMatcher(matchers)
+
+    assert matcher("x-custom", "value", "value")
+    assert not matcher("x-custom", "VALUE", "value")
+    assert not matchers
+
+    matchers["X-Custom"] = lambda actual, expected: actual == expected.upper()
+    assert matcher("x-custom", "VALUE", "value")
+
+
+def test_header_matcher_without_default():
+    matcher = HeaderValueMatcher({"x-custom": HeaderValueMatcher.default_header_value_matcher})
+
+    assert matcher("X-CUSTOM", "value", "value")
+    assert not matcher("X-CUSTOM", "VALUE", "value")
+    with pytest.raises(NoMethodFoundForMatchingHeaderValueError, match="X-Missing"):
+        matcher("X-Missing", "value", "value")
+
+
+@pytest.mark.parametrize("header_name", ["Custom", "custom", "CUSTOM"])
+def test_custom_headers(httpserver: HTTPServer, header_name: str):
+    headers_with_values_in_direct_order = {header_name: 'Scheme key0="value0", key1="value1"'}
     httpserver.expect_request(uri="/", headers=headers_with_values_in_direct_order).respond_with_data("OK")
     response = requests.get(httpserver.url_for("/"), headers=headers_with_values_in_direct_order)
     assert response.status_code == 200
@@ -42,9 +67,10 @@ def test_custom_headers(httpserver: HTTPServer):
 
 
 # See https://en.wikipedia.org/wiki/Digest_access_authentication
-def test_authorization_headers(httpserver: HTTPServer):
+@pytest.mark.parametrize("header_name", ["Authorization", "authorization", "AUTHORIZATION", "aUtHoRiZaTiOn"])
+def test_authorization_headers(httpserver: HTTPServer, header_name: str):
     headers_with_values_in_direct_order = {
-        "Authorization": (
+        header_name: (
             'Digest username="Mufasa",'
             'realm="testrealm@host.com",'
             'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
