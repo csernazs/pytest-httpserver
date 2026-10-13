@@ -124,10 +124,10 @@ library added to the requirements, which may cause compatibility issues.
 Requirements version restrictions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In general, the package requirements should have no version restrictions. For
-example, the *werkzeug* library has no restrictions, which means that if a new
-version comes out of it, it is assumed that *pytest-httpserver* will be able to
-run with it.
+In general, the package requirements should have as few version restrictions
+as possible. The *werkzeug* library currently requires *werkzeug >= 3.0.0*, so
+new versions of *werkzeug* are assumed to work with *pytest-httpserver*,
+but older, unsupported versions are not.
 
 Many people uses this library in an environment having full of other packages
 and limiting version here will limit their versions in their requirements also.
