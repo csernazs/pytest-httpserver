@@ -530,8 +530,11 @@ output::
   Note: these errors were not raised because the test did not call the check methods of the server (for example HTTPServer.check()).
 
 Errors which were already raised during the test (by calling the ``check()``
-methods) are not added to the report again, and the errors collected during a
-test are not leaked into the report of the other tests.
+methods) are not added to the report again. If the test fails in multiple
+phases (such as setup and teardown), each error is attached to one report
+only - errors collected after a failed phase are added to the report of the
+next failed phase. The collected errors are also not leaked into the report
+of the other tests.
 
 This works for every test which uses the ``httpserver``, ``httpserver_ipv4``
 or ``httpserver_ipv6`` fixture, no configuration is needed. If you use your

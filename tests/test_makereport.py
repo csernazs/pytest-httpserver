@@ -182,6 +182,65 @@ def test_ipv4_server_reported(pytester: pytest.Pytester):
     )
 
 
+def test_no_duplication_when_setup_and_teardown_fails(pytester: pytest.Pytester):
+    pytester.makepyfile("""
+        import pytest
+        import requests
+
+        @pytest.fixture
+        def client(httpserver):
+            requests.get(httpserver.url_for("/unexpected_setup"))
+            raise RuntimeError("error in setup")
+
+        @pytest.fixture
+        def teardown_error():
+            yield
+            raise RuntimeError("error in teardown")
+
+        def test_setup_and_teardown_error(teardown_error, client):
+            pass
+        """)
+    result = pytester.runpytest(*pytester_args)
+    result.assert_outcomes(errors=2)
+    # the same pending assertion must be attached to one report only
+    title_lines = [line for line in result.stdout.lines if "pytest-httpserver report" in line]
+    assert len(title_lines) == 1
+    result.stdout.fnmatch_lines(
+        [
+            "*pytest-httpserver report*",
+            "*No handler found for request*unexpected_setup*",
+        ]
+    )
+
+
+def test_errors_made_in_teardown_reported_once(pytester: pytest.Pytester):
+    pytester.makepyfile("""
+        import pytest
+        import requests
+
+        @pytest.fixture
+        def client(httpserver):
+            yield "client"
+            requests.get(httpserver.url_for("/unexpected_teardown"))
+            raise RuntimeError("error in teardown")
+
+        def test_teardown_error(client, httpserver):
+            requests.get(httpserver.url_for("/unexpected_call"))
+            assert False, "test failed"
+        """)
+    result = pytester.runpytest(*pytester_args)
+    result.assert_outcomes(failed=1, errors=1)
+    # each error is reported in the report of the phase where it was collected
+    title_lines = [line for line in result.stdout.lines if "pytest-httpserver report" in line]
+    assert len(title_lines) == 2
+    result.stdout.fnmatch_lines(
+        [
+            "*No handler found for request*unexpected_teardown*",
+            "*No handler found for request*unexpected_call*",
+        ]
+    )
+
+
 def test_registered_custom_server_reported(pytester: pytest.Pytester):
     pytester.makepyfile("""
         import pytest

@@ -14,7 +14,120 @@ if TYPE_CHECKING:
 
 REPORT_SECTION_TITLE = "pytest-httpserver report"
 
-SERVERS_STASH_KEY = pytest.StashKey[list[HTTPServerBase]]()
+
+class _ServerRegistry:
+    """
+    Registry of the servers used by a test.
+
+    It keeps track of the server findings (assertions and handler errors):
+
+    * which findings were already attached to a test report, so a finding is
+      never added to more than one report, even if the test fails in multiple
+      phases (setup, call and teardown),
+
+    * a snapshot of the findings taken when the fixtures of the test are torn
+      down (see :py:meth:`snapshot`), so the findings collected during the
+      teardown phase can be attached to the teardown report even if the
+      server's state is cleared by another (for example session scoped)
+      fixture finalizer before the report is made.
+    """
+
+    def __init__(self) -> None:
+        self._servers: list[HTTPServerBase] = []
+        self._reported_findings: list[object] = []
+        self._snapshotted_findings: list[tuple[HTTPServerBase, str, object]] = []
+
+    def register(self, server: HTTPServerBase) -> bool:
+        """
+        Registers the server.
+
+        :param server: the server object
+        :return: ``True`` if the server was not registered before, ``False`` otherwise
+        """
+        if server in self._servers:
+            return False
+        self._servers.append(server)
+        return True
+
+    def snapshot(self, server: HTTPServerBase) -> None:
+        """
+        Copies the not yet reported findings of the server to the registry.
+
+        This is called from a finalizer of the fixture which registered the
+        server, so the findings collected during the teardown phase of the test
+        are copied before any other (typically session scoped) fixture
+        finalizer clears the state of the server.
+
+        :param server: the server object
+        """
+        for kind, finding in self._iter_findings(server):
+            if not self._is_reported(finding):
+                self._snapshotted_findings.append((server, kind, finding))
+
+    def _is_reported(self, finding: object) -> bool:
+        return any(finding is reported for reported in self._reported_findings)
+
+    def _iter_findings(self, server: HTTPServerBase) -> Generator[tuple[str, object], None, None]:
+        for assertion in server.assertions:
+            yield ("assertion", assertion)
+        for handler_error in server.handler_errors:
+            yield ("error", handler_error)
+
+    def collect_findings(self) -> list[str]:
+        """
+        Returns the report lines of the findings which were not reported yet.
+
+        The returned findings are marked as reported so subsequent calls won't
+        include them again.
+
+        :return: list of the report lines, empty list if there's nothing to report
+        """
+
+        section_lines: list[str] = []
+
+        for server in self._servers:
+            server_lines: list[str] = []
+            new_assertions: list[object] = []
+            new_handler_errors: list[object] = []
+
+            candidates: list[tuple[str, object]] = list(self._iter_findings(server))
+            candidates.extend(
+                (kind, finding)
+                for snapshotted_server, kind, finding in self._snapshotted_findings
+                if snapshotted_server is server
+            )
+
+            for kind, finding in candidates:
+                if self._is_reported(finding):
+                    continue
+                if kind == "assertion":
+                    new_assertions.append(finding)
+                else:
+                    new_handler_errors.append(finding)
+                self._reported_findings.append(finding)
+
+            if new_assertions:
+                server_lines.append("Pending server-side assertions:")
+                server_lines.append("")
+                for index, assertion in enumerate(new_assertions, start=1):
+                    server_lines.append("{}. {}".format(index, assertion))
+                    server_lines.append("")
+
+            if new_handler_errors:
+                server_lines.append("Errors raised by request handlers:")
+                server_lines.append("")
+                for index, error in enumerate(new_handler_errors, start=1):
+                    server_lines.append("{}. {!r}".format(index, error))
+                    server_lines.append("")
+
+            if server_lines:
+                section_lines.append("--- {}".format(server))
+                section_lines.extend(server_lines)
+
+        return section_lines
+
+
+SERVERS_STASH_KEY = pytest.StashKey[_ServerRegistry]()
 
 
 class Plugin:
@@ -50,12 +163,20 @@ def register_server(request: pytest.FixtureRequest, server: HTTPServerBase) -> N
     :param server: the server object to register
     """
     node = request.node
-    servers = node.stash.get(SERVERS_STASH_KEY, None)
-    if servers is None:
-        servers = []
-        node.stash[SERVERS_STASH_KEY] = servers
-    if server not in servers:
-        servers.append(server)
+    registry = node.stash.get(SERVERS_STASH_KEY, None)
+    if registry is None:
+        registry = _ServerRegistry()
+        node.stash[SERVERS_STASH_KEY] = registry
+
+    def snapshot() -> None:
+        registry.snapshot(server)
+
+    if registry.register(server):
+        # copy the findings of the server before the state of the server is
+        # cleared (which may happen in another fixture finalizer), so the
+        # findings collected during the teardown phase of the test can be
+        # attached to the report of the teardown phase
+        request.addfinalizer(snapshot)
 
 
 def get_httpserver_listen_address() -> tuple[str | None, int | None]:
@@ -150,39 +271,19 @@ def httpserver_ipv6(make_httpserver_ipv6: HTTPServer, request: pytest.FixtureReq
     return server
 
 
-def _format_server_findings(server: HTTPServerBase) -> list[str]:
-    """
-    Formats the pending (not yet raised) errors of the specified server.
-
-    :param server: the server object
-    :return: list of the report lines, empty list if there's nothing to report
-    """
-
-    lines: list[str] = []
-
-    assertions = list(server.assertions)
-    if assertions:
-        lines.append("Pending server-side assertions:")
-        lines.append("")
-        for index, assertion in enumerate(assertions, start=1):
-            lines.append("{}. {}".format(index, assertion))
-            lines.append("")
-
-    handler_errors = list(server.handler_errors)
-    if handler_errors:
-        lines.append("Errors raised by request handlers:")
-        lines.append("")
-        for index, error in enumerate(handler_errors, start=1):
-            lines.append("{}. {!r}".format(index, error))
-            lines.append("")
-
-    return lines
+def _format_report_section(section_lines: list[str]) -> str:
+    section_lines.insert(0, "Server-side errors collected by pytest-httpserver (not raised during the test):")
+    section_lines.append(
+        "Note: these errors were not raised because the test did not call the check "
+        "methods of the server (for example HTTPServer.check())."
+    )
+    return "\n".join(section_lines)
 
 
 @pytest.hookimpl(wrapper=True)
 def pytest_runtest_makereport(
     item: pytest.Item,
-    call: pytest.CallInfo[None],  # noqa: ARG001
+    call: pytest.CallInfo[None],
 ) -> Generator[None, object, object]:
     """
     Adds the pending server-side errors to the report of the failed test.
@@ -197,24 +298,26 @@ def pytest_runtest_makereport(
     To make the debugging easier in these cases, the errors are attached to
     the report of the failed test (as a report section), as they may explain
     why the test failed.
+
+    Each error is attached to one report only, so if the test fails in
+    multiple phases (such as setup and teardown), the errors are not
+    duplicated - errors collected after a failed phase are added to the
+    report of the next failed phase.
+
+    The registry of the servers is removed from the test item when the report
+    of the teardown phase is made, so neither the servers nor their state
+    (such as the log of the requests) outlives the test.
     """
     report = yield
-    if isinstance(report, pytest.TestReport) and report.failed:
-        servers = item.stash.get(SERVERS_STASH_KEY, None)
-        if servers:
-            section_lines: list[str] = []
-            for server in servers:
-                server_lines = _format_server_findings(server)
-                if server_lines:
-                    section_lines.append("--- {}".format(server))
-                    section_lines.extend(server_lines)
-            if section_lines:
-                section_lines.insert(
-                    0, "Server-side errors collected by pytest-httpserver (not raised during the test):"
-                )
-                section_lines.append(
-                    "Note: these errors were not raised because the test did not call the check "
-                    "methods of the server (for example HTTPServer.check())."
-                )
-                report.sections.append((REPORT_SECTION_TITLE, "\n".join(section_lines)))
+    if isinstance(report, pytest.TestReport):
+        registry = item.stash.get(SERVERS_STASH_KEY, None)
+        if registry is not None:
+            if report.failed:
+                section_lines = registry.collect_findings()
+                if section_lines:
+                    report.sections.append((REPORT_SECTION_TITLE, _format_report_section(section_lines)))
+            if call.when == "teardown":
+                # this is the last report of the test, drop the registry to
+                # not keep the server objects (and their state) alive
+                del item.stash[SERVERS_STASH_KEY]
     return report
