@@ -341,6 +341,7 @@ class RequestMatcherKwargs(TypedDict, total=False):
     query_string: QueryMatcher | str | bytes | Mapping[str, str] | None
     header_value_matcher: HVMATCHER_T | None
     json: Any
+    data_form: Mapping[str, str] | None
 
 
 class RequestMatcher:
@@ -370,6 +371,9 @@ class RequestMatcher:
     :param json: a python object (eg. a dict) whose value will be compared to the request body after it
         is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
         If that's desired, add it to the headers parameter.
+    :param data_form: expected form fields, parsed by werkzeug using the request's *Content-Type*.
+        A mapping matches the first value for each field; a ``MultiDict`` matches all values.
+        Mutually exclusive with `data` and `json`.
     """
 
     def __init__(
@@ -382,15 +386,19 @@ class RequestMatcher:
         query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
+        data_form: Mapping[str, str] | None = None,
     ) -> None:
         if json is not UNDEFINED and data is not None:
             raise ValueError("data and json parameters are mutually exclusive")
+        if data_form is not None and (data is not None or json is not UNDEFINED):
+            raise ValueError("data_form is mutually exclusive with data and json")
 
         self.uri = uri
         self.method = method
         self.query_string = query_string
         self.query_matcher = _create_query_matcher(self.query_string)
         self.json = json
+        self.data_form = data_form
 
         self.headers: Mapping[str, str] = {}
         if headers is not None:
@@ -416,9 +424,11 @@ class RequestMatcher:
         retval = "<{} ".format(class_name)
         retval += (
             "uri={uri!r} method={method!r} query_string={query_string!r} "
-            "headers={headers!r} data={data!r} json={json!r}>"
+            "headers={headers!r} data={data!r} json={json!r}"
         ).format_map(self.__dict__)
-        return retval
+        if self.data_form is not None:
+            retval += f" data_form={self.data_form!r}"
+        return retval + ">"
 
     def match_data(self, request: Request) -> bool:
         """
@@ -477,6 +487,17 @@ class RequestMatcher:
 
         return bool(json_received == self.json)
 
+    def match_data_form(self, request: Request) -> bool:
+        """Match parsed form fields, or accept any form when no expectation is set."""
+        if self.data_form is None:
+            return True
+
+        # Cache the raw body before form parsing so response handlers can still read it.
+        request.get_data()
+        if isinstance(self.data_form, MultiDict):
+            return bool(request.form == self.data_form)
+        return request.form.to_dict() == dict(self.data_form)
+
     def difference(self, request: Request) -> list[tuple[str, str, str | URIPattern]]:
         """
         Calculates the difference between the matcher and the request.
@@ -515,6 +536,8 @@ class RequestMatcher:
 
         if not self.match_json(request):
             retval.append(("json", request.data, self.json))
+        if not self.match_data_form(request):
+            retval.append(("data_form", request.form, self.data_form))
         return retval
 
     def match(self, request: Request) -> bool:
@@ -640,9 +663,11 @@ class RequestHandler(RequestHandlerBase):
         retval = (
             f"<{class_name} uri={self.matcher.uri!r} method={self.matcher.method!r} "
             f"query_string={self.matcher.query_string!r} headers={self.matcher.headers!r} data={self.matcher.data!r} "
-            f"json={self.matcher.json!r}>"
+            f"json={self.matcher.json!r}"
         )
-        return retval
+        if self.matcher.data_form is not None:
+            retval += f" data_form={self.matcher.data_form!r}"
+        return retval + ">"
 
 
 class RequestHandlerList(list[RequestHandler]):
@@ -1124,6 +1149,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         header_value_matcher: HVMATCHER_T | None = None,
         handler_type: HandlerType = HandlerType.PERMANENT,
         json: Any = UNDEFINED,
+        data_form: Mapping[str, str] | None = None,
     ) -> RequestHandler:
         """
         Create and register a request handler.
@@ -1171,10 +1197,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         :param json: a python object (eg. a dict) whose value will be compared to the request body after it
             is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
             If that's desired, add it to the headers parameter.
+        :param data_form: expected form fields, parsed by werkzeug using the request's *Content-Type*.
+            A mapping matches the first value for each field; a ``MultiDict`` matches all values.
+            Mutually exclusive with `data` and `json`.
 
         :return: Created and register :py:class:`RequestHandler`.
 
-        Parameters `json` and `data` are mutually exclusive.
+        Parameters `json`, `data`, and `data_form` are mutually exclusive.
         """
 
         matcher = self.create_matcher(
@@ -1186,6 +1215,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             query_string=query_string,
             header_value_matcher=header_value_matcher,
             json=json,
+            **({"data_form": data_form} if data_form is not None else {}),
         )
         request_handler = RequestHandler(matcher)
         if handler_type == HandlerType.PERMANENT:
@@ -1206,6 +1236,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
+        data_form: Mapping[str, str] | None = None,
     ) -> RequestHandler:
         """
         Create and register a oneshot request handler.
@@ -1233,10 +1264,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         :param json: a python object (eg. a dict) whose value will be compared to the request body after it
             is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
             If that's desired, add it to the headers parameter.
+        :param data_form: expected form fields, parsed by werkzeug using the request's *Content-Type*.
+            A mapping matches the first value for each field; a ``MultiDict`` matches all values.
+            Mutually exclusive with `data` and `json`.
 
         :return: Created and register :py:class:`RequestHandler`.
 
-        Parameters `json` and `data` are mutually exclusive.
+        Parameters `json`, `data`, and `data_form` are mutually exclusive.
         """
 
         return self.expect_request(
@@ -1249,6 +1283,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             header_value_matcher=header_value_matcher,
             handler_type=HandlerType.ONESHOT,
             json=json,
+            **({"data_form": data_form} if data_form is not None else {}),
         )
 
     def expect_ordered_request(
@@ -1261,6 +1296,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
         header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
+        data_form: Mapping[str, str] | None = None,
     ) -> RequestHandler:
         """
         Create and register a ordered request handler.
@@ -1288,10 +1324,13 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         :param json: a python object (eg. a dict) whose value will be compared to the request body after it
             is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
             If that's desired, add it to the headers parameter.
+        :param data_form: expected form fields, parsed by werkzeug using the request's *Content-Type*.
+            A mapping matches the first value for each field; a ``MultiDict`` matches all values.
+            Mutually exclusive with `data` and `json`.
 
         :return: Created and register :py:class:`RequestHandler`.
 
-        Parameters `json` and `data` are mutually exclusive.
+        Parameters `json`, `data`, and `data_form` are mutually exclusive.
         """
 
         return self.expect_request(
@@ -1304,6 +1343,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             header_value_matcher=header_value_matcher,
             handler_type=HandlerType.ORDERED,
             json=json,
+            **({"data_form": data_form} if data_form is not None else {}),
         )
 
     def format_matchers(self) -> str:

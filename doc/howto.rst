@@ -55,6 +55,26 @@ including an empty value. A ``werkzeug.datastructures.MultiDict`` matches all
 values, including empty ones.
 
 
+Matching form data
+------------------
+
+Use ``data_form`` to match parsed form fields without depending on their encoded
+order or spelling:
+
+.. literalinclude :: ../tests/examples/test_howto_form_data.py
+   :language: python
+
+A dictionary matches the first value for each field. Use a
+``werkzeug.datastructures.MultiDict`` to match all values of repeated fields.
+Extra fields do not match, and an empty value is distinct from a missing field.
+
+Werkzeug parses form fields when the request's ``Content-Type`` header is
+``application/x-www-form-urlencoded`` or ``multipart/form-data``.
+``data_form={}`` matches requests with no parsed form fields; use ``headers``
+if a particular content type is required. ``data_form`` is mutually exclusive
+with ``data`` and ``json``. The raw body remains available to response handlers.
+
+
 URI matching
 ------------
 
