@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Add an opt-in case-insensitive header value matcher,
+    ``CaseInsensitiveHeaderValueMatcher``, which can be passed as
+    ``header_value_matcher`` to expect_request. It matches header names
+    case-insensitively, parses Authorization values by default, and compares
+    other values exactly. A custom mapping of header names to comparator
+    functions can be supplied.
