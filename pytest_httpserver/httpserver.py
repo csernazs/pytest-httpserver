@@ -162,15 +162,8 @@ class HeaderValueMatcher:
         return actual == expected
 
     def __call__(self, header_name: str, actual: str | None, expected: str) -> bool:
-        for name, matcher in self.matchers.items():
-            if name.lower() == header_name.lower():
-                return matcher(actual, expected)
-
         try:
-            if isinstance(self.matchers, defaultdict) and self.matchers.default_factory is not None:
-                matcher = self.matchers.default_factory()
-            else:
-                matcher = self.matchers[header_name]
+            matcher = self.matchers[header_name]
         except KeyError:
             raise NoMethodFoundForMatchingHeaderValueError(
                 "No method found for matching header value: {}".format(header_name)
@@ -182,6 +175,43 @@ HeaderValueMatcher.DEFAULT_MATCHERS = defaultdict(
     lambda: HeaderValueMatcher.default_header_value_matcher,
     {"Authorization": HeaderValueMatcher.authorization_header_value_matcher},
 )
+
+
+class CaseInsensitiveHeaderValueMatcher:
+    """
+    Match header values using case-insensitive comparator names.
+
+    This matcher must be passed explicitly as ``header_value_matcher``. By
+    default, it parses Authorization values and compares other values exactly,
+    independently of ``HeaderValueMatcher.DEFAULT_MATCHERS``.
+
+    :param matchers: optional mapping of header names to comparator functions,
+        replacing the built-in comparators. Keys are copied and lowercased at
+        construction; the last entry wins if names differ only in case. Later
+        changes to the input mapping do not affect this instance. A defaultdict's
+        factory supplies comparators for missing names without caching them;
+        otherwise missing names raise NoMethodFoundForMatchingHeaderValueError.
+    """
+
+    def __init__(self, matchers: Mapping[str, Callable[[str | None, str], bool]] | None = None) -> None:
+        if matchers is None:
+            matchers = defaultdict(
+                lambda: HeaderValueMatcher.default_header_value_matcher,
+                {"Authorization": HeaderValueMatcher.authorization_header_value_matcher},
+            )
+        self._matchers = {name.lower(): matcher for name, matcher in matchers.items()}
+        self._default_factory = matchers.default_factory if isinstance(matchers, defaultdict) else None
+
+    def __call__(self, header_name: str, actual: str | None, expected: str) -> bool:
+        try:
+            matcher = self._matchers[header_name.lower()]
+        except KeyError:
+            if self._default_factory is None:
+                raise NoMethodFoundForMatchingHeaderValueError(
+                    "No method found for matching header value: {}".format(header_name)
+                )
+            matcher = self._default_factory()
+        return matcher(actual, expected)
 
 
 class QueryMatcher(abc.ABC):

@@ -5,9 +5,9 @@ from queue import Queue
 from typing import TYPE_CHECKING
 from typing import Any
 
+from pytest_httpserver.httpserver import HVMATCHER_T
 from pytest_httpserver.httpserver import METHOD_ALL
 from pytest_httpserver.httpserver import UNDEFINED
-from pytest_httpserver.httpserver import HeaderValueMatcher
 from pytest_httpserver.httpserver import HTTPServerBase
 from pytest_httpserver.httpserver import QueryMatcher
 from pytest_httpserver.httpserver import RequestHandlerBase
@@ -77,7 +77,7 @@ class BlockingHTTPServer(HTTPServerBase):
         data_encoding: str = "utf-8",
         headers: Mapping[str, str] | None = None,
         query_string: QueryMatcher | str | bytes | Mapping[str, str] | None = None,
-        header_value_matcher: HeaderValueMatcher | None = None,
+        header_value_matcher: HVMATCHER_T | None = None,
         json: Any = UNDEFINED,
         timeout: int = 30,
     ) -> BlockingRequestHandler:
@@ -104,7 +104,7 @@ class BlockingHTTPServer(HTTPServerBase):
             specified in the request. If multiple values specified for a given key, the first
             value will be used. If multiple values needed to be handled, use ``MultiDict``
             object from werkzeug.
-        :param header_value_matcher: :py:class:`HeaderValueMatcher` that matches values of headers.
+        :param header_value_matcher: callable that matches values of headers.
         :param json: a python object (eg. a dict) whose value will be compared to the request body after it
             is loaded as json. If load fails, this matcher will be failed also. *Content-Type* is not checked.
             If that's desired, add it to the headers parameter.

@@ -69,6 +69,12 @@ HeaderValueMatcher
     .. autoclass:: HeaderValueMatcher
         :members:
 
+CaseInsensitiveHeaderValueMatcher
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    .. autoclass:: CaseInsensitiveHeaderValueMatcher
+        :members:
+
 URIPattern
 ~~~~~~~~~~
 

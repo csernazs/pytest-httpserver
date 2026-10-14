@@ -202,6 +202,47 @@ In case you don't want to change the defaults, you can provide the
 .. literalinclude :: ../tests/examples/test_howto_header_value_matcher.py
    :language: python
 
+Case-insensitive comparator names
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``HeaderValueMatcher`` selects comparators by exact header name and remains the
+default. To select them regardless of header-name casing, explicitly pass a
+``CaseInsensitiveHeaderValueMatcher`` to an expectation or use ``bake()``:
+
+.. code:: python
+
+    from pytest_httpserver import CaseInsensitiveHeaderValueMatcher
+
+    server = httpserver.bake(header_value_matcher=CaseInsensitiveHeaderValueMatcher())
+    server.expect_request(
+        "/", headers={"authorization": 'Digest a="1", b="2"'}
+    ).respond_with_data("OK")
+
+This parses ``Authorization`` values for any casing of that header name. Other
+header values still use exact, case-sensitive equality. Only expectations
+registered through ``server`` use this matcher; the original ``httpserver``
+retains its defaults.
+
+Custom comparator keys are also case-insensitive:
+
+.. code:: python
+
+    def compare_values(actual: str | None, expected: str) -> bool:
+        return actual is not None and actual.lower() == expected.lower()
+
+
+    matcher = CaseInsensitiveHeaderValueMatcher({"x-CUSTOM": compare_values})
+    httpserver.expect_request(
+        "/custom", headers={"X-Custom": "value"}, header_value_matcher=matcher
+    ).respond_with_data("OK")
+
+The supplied mapping replaces the built-in comparators and is copied when the
+matcher is created. If keys differ only in case, the last entry wins. A plain
+mapping raises ``NoMethodFoundForMatchingHeaderValueError`` for unregistered
+names; a ``defaultdict`` can supply a fallback comparator without caching those
+names. Create a new matcher to use a changed mapping. Instances do not read or
+modify ``HeaderValueMatcher.DEFAULT_MATCHERS`` and do not share a registry.
+
 Using custom request handler
 ----------------------------
 In the case the response is not static, for example it depends on the request,
