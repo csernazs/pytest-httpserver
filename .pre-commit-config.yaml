@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.0
+    rev: v0.17.1
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -23,7 +23,7 @@ repos:
     - id: requirements-txt-fixer
 
   - repo: https://github.com/pycqa/isort
-    rev: 9.0.2
+    rev: 10.0.0b1
     hooks:
       - id: isort
         name: isort (python)
