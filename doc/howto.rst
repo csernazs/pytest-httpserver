@@ -54,6 +54,31 @@ If a parameter appears more than once, a dictionary matches its first value,
 including an empty value. A ``werkzeug.datastructures.MultiDict`` matches all
 values, including empty ones.
 
+Percent encoding
+~~~~~~~~~~~~~~~~
+
+A string or bytes value for ``query_string`` is matched byte-for-byte against
+the query received by the server. A string is encoded as UTF-8, but it is not
+URL-quoted or percent-decoded. Supply the encoded query without the leading
+``?``. For example, ``"q=hello%20world"`` matches that exact spelling, not
+``"q=hello+world"``.
+
+A dictionary or ``MultiDict`` instead matches the parsed query parameters.
+The request's names and values are percent-decoded, and ``+`` becomes a space.
+The expected mapping is used as-is, so supply decoded names and values:
+``{"q": "hello world"}`` matches both ``?q=hello%20world`` and
+``?q=hello+world``. This also avoids depending on how your HTTP client encodes
+spaces or orders parameters with distinct names. Repeated values for the same
+name still follow the dictionary and ``MultiDict`` rules described above.
+
+To match a literal plus sign, use ``{"q": "a+b"}`` with a request containing
+``?q=a%2Bb``. Similarly, ``{"q": "hello%20world"}`` expects the literal
+characters ``%20``, so it matches ``?q=hello%2520world``, not
+``?q=hello%20world``. These rules apply to parameter names as well as values.
+
+.. literalinclude :: ../tests/examples/test_howto_query_params_encoding.py
+   :language: python
+
 
 Matching form data
 ------------------

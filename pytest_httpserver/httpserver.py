@@ -238,6 +238,8 @@ class StringQueryMatcher(QueryMatcher):
             If string is specified, it will be encoded by the encode() method.
             The query must not start with '?' but will be exactly (byte-by-byte) equal
             the actual query string of the incoming request.
+            Supply the URL-encoded query: no percent-decoding or URL-quoting is performed,
+            so a space encoded as '%20' is different from one encoded as '+'.
         """
         if not isinstance(query_string, (str, bytes)):
             raise TypeError("query_string must be a string, or a bytes-like object")
@@ -269,6 +271,10 @@ class MappingQueryMatcher(QueryMatcher):
             If you want to match multiple values, use a MultiDict object from werkzeug, which
             represents multiple values for one key. Empty values are kept, including
             parameters without an equals sign. An empty value is distinct from a missing key.
+            The request's names and values are percent-decoded, with '+' decoded as a space.
+            Supply decoded names and values in the expected mapping, which is used as-is.
+            For example, {'q': 'hello world'} matches both 'q=hello%20world' and
+            'q=hello+world'; {'q': 'hello%20world'} instead matches 'q=hello%2520world'.
         """
         self.query_dict = query_dict
 
