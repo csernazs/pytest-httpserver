@@ -28,6 +28,22 @@ def test_qm_bytes():
     assert_not_match(qm, b"k2=v2&k1=v1")
 
 
+@pytest.mark.parametrize("expected", ["q=hello%20world", b"q=hello%20world"])
+def test_qm_string_preserves_percent_encoding(expected):
+    qm = StringQueryMatcher(expected)
+    assert_match(qm, b"q=hello%20world")
+    assert_not_match(qm, b"q=hello+world")
+    assert_not_match(qm, b"q=hello world")
+
+
+@pytest.mark.parametrize("mapping_type", [dict, MultiDict])
+def test_qm_mapping_decodes_names_and_values(mapping_type):
+    qm = MappingQueryMatcher(mapping_type({"search term": "hello world", "literal": "a+b%20"}))
+    assert_match(qm, b"search%20term=hello%20world&literal=a%2Bb%2520")
+    assert_match(qm, b"literal=a%2Bb%2520&search+term=hello+world")
+    assert_not_match(qm, b"search+term=hello+world&literal=a+b%20")
+
+
 def test_qm_boolean():
     qm = BooleanQueryMatcher(result=True)
     assert_match(qm, b"k1=v1")
