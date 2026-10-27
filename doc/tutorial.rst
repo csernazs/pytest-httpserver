@@ -497,6 +497,54 @@ When the tests are run with ``-vv`` then it will show both errors::
       <RequestMatcher uri='/bar' method='__ALL' query_string=None headers={} data=None json=<UNDEFINED>>
 
 
+Server-side errors in the test report
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Calling ``check()`` (or any other similar method) raises the server-side
+errors in the test but this must be done explicitly. If the test fails before
+these errors would be raised (for example an assertion about the response
+fails), the errors collected by the server remain unseen, although they could
+explain the failure of the test.
+
+To make the debugging of such tests easier, the plugin automatically attaches
+these errors to the report of the failed test. When a test fails, the pending
+server-side assertions (such as the one added when the server received a
+request which was not matching any of the registered handlers) and the errors
+raised in the request handlers are shown as an extra section of the failure
+output::
+
+  --------------------------- pytest-httpserver report ---------------------------
+  Server-side errors collected by pytest-httpserver (not raised during the test):
+  --- <HTTPServer host=localhost port=37425>
+  Pending server-side assertions:
+
+  1. No handler found for request <Request 'http://localhost:37425/foobar' [GET]> with data b''.Ordered matchers:
+      none
+
+  Oneshot matchers:
+      none
+
+  Persistent matchers:
+      <RequestMatcher uri='/foo' method='__ALL' query_string=None headers={} data=None json=<UNDEFINED>>
+
+  Note: these errors were not raised because the test did not call the check methods of the server (for example HTTPServer.check()).
+
+Errors which were already raised during the test (by calling the ``check()``
+methods) are not added to the report again. If the test fails in multiple
+phases (such as setup and teardown), each error is attached to one report
+only - errors collected after a failed phase are added to the report of the
+next failed phase. The collected errors are also not leaked into the report
+of the other tests.
+
+This works for every test which uses the ``httpserver``, ``httpserver_ipv4``
+or ``httpserver_ipv6`` fixture, no configuration is needed. If you use your
+own server object in a custom fixture (for example a
+:py:class:`pytest_httpserver.BlockingHTTPServer`), you can call the
+``register_server()`` function of the ``pytest_httpserver.pytest_plugin``
+module (with the ``request`` fixture and the server object as parameters) to
+get the same behavior.
+
+
 Logs
 ~~~~
 
