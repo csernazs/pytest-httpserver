@@ -38,13 +38,9 @@ if TYPE_CHECKING:
     import sys
     from ssl import SSLContext
     from types import TracebackType
+    from typing import Self
 
     from werkzeug.serving import BaseWSGIServer
-
-    if sys.version_info >= (3, 11):
-        from typing import Self
-    else:
-        from typing_extensions import Self
 
     if sys.version_info >= (3, 12):
         from typing import Unpack
