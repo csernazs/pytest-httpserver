@@ -5,6 +5,7 @@ import re
 import shutil
 import subprocess
 import tarfile
+import tomllib
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,13 +16,6 @@ import pytest
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-try:
-    import tomllib
-except ImportError:
-    # Unfortunately mypy cannot handle this try/expect pattern, and "type: ignore"
-    # is the simplest work-around. See: https://github.com/python/mypy/issues/1153
-    import tomli as tomllib  # type: ignore
-
 # TODO: skip if poetry is not available or add mark to test it explicitly
 
 
@@ -29,7 +23,7 @@ pytestmark = pytest.mark.release
 
 NAME = "pytest-httpserver"
 NAME_UNDERSCORE = NAME.replace("-", "_")
-PY_MAX_VERSION = (3, 14)
+PY_MAX_VERSION = (3, 15)
 
 
 @pytest.fixture(scope="session")

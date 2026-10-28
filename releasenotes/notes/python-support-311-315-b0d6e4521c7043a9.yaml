@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Python 3.9 and 3.10 are no longer supported. Python 3.11 or newer is required.
+features:
+  - |
+    Add support for Python 3.15.
