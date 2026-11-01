@@ -1,0 +1,5 @@
+fixes:
+  - |
+    Wait for ordered and oneshot response callbacks to finish before reporting
+    successful completion from ``HTTPServer.wait()``, including callbacks
+    executing concurrently in a threaded server.
