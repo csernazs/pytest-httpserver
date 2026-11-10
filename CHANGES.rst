@@ -2,6 +2,53 @@
 Release Notes
 =============
 
+.. _Release Notes_1.2.1:
+
+1.2.1
+=====
+
+.. _Release Notes_1.2.1_New Features:
+
+New Features
+------------
+
+- Add an opt-in case-insensitive header value matcher,
+  ``CaseInsensitiveHeaderValueMatcher``, which can be passed as
+  ``header_value_matcher`` to expect_request. It matches header names
+  case-insensitively, parses Authorization values by default, and compares
+  other values exactly. A custom mapping of header names to comparator
+  functions can be supplied.
+
+- Add the ``data_form`` keyword argument to request expectations and
+  ``BlockingHTTPServer.assert_request()`` for matching parsed form fields.
+  A mapping matches each field's first value, while a Werkzeug ``MultiDict``
+  matches all repeated values. Form expectations are mutually exclusive with
+  ``data`` and ``json`` expectations, and preserve the raw request body for
+  response handlers.
+
+- Add support for Python 3.15.
+
+- Add ``HTTPServer.with_check()``, a context manager that checks server-side
+  assertions and handler errors when its body completes normally. It detects
+  unexpected requests received after the expected ordered requests without
+  changing ``wait()`` semantics. Exceptions raised in the body propagate
+  unchanged.
+
+
+.. _Release Notes_1.2.1_Upgrade Notes:
+
+Upgrade Notes
+-------------
+
+- Python 3.9 and 3.10 are no longer supported. Python 3.11 or newer is required.
+
+- Support for Werkzeug versions older than 3.0.0 has been removed as
+  pytest-httpserver now requires ``Werkzeug >= 3.0.0``. The fallback for
+  the deprecated ``werkzeug.http.parse_authorization_header`` has been
+  dropped from ``HeaderValueMatcher`` and the documentation has been
+  updated accordingly.
+
+
 .. _Release Notes_1.2.0:
 
 1.2.0
