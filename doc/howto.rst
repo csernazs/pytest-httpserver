@@ -769,6 +769,25 @@ fixture so you can keep the original single-threaded behavior.
     described above.
 
 
+Returning JSON for unknown URLs
+-------------------------------
+
+If an API returns JSON for unknown URLs, register a persistent catch-all
+handler after the specific persistent handlers:
+
+.. literalinclude :: ../tests/examples/test_howto_json_fallback.py
+    :language: python
+
+Persistent handlers are checked in registration order. Registering the
+catch-all last lets the specific handlers respond first. The fallback can
+return any JSON body and status code required by your API.
+
+A request served by this fallback has matched a handler, so
+``check_assertions()`` does not report it as an unexpected request. If
+unexpected requests should fail the test, omit the catch-all and keep the
+normal unmatched-request checks.
+
+
 Adding side effects
 -------------------
 
