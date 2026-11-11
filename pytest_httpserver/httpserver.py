@@ -1073,6 +1073,8 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             self.default_waiting_settings = WaitingSettings()
         self._waiting_settings = copy(self.default_waiting_settings)
         self._waiting_result: queue.LifoQueue[bool] = queue.LifoQueue(maxsize=1)
+        self._handler_lock = threading.RLock()
+        self._active_waiting_handlers = 0
         self.startup_timeout = startup_timeout
         self._readiness_check_pending = False
 
@@ -1422,27 +1424,31 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         if self.permanently_failed:
             return self.respond_permanent_failure()
 
-        handler = None
-        if self.ordered_handlers:
-            handler = self.ordered_handlers[0]
-            if not handler.matcher.match(request):
-                self.permanently_failed = True
-                response = self.respond_nohandler(request)
-                return response
+        with self._handler_lock:
+            handler = None
+            consumed_handler = False
+            if self.ordered_handlers:
+                handler = self.ordered_handlers[0]
+                if not handler.matcher.match(request):
+                    self.permanently_failed = True
+                    response = self.respond_nohandler(request)
+                    return response
 
-            self.ordered_handlers.pop(0)
-            self._update_waiting_result()
-
-        if not handler:
-            handler = self.oneshot_handlers.match(request)
-            if handler:
-                self.oneshot_handlers.remove(handler)
-                self._update_waiting_result()
-            else:
-                handler = self.handlers.match(request)
+                self.ordered_handlers.pop(0)
+                consumed_handler = True
 
             if not handler:
-                return self.respond_nohandler(request)
+                handler = self.oneshot_handlers.match(request)
+                if handler:
+                    self.oneshot_handlers.remove(handler)
+                    consumed_handler = True
+                else:
+                    handler = self.handlers.match(request)
+
+                if not handler:
+                    return self.respond_nohandler(request)
+            if consumed_handler:
+                self._active_waiting_handlers += 1
 
         try:
             response = handler.respond(request)
@@ -1455,6 +1461,11 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
         except Exception as e:
             self.handler_errors.append(e)
             raise
+        finally:
+            if consumed_handler:
+                with self._handler_lock:
+                    self._active_waiting_handlers -= 1
+                    self._update_waiting_result()
 
         if response is None:
             response = Response("")
@@ -1473,7 +1484,7 @@ class HTTPServer(HTTPServerBase):  # pylint: disable=too-many-instance-attribute
             self._waiting_result.put_nowait(value)
 
     def _update_waiting_result(self) -> None:
-        if not self.oneshot_handlers and not self.ordered_handlers:
+        if not self.oneshot_handlers and not self.ordered_handlers and not self._active_waiting_handlers:
             self._set_waiting_result(value=True)
 
     @contextmanager
