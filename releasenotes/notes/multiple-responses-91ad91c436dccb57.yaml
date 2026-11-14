@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add ``RequestHandler.respond_multiple`` to serve successive Werkzeug responses
+    from an iterable for successive matching requests. Supports lazy generators
+    and infinite iterables; exhausted sequences produce an assertion failure.
