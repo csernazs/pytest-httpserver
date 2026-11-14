@@ -288,6 +288,29 @@ names; a ``defaultdict`` can supply a fallback comparator without caching those
 names. Create a new matcher to use a changed mapping. Instances do not read or
 modify ``HeaderValueMatcher.DEFAULT_MATCHERS`` and do not share a registry.
 
+Returning successive responses
+------------------------------
+
+To simulate retries or a changing endpoint, use
+:py:meth:`~pytest_httpserver.RequestHandler.respond_multiple` with
+an iterable of Werkzeug ``Response`` objects:
+
+.. literalinclude:: ../tests/test_multiple_responses.py
+   :language: python
+   :pyobject: test_multiple_responses
+
+Each matching request consumes the next response. Generators are consumed lazily,
+and ``itertools.cycle`` can provide a repeating sequence. When the iterable is
+exhausted, further matching requests return HTTP 500 and ``httpserver.check()``
+raises an assertion explaining that there are no responses left. An empty
+iterable fails on the first matching request. Unused responses are not checked
+by ``httpserver.check()``.
+
+Register the sequence with ``expect_request``. Oneshot and ordered handlers
+still serve only one request, even when given multiple responses. Existing
+handler priorities are unchanged: an exhausted permanent handler remains
+registered and does not fall through to another handler.
+
 Using custom request handler
 ----------------------------
 In the case the response is not static, for example it depends on the request,

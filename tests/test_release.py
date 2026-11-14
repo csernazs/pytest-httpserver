@@ -222,6 +222,7 @@ def test_sdist_contents(build: Build, version: str):
             "test_log_leak.py",
             "test_log_querying.py",
             "test_mixed.py",
+            "test_multiple_responses.py",
             "test_oneshot.py",
             "test_ordered.py",
             "test_permanent.py",

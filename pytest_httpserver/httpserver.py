@@ -656,6 +656,33 @@ class RequestHandler(RequestHandlerBase):
     def respond_with_response(self, response: Response) -> None:
         self.request_handler = lambda request: response
 
+    def respond_multiple(self, responses: Iterable[Response]) -> None:
+        """
+        Respond to successive matching requests with successive responses.
+
+        The iterable is consumed lazily, once per matching request. When it is
+        exhausted, further matching requests fail with an assertion recorded by
+        :py:meth:`HTTPServer.check`. Responses must be Werkzeug response objects.
+
+        Use with :py:meth:`HTTPServer.expect_request` to serve multiple requests.
+        Oneshot and ordered handlers still handle only one request.
+
+        :param responses: an iterable of response objects, possibly infinite
+        """
+        iterator = iter(responses)
+
+        def respond(request: Request) -> Response:
+            try:
+                response = next(iterator)
+            except StopIteration:
+                message = f"No responses left for matching request: {request.method} {request.path}"
+                raise AssertionError(message) from None
+            if not isinstance(response, Response):
+                raise TypeError("respond_multiple expects Werkzeug Response objects")
+            return response
+
+        self.respond_with_handler(respond)
+
     def __repr__(self) -> str:
         class_name = self.__class__.__name__
         retval = (
