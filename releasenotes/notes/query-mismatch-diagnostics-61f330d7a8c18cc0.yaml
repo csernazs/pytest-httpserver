@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Include raw query strings and decoded query parameters in unmatched-request
+    diagnostics to clarify percent-encoding mismatches (issue #370).
