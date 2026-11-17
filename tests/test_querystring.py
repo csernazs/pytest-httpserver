@@ -3,6 +3,7 @@ import requests
 from werkzeug.datastructures import MultiDict
 
 from pytest_httpserver import HTTPServer
+from pytest_httpserver.httpserver import QueryMatcher
 
 
 def test_querystring_str(httpserver: HTTPServer):
@@ -67,3 +68,60 @@ def test_querystring_dict_ignores_empty_value(httpserver: HTTPServer):
     httpserver.check_assertions()
     assert response.status_code == 200
     assert response.text == "example_response"
+
+
+@pytest.mark.parametrize(
+    ("query_string", "raw_query", "decoded"),
+    [
+        ({"foo": "bar%20baz"}, "foo=bar%20baz", "[('foo', 'bar baz')]"),
+        ("foo=bar baz", "foo=bar%20baz", "[('foo', 'bar baz')]"),
+        (b"q=a+b", "q=a%2Bb", "[('q', 'a+b')]"),
+        (
+            MultiDict([("q", "first"), ("q", "other"), ("empty", "")]),
+            "q=first&q=second&empty",
+            "[('q', 'first'), ('q', 'second'), ('empty', '')]",
+        ),
+        ({"näme": "other"}, "n%C3%A4me=J%C3%B6rg", "[('näme', 'Jörg')]"),
+        ({"q": "other"}, "q=%FF", "[('q', '�')]"),
+    ],
+)
+def test_no_handler_query_diagnostics(httpserver: HTTPServer, query_string, raw_query, decoded):
+    httpserver.expect_request("/query", query_string=query_string).respond_with_data("OK")
+
+    response = requests.get(httpserver.url_for("/query") + "?" + raw_query)
+    assert response.status_code == 500
+    with pytest.raises(AssertionError) as exc_info:
+        httpserver.check_assertions()
+
+    for detail in (f"Query string: {raw_query.encode()!r}", f"Decoded query parameters: {decoded}"):
+        assert detail in str(exc_info.value)
+        assert detail in response.text
+
+
+def test_no_handler_without_query(httpserver: HTTPServer):
+    httpserver.expect_request("/expected").respond_with_data("OK")
+    response = requests.get(httpserver.url_for("/other"))
+    assert response.status_code == 500
+    with pytest.raises(AssertionError) as exc_info:
+        httpserver.check_assertions()
+
+    assert "No handler found" in str(exc_info.value)
+    assert "Query string:" not in str(exc_info.value)
+    assert "Decoded query parameters:" not in response.text
+
+
+def test_query_diagnostics_do_not_repeat_custom_matcher(httpserver: HTTPServer):
+    class CountingQueryMatcher(QueryMatcher):
+        calls = 0
+
+        def get_comparing_values(self, request_query_string):
+            self.calls += 1
+            return request_query_string, b"other"
+
+    matcher = CountingQueryMatcher()
+    httpserver.expect_request("/query", query_string=matcher).respond_with_data("OK")
+    response = requests.get(httpserver.url_for("/query?q=value"))
+    assert response.status_code == 500
+    with pytest.raises(AssertionError, match="No handler found"):
+        httpserver.check_assertions()
+    assert matcher.calls == 1
