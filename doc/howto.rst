@@ -701,6 +701,26 @@ Example:
    :language: python
 
 
+Streaming responses
+-------------------
+
+To test a streaming client, return a Werkzeug ``Response``
+with an iterable body from a custom request handler. Each value yielded by the
+iterable supplies another part of the response body.
+
+This example sends two server-sent events. It waits for the client to read the
+first event before producing the second one:
+
+.. literalinclude :: ../tests/examples/test_howto_streaming.py
+   :language: python
+
+Requests needs ``stream=True`` to read the response incrementally.
+``iter_lines(chunk_size=1)`` keeps its read buffer small enough to deliver the
+first event while the producer is waiting. The response context manager closes
+the connection, and the ``finally`` block releases the producer if an assertion
+fails. The timeouts bound waits when the client or server fails to progress.
+
+
 Serving requests in parallel
 ----------------------------
 
