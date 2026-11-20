@@ -147,7 +147,11 @@ class HeaderValueMatcher:
 
     @staticmethod
     def authorization_header_value_matcher(actual: str | None, expected: str) -> bool:
-        return Authorization.from_header(actual) == Authorization.from_header(expected)
+        actual_authorization = Authorization.from_header(actual)
+        expected_authorization = Authorization.from_header(expected)
+        if actual_authorization is None or expected_authorization is None:
+            return actual == expected
+        return actual_authorization == expected_authorization
 
     @staticmethod
     def default_header_value_matcher(actual: str | None, expected: str) -> bool:
