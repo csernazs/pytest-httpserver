@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    The plugin now implements the ``pytest_runtest_makereport`` hook: when a
+    test fails, the server-side errors which were collected but not raised
+    during the test (such as the assertion added when the server received a
+    request which was not matching any of the registered handlers) are
+    attached to the test report as a new report section, making the debugging
+    of the failed test easier.
