@@ -3,6 +3,7 @@ from collections import defaultdict
 
 import pytest
 import requests
+from werkzeug import Request
 from werkzeug.datastructures import Headers
 from werkzeug.http import parse_dict_header
 
@@ -11,6 +12,43 @@ from pytest_httpserver import HTTPServer
 from pytest_httpserver import RequestMatcher
 from pytest_httpserver.httpserver import HeaderValueMatcher
 from pytest_httpserver.httpserver import NoMethodFoundForMatchingHeaderValueError
+
+
+@pytest.mark.parametrize(
+    ("matcher_class", "header_name"),
+    [
+        (HeaderValueMatcher, "Authorization"),
+        (CaseInsensitiveHeaderValueMatcher, "Authorization"),
+        (CaseInsensitiveHeaderValueMatcher, "authorization"),
+        (CaseInsensitiveHeaderValueMatcher, "AUTHORIZATION"),
+    ],
+)
+@pytest.mark.parametrize(
+    ("actual", "expected", "matches"),
+    [
+        (None, "", False),
+        (None, "Basic !!!!", False),
+        ("", "Basic !!!!", False),
+        ("Basic !!!!", "Basic ????", False),
+        ("Basic /w==", "Basic /g==", False),
+        ("", "", True),
+        ("Basic !!!!", "Basic !!!!", True),
+        ("Basic /w==", "Basic /w==", True),
+        ("Basic Zm9vOmJhcg==", "basic Zm9vOmJhcg==", True),
+        ("Basic Zm9vOmJhcg==", "Basic Zm9vOmJheg==", False),
+        ("Bearer token", "bearer token", True),
+        ("Bearer different", "Bearer token", False),
+        ('Digest a="1", b="2"', 'Digest b="2", a="1"', True),
+        (None, "Basic Zm9vOmJhcg==", False),
+        ("Basic !!!!", "Basic Zm9vOmJhcg==", False),
+        ("Basic Zm9vOmJhcg==", "Basic !!!!", False),
+    ],
+)
+def test_authorization_header_parse_failures(matcher_class, header_name, actual, expected, matches):
+    matcher = RequestMatcher("/", headers={header_name: expected}, header_value_matcher=matcher_class())
+    request = Request.from_values("/", headers={} if actual is None else {header_name: actual})
+
+    assert matcher.match(request) is matches
 
 
 def test_case_insensitive_header_matcher_fallback_does_not_cache_header_names():

@@ -1,0 +1,7 @@
+fixes:
+  - |
+    Authorization header matching now compares the original header values when
+    either value cannot be parsed. Missing headers no longer match expected
+    empty or malformed values, and different malformed Basic credentials no
+    longer match each other. Valid Authorization values still use parsed
+    comparison in both header value matchers.
