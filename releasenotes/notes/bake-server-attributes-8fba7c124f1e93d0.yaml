@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Forward assignments to existing public server attributes through baked
+    proxies, so settings such as ``no_handler_status_code`` affect HTTP responses
+    and remain consistent across proxies. Preserve private proxy state, subclass
+    attributes and newly added local attributes.
