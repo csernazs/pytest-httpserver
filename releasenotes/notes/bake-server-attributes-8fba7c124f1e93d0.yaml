@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Make ``no_handler_status_code`` read-only on baked proxies, preventing a
+    proxy-local setting from disagreeing with actual HTTP responses. Configure
+    the underlying server explicitly; all baked proxies read its current value.

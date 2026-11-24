@@ -32,7 +32,8 @@ class BakedHTTPServer:
 
     Any attribute not explicitly defined here is delegated to the wrapped
     :py:class:`HTTPServer`, so ``url_for()``, ``check_assertions()``, etc.
-    work transparently.
+    work transparently. ``no_handler_status_code`` is read-only on the proxy;
+    configure it directly on the wrapped server instead.
     """
 
     def __init__(self, server: HTTPServer, **kwargs: Unpack[RequestMatcherKwargs]) -> None:
@@ -61,6 +62,14 @@ class BakedHTTPServer:
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._server, name)
+
+    @property
+    def no_handler_status_code(self) -> int:
+        """The wrapped server's current status for unmatched requests.
+
+        Configure this setting on the main server, not on a baked proxy.
+        """
+        return self._server.no_handler_status_code
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} defaults={self._defaults!r} server={self._server!r}>"

@@ -171,3 +171,52 @@ def test_bake_returns_baked_type(
 ) -> None:
     server = bake_chain(httpserver)
     assert isinstance(server, BakedHTTPServer)
+
+
+@pytest.mark.parametrize("status_code", [500, 404])
+@pytest.mark.parametrize("chained", [False, True])
+def test_bake_no_handler_status_code_is_read_only(httpserver: HTTPServer, status_code: int, *, chained: bool) -> None:
+    httpserver.no_handler_status_code = status_code
+    baked = httpserver.bake(method="GET")
+    sibling = httpserver.bake(method="POST")
+    if chained:
+        baked = baked.bake(headers={"X-Request": "test"})
+
+    with pytest.raises(AttributeError, match="no_handler_status_code"):
+        baked.no_handler_status_code = 503  # type: ignore[misc]
+
+    assert httpserver.no_handler_status_code == status_code
+    assert baked.no_handler_status_code == status_code
+    assert sibling.no_handler_status_code == status_code
+    assert requests.get(baked.url_for("/unmatched")).status_code == status_code
+    with pytest.raises(AttributeError, match="no_handler_status_code"):
+        del baked.no_handler_status_code
+    assert httpserver.no_handler_status_code == status_code
+
+
+def test_bake_reads_current_no_handler_status_code(httpserver: HTTPServer) -> None:
+    baked = httpserver.bake(method="GET")
+    sibling = httpserver.bake(method="POST")
+    chained = baked.bake(headers={"X-Request": "test"})
+
+    httpserver.no_handler_status_code = 404
+    assert baked.no_handler_status_code == sibling.no_handler_status_code == chained.no_handler_status_code == 404
+    assert requests.get(chained.url_for("/unmatched")).status_code == 404
+
+    httpserver.clear()
+    assert baked.no_handler_status_code == sibling.no_handler_status_code == chained.no_handler_status_code == 500
+    assert requests.get(baked.url_for("/unmatched")).status_code == 500
+
+
+def test_bake_keeps_other_attribute_assignments_local() -> None:
+    server = HTTPServer(host="localhost", port=12345)
+    baked = server.bake(method="GET")
+
+    baked.host = "proxy"  # type: ignore[attr-defined]
+    baked.port = 54321  # type: ignore[attr-defined]
+
+    assert baked.host == "proxy"
+    assert baked.port == 54321
+    assert server.host == "localhost"
+    assert server.port == 12345
+    assert baked.url_for("/path") == "http://localhost:12345/path"
