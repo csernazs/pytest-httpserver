@@ -6,7 +6,6 @@ import requests
 from pytest_httpserver import BakedHTTPServer
 from pytest_httpserver import HTTPServer
 from pytest_httpserver import RequestMatcherKwargs
-from pytest_httpserver import WaitingSettings
 
 
 def test_bake_with_headers(httpserver: HTTPServer) -> None:
@@ -174,112 +173,50 @@ def test_bake_returns_baked_type(
     assert isinstance(server, BakedHTTPServer)
 
 
-def test_bake_assigns_server_status_code(httpserver: HTTPServer) -> None:
+@pytest.mark.parametrize("status_code", [500, 404])
+@pytest.mark.parametrize("chained", [False, True])
+def test_bake_no_handler_status_code_is_read_only(httpserver: HTTPServer, status_code: int, *, chained: bool) -> None:
+    httpserver.no_handler_status_code = status_code
+    baked = httpserver.bake(method="GET")
+    sibling = httpserver.bake(method="POST")
+    if chained:
+        baked = baked.bake(headers={"X-Request": "test"})
+
+    with pytest.raises(AttributeError, match="no_handler_status_code"):
+        baked.no_handler_status_code = 503  # type: ignore[misc]
+
+    assert httpserver.no_handler_status_code == status_code
+    assert baked.no_handler_status_code == status_code
+    assert sibling.no_handler_status_code == status_code
+    assert requests.get(baked.url_for("/unmatched")).status_code == status_code
+    with pytest.raises(AttributeError, match="no_handler_status_code"):
+        del baked.no_handler_status_code
+    assert httpserver.no_handler_status_code == status_code
+
+
+def test_bake_reads_current_no_handler_status_code(httpserver: HTTPServer) -> None:
     baked = httpserver.bake(method="GET")
     sibling = httpserver.bake(method="POST")
     chained = baked.bake(headers={"X-Request": "test"})
 
-    baked.no_handler_status_code = 404
-
-    assert requests.get(baked.url_for("/unmatched")).status_code == 404
-    assert httpserver.no_handler_status_code == 404
-    assert sibling.no_handler_status_code == 404
-    assert chained.no_handler_status_code == 404
+    httpserver.no_handler_status_code = 404
+    assert baked.no_handler_status_code == sibling.no_handler_status_code == chained.no_handler_status_code == 404
+    assert requests.get(chained.url_for("/unmatched")).status_code == 404
 
     httpserver.clear()
-    assert baked.no_handler_status_code == 500
-    assert sibling.no_handler_status_code == 500
-    assert chained.no_handler_status_code == 500
+    assert baked.no_handler_status_code == sibling.no_handler_status_code == chained.no_handler_status_code == 500
+    assert requests.get(baked.url_for("/unmatched")).status_code == 500
 
 
-def test_bake_assigns_server_address() -> None:
-    server = HTTPServer()
+def test_bake_keeps_other_attribute_assignments_local() -> None:
+    server = HTTPServer(host="localhost", port=12345)
     baked = server.bake(method="GET")
 
-    baked.host = "127.0.0.1"
-    baked.port = 12345
-
-    assert baked.url_for("/path") == "http://127.0.0.1:12345/path"
-    assert server.host == "127.0.0.1"
-    assert server.port == 12345
-
-
-def test_bake_assigns_waiting_settings() -> None:
-    server = HTTPServer()
-    baked = server.bake(method="GET")
-    settings = WaitingSettings(timeout=0.5)
-
-    baked.default_waiting_settings = settings
-
-    assert server.default_waiting_settings is settings
-    assert baked.default_waiting_settings is settings
-    assert baked.bake().default_waiting_settings is settings
-
-
-def test_bake_assigns_server_descriptor_without_reading() -> None:
-    class CustomServer(HTTPServer):
-        @property
-        def setting(self) -> str:
-            raise RuntimeError("setting must not be read")
-
-        @setting.setter
-        def setting(self, value: str) -> None:
-            self.host = value
-
-    server = CustomServer()
-    baked = server.bake()
-
-    baked.setting = "127.0.0.1"
-
-    assert server.host == "127.0.0.1"
-    assert "setting" not in vars(baked)
-
-
-def test_bake_preserves_read_only_server_descriptors() -> None:
-    class CustomServer(HTTPServer):
-        @property
-        def setting(self) -> str:
-            return "read only"
-
-    baked = CustomServer().bake()
-
-    with pytest.raises(AttributeError, match="setting"):
-        baked.setting = "replacement"
-
-    assert baked.setting == "read only"
-
-
-def test_bake_keeps_custom_attributes_local() -> None:
-    server = HTTPServer()
-    baked = server.bake()
-
-    baked.label = "first"
-    baked.label = "second"
-
-    assert baked.label == "second"
-    assert not hasattr(server, "label")
-    # An existing local attribute keeps its original ownership even if the
-    # wrapped server subsequently gains an attribute with the same name.
-    server.label = "server"  # type: ignore[attr-defined]
-    baked.label = "third"
-    assert server.label == "server"  # type: ignore[attr-defined]
-    assert baked.label == "third"
-
-
-def test_bake_keeps_subclass_descriptors_local() -> None:
-    class CustomBakedServer(BakedHTTPServer):
-        @property
-        def host(self) -> str:
-            return self._local_host
-
-        @host.setter
-        def host(self, value: str) -> None:
-            self._local_host = value
-
-    server = HTTPServer(host="localhost")
-    baked = CustomBakedServer(server)
-
-    baked.host = "proxy"
+    baked.host = "proxy"  # type: ignore[attr-defined]
+    baked.port = 54321  # type: ignore[attr-defined]
 
     assert baked.host == "proxy"
+    assert baked.port == 54321
     assert server.host == "localhost"
+    assert server.port == 12345
+    assert baked.url_for("/path") == "http://localhost:12345/path"

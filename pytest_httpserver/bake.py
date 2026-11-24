@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from inspect import getattr_static
 from typing import TYPE_CHECKING
 from typing import Any
 
@@ -21,9 +20,6 @@ if TYPE_CHECKING:
     from .httpserver import URIPattern
 
 
-_MISSING_ATTRIBUTE = object()
-
-
 class BakedHTTPServer:
     """
     A proxy for :py:class:`HTTPServer` with pre-configured defaults for
@@ -36,8 +32,8 @@ class BakedHTTPServer:
 
     Any attribute not explicitly defined here is delegated to the wrapped
     :py:class:`HTTPServer`, so ``url_for()``, ``check_assertions()``, etc.
-    work transparently. Assignments to existing public server attributes are
-    delegated too; private proxy state and new local attributes remain local.
+    work transparently. ``no_handler_status_code`` is read-only on the proxy;
+    configure it directly on the wrapped server instead.
     """
 
     def __init__(self, server: HTTPServer, **kwargs: Unpack[RequestMatcherKwargs]) -> None:
@@ -67,18 +63,13 @@ class BakedHTTPServer:
     def __getattr__(self, name: str) -> Any:
         return getattr(self._server, name)
 
-    def __setattr__(self, name: str, value: Any) -> None:
-        # Inspect descriptors without invoking their getters. Proxy-owned
-        # attributes must stay local, including descriptors on subclasses.
-        if (
-            name.startswith("_")
-            or name in vars(self)
-            or getattr_static(type(self), name, _MISSING_ATTRIBUTE) is not _MISSING_ATTRIBUTE
-            or getattr_static(self._server, name, _MISSING_ATTRIBUTE) is _MISSING_ATTRIBUTE
-        ):
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self._server, name, value)
+    @property
+    def no_handler_status_code(self) -> int:
+        """The wrapped server's current status for unmatched requests.
+
+        Configure this setting on the main server, not on a baked proxy.
+        """
+        return self._server.no_handler_status_code
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} defaults={self._defaults!r} server={self._server!r}>"

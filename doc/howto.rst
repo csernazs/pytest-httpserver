@@ -838,13 +838,13 @@ The ``bake()`` method can be chained to layer additional defaults:
 All ``expect_request``, ``expect_oneshot_request``, and
 ``expect_ordered_request`` methods are available on the baked object. Other
 attributes such as ``url_for()`` and ``check_assertions()`` are delegated to
-the underlying server transparently. Assigning an existing public server attribute
-also updates the underlying server, so the setting is shared by all baked
-proxies::
+the underlying server transparently. The ``no_handler_status_code`` setting is
+read-only on baked proxies. Configure the underlying server explicitly; all
+proxies then read its current value::
 
-    json_post.no_handler_status_code = 404
-    assert httpserver.no_handler_status_code == 404
+    httpserver.no_handler_status_code = 404
+    assert json_post.no_handler_status_code == 404
 
-Private proxy state, attributes defined by a proxy subclass, and new local
-attributes are kept on the proxy. Deleting delegated attributes is not supported;
-change or reset the underlying server attribute instead.
+Assigning or deleting ``no_handler_status_code`` on a baked proxy raises
+``AttributeError`` and leaves the server setting unchanged. Clearing the
+underlying server resets the value read by every proxy.
