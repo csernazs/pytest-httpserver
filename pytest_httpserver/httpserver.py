@@ -557,7 +557,7 @@ class RequestHandlerBase(abc.ABC):
         self,
         response_json: Any,
         status: int = HTTPStatus.OK.value,
-        headers: Mapping[str, str] | None = None,
+        headers: HEADERS_T | None = None,
         content_type: str = "application/json",
     ) -> None:
         """

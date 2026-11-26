@@ -221,3 +221,17 @@ def test_header_one_key_multiple_values(httpserver: HTTPServer):
 
         assert response.status == 200
         assert response.headers.get_all("X-Foo") == ["123", "456"]
+
+
+def test_json_response_repeated_headers(httpserver: HTTPServer):
+    pairs = [("Set-Cookie", "a=1"), ("Set-Cookie", "b=2")]
+    body = {"ok": True}
+    httpserver.expect_request("/tuple").respond_with_json(body, headers=pairs)
+    httpserver.expect_request("/mapping").respond_with_json(body, headers={"Set-Cookie": ["a=1", "b=2"]})
+    httpserver.expect_request("/headers").respond_with_json(body, headers=Headers(pairs))
+
+    for path in ("/tuple", "/mapping", "/headers"):
+        with requests.get(httpserver.url_for(path)) as response:
+            assert response.status_code == 200
+            assert response.json() == body
+            assert response.cookies.get_dict() == {"a": "1", "b": "2"}
