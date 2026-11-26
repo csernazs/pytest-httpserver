@@ -1,0 +1,4 @@
+fixes:
+  - |
+    Accept Werkzeug Headers, header-pair iterables and mappings with multiple
+    values in the type annotation for ``respond_with_json`` headers.
