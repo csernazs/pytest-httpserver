@@ -1,5 +1,7 @@
 import pytest
 
+pytest_plugins = ["pytester"]
+
 
 def pytest_addoption(parser):
     parser.addoption("--ssl", action="store_true", default=False, help="run ssl tests")
