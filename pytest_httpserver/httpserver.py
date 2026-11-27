@@ -950,6 +950,11 @@ class HTTPServerBase(abc.ABC):  # pylint: disable=too-many-instance-attributes
 
         """
         text = "No handler found for request {!r} with data {!r}.".format(request, request.data)
+        if request.query_string:
+            query_parameters = urllib.parse.parse_qsl(
+                request.query_string.decode("utf-8", errors="replace"), keep_blank_values=True
+            )
+            text += f"\nQuery string: {request.query_string!r}\nDecoded query parameters: {query_parameters!r}"
         self.add_assertion(text + extra_message)
         return Response(text + extra_message, self.no_handler_status_code)
 

@@ -76,6 +76,13 @@ To match a literal plus sign, use ``{"q": "a+b"}`` with a request containing
 characters ``%20``, so it matches ``?q=hello%2520world``, not
 ``?q=hello%20world``. These rules apply to parameter names as well as values.
 
+When a request with a query string has no matching handler, its error response
+and assertion include the raw query bytes and the decoded name/value pairs.
+For example, ``foo=bar%20baz`` is shown as ``b'foo=bar%20baz'`` and
+``[('foo', 'bar baz')]``. This helps explain why an expected mapping containing
+``{'foo': 'bar%20baz'}`` does not match. The decoded view keeps repeated names
+and empty values.
+
 .. literalinclude :: ../tests/examples/test_howto_query_params_encoding.py
    :language: python
 
